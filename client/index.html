@@ -1,0 +1,96 @@
+<html>
+    <head>
+    <title>Collapsa.io</title>
+    <link rel="stylesheet" type="text/css" href="/client/css/style.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel='icon' href='/client/img/favicon.ico' type='image/x-icon'/>
+    <meta property="og:title" content="Collapsa.io">
+    <meta property="og:description" content="It's a game. Made by Logos">
+    <meta property="og:image" content="/client/img/favicon.png">
+    <script src="/client/js/changelog.js"></script>
+    <script src="/client/js/CanvasInput.js"></script>
+    <script>
+    var socket = io();
+    </script>
+    </head>
+    <body>
+        <div class ="modal" id="start">
+            <div id="instructions">
+                <h1>How to play?</h1>
+                <p>
+                  Kill players and fight whilst you avoid demons and destroyers. Use WASD to move and E to pick up items and open doors. 
+                  
+                  Basic Crafting:
+                  <ul>
+                    <li>20 of the main ore and 15 iron to make pickaxes and hammers after stone. </li>
+                      <li>20 main ore and 10 iron for axes. </li>
+                      <li>10 main ore, 10 iron, and 10 of the ore below the main iron or stone if the ore below is iron for swords. </li>
+                  </ul>
+              </p>
+            </div>
+            
+            <form class="modal-content" id="enterForm">
+                <h1 id="title">Collapsa.io</h1>
+                <h3 id="enter">Join the collapse</h3>
+                <label id="server-label" for="server">
+                    <select id="server">
+                        <option value="usaeast1">USA East #1</option>
+                    </select>
+                </label>
+                <label id="enter-label" for="nameyourself">
+                    <input id="nameyourself" maxlength="16" placeholder="Input Username"/>
+                </label>
+
+            </form>
+            <div id="changelog">
+                <h1>Changelog</h1>
+            </div>
+            <div id="widgets">
+                <div class="widgetSizingWrapper">
+                    <div class='widgetWrapper'>
+                        <div class="widget" id="discord">
+                            <a href="https://discord.gg/gXUGnGf">
+                                <img class="widgetIcon" src="https://discord.com/assets/2c21aeda16de354ba5334551a883b481.png"/></div>
+                            </a>
+                        </div>
+                </div>
+                <div class="widgetSizingWrapper">
+                    <div class='widgetWrapper'>
+                        <div class="widget" id="twitter">
+                            <a href="https://twitter.com/Logos_King">
+                                <img class="widgetIcon" src="/client/img/Twitter_Logo_WhiteOnImage.png">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="widgetSizingWrapper">
+                    <div class='widgetWrapper'>
+                        <div class="widget" id="facebook">
+                            <a href="https://www.facebook.com/logos.king.3/">
+                                <img class="widgetIcon" src="/client/img/facebook.png">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="modal" id="loadingScreen">
+            <div class="modal-content">
+               <h1 id="LoadingTitle">Loading</h1>
+            </div>
+        </div>
+        <canvas id="canvas"></canvas>
+        <!--<div id="chat" style="display:none;">
+          <div id="clist">
+            <ul id="messages"></ul>
+          </div>
+          <form id="form" action="">
+            <input id="m" autocomplete="off" /><button id="play">Send</button>
+          </form>
+        </div>
+        -->
+    </body>
+    <script src="/client/js/game.js"></script>
+</html>

@@ -1,0 +1,35 @@
+{
+  "name": "collapsa.io",
+  "version": "0.0.0",
+  "description": "It's a game",
+  "homepage": "https://github.com/Electrox-Qui-Mortem/omegalords#readme",
+  "main": "server",
+  "license": "MIT",
+  "author": "Electrox Qui Mortem <QuiMortemKing@Gmail.com> (http://)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Electrox-Qui-Mortem/omegalords.git"
+  },
+  "dependencies": {
+    "express": "^4.16.4",
+    "serve-favicon": "^2.5.0",
+    "socket.io": "^2.2.0",
+    "socketio": "^1.0.0",
+    "matter-js": "^0.14.2",
+    "pathfinding": "^0.4.18"
+  },
+  "scripts": {
+    "start": "node server",
+    "test": "node test"
+  },
+  "bugs": {
+    "url": "https://github.com/Electrox-Qui-Mortem/omegalords/issues",
+    "email": "QuiMortemKing@gmail.com"
+  },
+  "engines": {
+    "node": "8.0"
+  },
+  "keywords": [
+    "OmegaLords"
+  ]
+}
