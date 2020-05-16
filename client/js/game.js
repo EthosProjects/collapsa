@@ -1,4 +1,5 @@
 //Sets a few core values and then sets up onsubmits
+
 /* global changelog io usr loadingTimer*/
 class Mapper extends Map {
     constructor(iterator){
@@ -27,9 +28,16 @@ class Mapper extends Map {
         return results;
     }
 }
+if(!('contains' in String.prototype)) {
+    String.prototype.contains = function(str, startIndex) {
+             return -1 !== String.prototype.indexOf.call(this, str, startIndex);
+    };
+}
 let quality = 240
-var socket = io();
+let curServer = '/usaeast1'
+var managerSocket = io();
 socket = io('/usaeast1')
+socket.on('recon', () => {console.log('Reconnecting')})
 var nme = document.getElementById("enterForm");
 var star = document.getElementById("start");
 var form = document.getElementById("form");
@@ -55,6 +63,24 @@ for(var i = 0; i < changelog.Plans.length; i++){
 let allLoaded = false
 let imagesCount = 0
 let imagesLoaded = 0
+let id
+socket.once('connect', () => id = (' ' + new String(socket.id)).slice(1))
+managerSocket.on('connect_error', function(err) {
+    // handle server error here
+    console.log('Error connecting to server');
+    managerSocket.once('reconnect', () => {
+        socket.connect()
+        socket.once('connect', () => {
+            socket.emit('recon', id)
+            id = (' ' + new String(socket.id)).slice(1)
+        })
+        console.log('connected', id)
+    })
+});
+window.addEventListener('error', e => {
+    e.preventDefault()
+    console.warn(e, 'caught')
+})
 var Img = {
     loadImages:() => {
         for(let prop in Img){
@@ -70,44 +96,36 @@ var Img = {
                     let p = prop.replace(/\-\d+$/, '')
                     p = p.replace(/stone\//, '')
                     Img[p] = Img[prop]
-                    console.log(p)
                 }
                 if(prop.match(/iron\/[a-z]+\-\d+$/)){
                     let p = prop.replace(/\-\d+$/, '')
                     p = p.replace(/iron\//, '')
                     Img[p] = Img[prop]
-                    console.log(p)
                 }
                 if(prop.match(/gold\/[a-z]+\-\d+$/)){
                     let p = prop.replace(/\-\d+$/, '')
                     p = p.replace(/gold\//, '')
                     Img[p] = Img[prop]
-                    console.log(p)
                 }
                 if(prop.match(/diamond\/[a-z]+\-\d+$/)){
                     let p = prop.replace(/\-\d+$/, '')
                     p = p.replace(/diamond\//, '')
                     Img[p] = Img[prop]
-                    console.log(p)
                 }
                 if(prop.match(/emerald\/[a-z]+\-\d+$/)){
                     let p = prop.replace(/\-\d+$/, '')
                     p = p.replace(/emerald\//, '')
                     Img[p] = Img[prop]
-                    console.log(p)
                 }
                 if(prop.match(/amethyst\/[a-z]+\-\d+$/)){
                     let p = prop.replace(/\-\d+$/, '')
                     p = p.replace(/amethyst\//, '')
                     Img[p] = Img[prop]
-                    console.log(p)
                 }
-                console.log(prop)
                 if(prop.match(/tree\/[a-z]+\-\d+$/)){
                     let p = prop.replace(/\-\d+$/, '')
                     p = p.replace(/tree\//, '')
                     Img[p] = Img[prop]
-                    console.log(p)
                 }
             }
         }
@@ -176,6 +194,8 @@ nme.addEventListener('submit', function(e) {
 
 document.getElementById('server').addEventListener('change', e => {
     var select = document.getElementById('server')
+    curServer = '/' + select.value
+    console.log(select.value)
     socket = io('/' + select.value)
 })
 socket.on('disconnect', die)
@@ -808,9 +828,14 @@ var init = function(name) {
             this.rad = 28
             this.msg = []
             this.clan = initPack.clan
+            this.receivePackTimer = setTimeout(() => {
+                this.receivedUpdate = false
+            }, 1000/5)
+            this.receivedUpdate = true
             Players.push(this)
         }
         draw(x, y) {
+            if(!this.receivedUpdate) return
             ctx.restore()
             ctx.save()
             ctx.scale(this.rad/25, this.rad/25)
@@ -1184,6 +1209,11 @@ var init = function(name) {
             }
         }
         processInitpack(initPack) {
+            if(!this.receivedUpdate) this.receivedUpdate = true
+            clearTimeout(this.receivePackTimer)
+            this.receivePackTimer = setTimeout(() => {
+                this.receivedUpdate = false
+            }, 1000/5)
             this.x = initPack.x
             this.y = initPack.y
             this.hp = initPack.health
@@ -1239,9 +1269,14 @@ var init = function(name) {
             this.kills = 0
             this.bcolor = 'crimson'
             this.hcolor = 'maroon'
+            this.receivePackTimer = setTimeout(() => {
+                this.receivedUpdate = false
+            }, 1000/5)
+            this.receivedUpdate = true
             Demons.push(this)
         }
         draw(x, y) {
+            if(!this.receivedUpdate) return
             ctx.restore()
             ctx.save()
             ctx.scale(this.rad/25, this.rad/25)
@@ -1330,6 +1365,11 @@ var init = function(name) {
             ctx.restore();
         }
         processInitpack(initPack) {
+            if(!this.receivedUpdate) this.receivedUpdate = true
+            clearTimeout(this.receivePackTimer)
+            this.receivePackTimer = setTimeout(() => {
+                this.receivedUpdate = false
+            }, 1000/5)
             if(initPack.kills == 1){
                 this.rad = 32
                 this.hcolor = 'coral'
@@ -1365,10 +1405,15 @@ var init = function(name) {
             this.rad = 25
             this.kills = 0
             this.bcolor = 'white'
-            this.hcolor = 'grey'
+            this.hcolor = 'red'
+            this.receivePackTimer = setTimeout(() => {
+                this.receivedUpdate = false
+            }, 1000/5)
+            this.receivedUpdate = true
             Rabbits.push(this)
         }
         draw(x, y) {
+            if(!this.receivedUpdate) return
             ctx.restore()
             ctx.save()
             ctx.scale(this.rad/25, this.rad/25)
@@ -1460,6 +1505,11 @@ var init = function(name) {
             ctx.restore();
         }
         processInitpack(initPack) {
+            if(!this.receivedUpdate) this.receivedUpdate = true
+            clearTimeout(this.receivePackTimer)
+            this.receivePackTimer = setTimeout(() => {
+                this.receivedUpdate = false
+            }, 1000/5)
             this.x = initPack.x
             this.y = initPack.y
             this.id = initPack.id
@@ -1470,90 +1520,100 @@ var init = function(name) {
         }
     }
     class Destroyer {
-          /**
-           * Creates a new Player
-           * @param {Number} x 
-           * @param {Number} y 
-           * @param {String} mainHand 
-           */
-          constructor(initPack) {
-              this.x = initPack.x
-              this.y = initPack.y
-              this.id = initPack.id
-              this.angle = initPack.angle
-              this.lhit = initPack.lhit
-              this.rhit = initPack.rhit
-              this.rad = 35
-              Destroyers.push(this)
-          }
-          draw(x, y) {
-              ctx.restore()
-              ctx.save()
-              ctx.scale(this.rad/25, this.rad/25)
-              var hpBar = 80 * this.rad/25 * this.hp / this.maxHp
-              var currx = (this.x + x)/(this.rad/25)
-              var curry = (this.y + y)/(this.rad/25)
-              if(currx < -this.rad || currx > canvas.width + this.rad) return
-              if(curry < -this.rad || curry > canvas.height + this.rad) return
-              ctx.save();
+        /**
+         * Creates a new Player
+         * @param {Number} x 
+         * @param {Number} y 
+         * @param {String} mainHand 
+         */
+        constructor(initPack) {
+            this.x = initPack.x
+            this.y = initPack.y
+            this.id = initPack.id
+            this.angle = initPack.angle
+            this.lhit = initPack.lhit
+            this.rhit = initPack.rhit
+            this.rad = 35
+            this.receivePackTimer = setTimeout(() => {
+                this.receivedUpdate = false
+            }, 1000/5)
+            this.receivedUpdate = true
+            Destroyers.push(this)
+        }
+        draw(x, y) {
+            if(!this.receivedUpdate) return
+            ctx.restore()
+            ctx.save()
+            ctx.scale(this.rad/25, this.rad/25)
+            var hpBar = 80 * this.rad/25 * this.hp / this.maxHp
+            var currx = (this.x + x)/(this.rad/25)
+            var curry = (this.y + y)/(this.rad/25)
+            if(currx < -this.rad || currx > canvas.width + this.rad) return
+            if(curry < -this.rad || curry > canvas.height + this.rad) return
+            ctx.save();
 
 
-              ctx.save()
-              ctx.beginPath()
-              ctx.translate(currx, curry)
-              ctx.rotate((Math.PI / 180) * this.angle)
-              ctx.scale(this.rad/25, this.rad/25)
-              if (!(this.rhit)) {
-                  ctx.drawImage(Img.hand, 32 - 7.5, 15 - 7.5, 15, 15)
-              } else {
-                  ctx.save();
-                  ctx.translate(32 - 7.5, 15 - 7.5);
-                  ctx.rotate((Math.PI / 180) * (360 - (-Math.abs(-160 * this.punchper + 80) + 80)))
-                  ctx.drawImage(Img.hand, 0, 0, 15, 15)
-                  ctx.restore()
-              }
-              if (!(this.lhit)) {
-                  ctx.drawImage(Img.hand, 32 - 7.5, -15 - 7.5, 15, 15)
-              } else {
-                  ctx.save();
-                  ctx.translate(32 - 7.5, -(15 - 7.5));
-                  ctx.rotate((Math.PI / 180) * (0 + (-Math.abs(-160 * this.punchper + 80) + 80)))
-                  ctx.drawImage(Img.hand, 0, 0 - 15, 15, 15)
-                  ctx.restore();
-              }
-              ctx.restore()
-              ctx.beginPath()
-              ctx.fillStyle = '#000010'
-              ctx.arc(currx, curry, this.rad, 0, 2 * Math.PI)
-              ctx.fill()
-              ctx.beginPath()
-              ctx.fillStyle = 'green'
-              ctx.arc(currx, curry, this.rad - 2, 0, 2 * Math.PI)
-              ctx.fill()
-              ctx.translate(currx, curry)
-              ctx.rotate((Math.PI / 180) * this.angle)
-              ctx.fillStyle = 'black'
-              ctx.beginPath()
-              ctx.arc(0 + 9 * 50/35, 0 + 8 * 50/35, 6 * 50/35, 0, 2*Math.PI);
-              ctx.arc(0 + 9 * 50/35, 0 - 8 * 50/35, 6 * 50/35, 0, 2*Math.PI);
-              ctx.fill()
-              ctx.fillStyle = 'yellow'
-              ctx.beginPath()
-              ctx.arc(0 + 6.5 * 50/35, 0 + 7 * 50/35, 2.5 * 50/35, 0, 2*Math.PI);
-              ctx.arc(0 + 6.5 * 50/35, 0 - 7 * 50/35, 2.5 * 50/35, 0, 2*Math.PI);
-              ctx.fill()
-              ctx.restore();
-              ctx.restore();
-          }
-          processInitpack(initPack) {
-              this.x = initPack.x
-              this.y = initPack.y
-              this.id = initPack.id
-              this.angle = initPack.angle
-              this.lhit = initPack.lhit
-              this.rhit = initPack.rhit
-              this.punchper = initPack.punchper
-          }
+            ctx.save()
+            ctx.beginPath()
+            ctx.translate(currx, curry)
+            ctx.rotate((Math.PI / 180) * this.angle)
+            ctx.scale(this.rad/25, this.rad/25)
+            if (!(this.rhit)) {
+                ctx.drawImage(Img.hand, 32 - 7.5, 15 - 7.5, 15, 15)
+            } else {
+                ctx.save();
+                ctx.translate(32 - 7.5, 15 - 7.5);
+                ctx.rotate((Math.PI / 180) * (360 - (-Math.abs(-160 * this.punchper + 80) + 80)))
+                ctx.drawImage(Img.hand, 0, 0, 15, 15)
+                ctx.restore()
+            }
+            if (!(this.lhit)) {
+                ctx.drawImage(Img.hand, 32 - 7.5, -15 - 7.5, 15, 15)
+            } else {
+                ctx.save();
+                ctx.translate(32 - 7.5, -(15 - 7.5));
+                ctx.rotate((Math.PI / 180) * (0 + (-Math.abs(-160 * this.punchper + 80) + 80)))
+                ctx.drawImage(Img.hand, 0, 0 - 15, 15, 15)
+                ctx.restore();
+            }
+            ctx.restore()
+            ctx.beginPath()
+            ctx.fillStyle = '#000010'
+            ctx.arc(currx, curry, this.rad, 0, 2 * Math.PI)
+            ctx.fill()
+            ctx.beginPath()
+            ctx.fillStyle = 'green'
+            ctx.arc(currx, curry, this.rad - 2, 0, 2 * Math.PI)
+            ctx.fill()
+            ctx.translate(currx, curry)
+            ctx.rotate((Math.PI / 180) * this.angle)
+            ctx.fillStyle = 'black'
+            ctx.beginPath()
+            ctx.arc(0 + 9 * 50/35, 0 + 8 * 50/35, 6 * 50/35, 0, 2*Math.PI);
+            ctx.arc(0 + 9 * 50/35, 0 - 8 * 50/35, 6 * 50/35, 0, 2*Math.PI);
+            ctx.fill()
+            ctx.fillStyle = 'yellow'
+            ctx.beginPath()
+            ctx.arc(0 + 6.5 * 50/35, 0 + 7 * 50/35, 2.5 * 50/35, 0, 2*Math.PI);
+            ctx.arc(0 + 6.5 * 50/35, 0 - 7 * 50/35, 2.5 * 50/35, 0, 2*Math.PI);
+            ctx.fill()
+            ctx.restore();
+            ctx.restore();
+        }
+        processInitpack(initPack) {
+            if(!this.receivedUpdate) this.receivedUpdate = true
+            clearTimeout(this.receivePackTimer)
+            this.receivePackTimer = setTimeout(() => {
+                this.receivedUpdate = false
+            }, 1000/5)
+            this.x = initPack.x
+            this.y = initPack.y
+            this.id = initPack.id
+            this.angle = initPack.angle
+            this.lhit = initPack.lhit
+            this.rhit = initPack.rhit
+            this.punchper = initPack.punchper
+        }
       }
     var CTrees = new Mapper() 
     class CTree {
@@ -1980,9 +2040,9 @@ var init = function(name) {
     var tempSelf
     var receivedFirstUpdate = false
     readSelfUpdatePack = function(pack) {
-        if (!playa){return tempSelf = pack}
-        playa.processSelfInitPack(pack)
-        if (!receivedFirstUpdate) receivedFirstUpdate = true
+        tempSelf = pack
+        receivedFirstUpdate = true
+        if(playa) playa.processSelfInitPack(pack)
     }
     readInitPack = function(pack) {
         pack.player.forEach(function(initPack) {
@@ -2115,12 +2175,20 @@ var init = function(name) {
     let removePacks = []
     socket.on('initPack', pack => {initPacks.push(pack)})
     socket.on('removePack', pack => {removePacks.push(pack)})
+    let loadingTimerRefresh
     readPack = pack => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+        console.log(canvas.width, canvas.height)
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if(tempSelf){
+                initPacks.forEach(readInitPack)
+                initPacks = []
+                removePacks.forEach(readRemovePack)
+                removePacks = []   
+        }
         if (!receivedFirstUpdate || !allLoaded) {
-            
+            console.log(initPacks, socket.id, allLoaded, receivedFirstUpdate, initPacks, (socket.id))
             canvas.style.display = 'none'
             document.getElementById('loadingScreen').style.display = 'block'
             if(tempSelf) {
@@ -2129,8 +2197,14 @@ var init = function(name) {
                 removePacks.forEach(readRemovePack)
                 removePacks = []
             }
+            if(!loadingTimerRefresh) loadingTimerRefresh = setTimeout(() => {
+                location.reload()
+            }, 5000)
         } else if (playa) {
             if(tempSelf) tempSelf = null
+            if(loadingTimerRefresh) clearTimeout(loadingTimerRefresh)
+            loadingTimer = null
+            loadingTimerRefresh = null
             initPacks.forEach(readInitPack)
             initPacks = []
             removePacks.forEach(readRemovePack)
@@ -2143,7 +2217,7 @@ var init = function(name) {
             var y = canvas.height / 2 - playa.y
             
             ctx.fillStyle = '#01571b'
-            ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y, 7500, 7500)
+            ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y, 2000, 1000)
             pack.player.forEach(function(pack) {
                 /**
                  * @type {Player} toUpdate
@@ -2151,7 +2225,13 @@ var init = function(name) {
                 var toUpdate = Players.find(function(element) {
                     return element.id === pack.id
                 })
-                if(!toUpdate) return
+                if(!toUpdate){
+                    if(pack.id == socket.id){
+                        die()
+                        init(name)
+                    }
+                    return
+                }
                 toUpdate.processInitpack(pack)
                 
             })
@@ -2183,50 +2263,31 @@ var init = function(name) {
                 let toUpdate = Doors.get(pack.id)
                 toUpdate.processUpdatePack(pack)
             })
-            CTrees.forEach((tree) => {
-                tree.show(x, y)
-            })
-            Stones.forEach((stone) => {
-                stone.show(x, y)
-            })
-            Irons.forEach((iron) => {
-                iron.show(x, y)
-            })
-            Golds.forEach((gold) => {
-                gold.show(x, y)
-            })
-            Diamonds.forEach((diamond) => {
-                diamond.show(x, y)
-            })
-            Emeralds.forEach((emerald) => {
-                emerald.show(x, y)
-            })
-            Amethysts.forEach((amethyst) => {
-                amethyst.show(x, y)
-            })
-            Floors.forEach((floor) => {
-                floor.show(x, y)
-            })
-            Walls.forEach((wall) => {
-                wall.show(x, y)
-            })
-            Doors.forEach((door) => {
-                door.show(x, y)
-            })
-            CraftingTables.forEach((ctable) => {
-                ctable.show(x, y)
-            })
-            Chests.forEach((chest) => {
-                chest.show(x, y)
-            })
-            CarrotFarms.forEach((ctable) => {
-                ctable.show(x, y)
-            })
+            let oreEntities = [
+                ...CTrees.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
+                ...Stones.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
+                ...Irons.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
+                ...Golds.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
+                ...CTrees.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
+                ...Diamonds.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
+                ...Emeralds.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
+                ...Amethysts.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
+            ]
+            oreEntities.forEach(e => e.show(x, y))
+            let buildEntities = [
+                ...Floors.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
+                ...Walls.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
+                ...Doors.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
+                ...CraftingTables.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
+                ...Chests.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
+                ...CarrotFarms.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
+            ]
+            buildEntities.forEach(e => e.show(x, y))
             leaderboard = pack.leaderboard
-            ctx.beginPath()
+
             if(leaderboard.length > 10) var l = 10
             else var l = leaderboard.length
-            for(var i = 0; i < l ;i++){
+            /*for(var i = 0; i < l ;i++){
                 var player = leaderboard[i]
                 //ctx.fillText(i + 1, canvas.width - 100, 50 + i * 20)
                 
@@ -2246,6 +2307,66 @@ var init = function(name) {
                 
                 ctx.strokeText(player._score, canvas.width - 40, 50 + i * 20)
                 ctx.fillText(player._score, canvas.width - 40, 50 + i * 20)
+            }*/
+            let offsetX = canvas.width - 250
+            let offsetY = 60
+            ctx.fillStyle = 'saddlebrown'
+            ctx.globalAlpha = 0.75
+            function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+                if (typeof stroke === 'undefined') {
+                  stroke = true;
+                }
+                if (typeof radius === 'undefined') {
+                  radius = 5;
+                }
+                if (typeof radius === 'number') {
+                  radius = {tl: radius, tr: radius, br: radius, bl: radius};
+                } else {
+                  var defaultRadius = {tl: 0, tr: 0, br: 0, bl: 0};
+                  for (var side in defaultRadius) {
+                    radius[side] = radius[side] || defaultRadius[side];
+                  }
+                }
+                ctx.beginPath();
+                ctx.moveTo(x + radius.tl, y);
+                ctx.lineTo(x + width - radius.tr, y);
+                ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+                ctx.lineTo(x + width, y + height - radius.br);
+                ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+                ctx.lineTo(x + radius.bl, y + height);
+                ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+                ctx.lineTo(x, y + radius.tl);
+                ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+                ctx.closePath();
+            }
+            roundRect(ctx, offsetX - 10, offsetY - 20, 175 + 20, 200 + 10, 25, true, false)
+            ctx.fill()            
+            //ctx.fillRect(offsetX, offsetY - 15, 175, 200)
+            ctx.globalAlpha = 1
+            
+            for(var i = 0; i < 10 ;i++){
+                var player = {
+                    name:"Haxor",
+                    score:100000000
+                }
+                //ctx.fillText(i + 1, canvas.width - 100, 50 + i * 20)
+                
+                
+                if(player.score > 1000000) player._score = Math.round(player.score/100000)/10 + 'm'
+                else if(player.score > 1000) player._score = Math.round(player.score/100)/10 + 'k'
+                else player._score = player.score
+                ctx.textStyle = 'start'
+                ctx.font = '15px Arial'
+                ctx.fillStyle = 'yellow'
+                ctx.lineWidth = '20px'
+                ctx.strokeText((i+1) + ".", offsetX, offsetY + i * 20)
+                ctx.fillText((i+1) + ".", offsetX, offsetY + i * 20)
+                
+                ctx.strokeText(player.name, offsetX + 15, offsetY + i * 20)
+                ctx.fillText(player.name, offsetX + 15, offsetY + i * 20)
+                
+                ctx.strokeText(player._score, offsetX + 120, offsetY + i * 20)
+                ctx.fillText(player._score, offsetX + 120, offsetY + i * 20)
             }
             dropped = pack.dropped
             dropped.forEach(item => {
@@ -2755,9 +2876,9 @@ var init = function(name) {
                 //ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y, 2500, 2500)
             }
             if(pack.tod == 'night'){
-                ctx.fillStyle = 'black'
+                ctx.fillStyle = '#000033'
                 ctx.globalAlpha = (-1 * (Math.abs(pack.per - 0.5)) + 0.5) * 0.9
-                ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y, 7500, 7500)
+                ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y, 2000, 1000)
             }
             
             ctx.globalAlpha = 1
@@ -2825,6 +2946,7 @@ var die = function() {
     socket.removeListener('selfUpdate', readSelfUpdatePack)
     socket.removeListener('initPack', readInitPack)
     socket.removeListener('removePack', readRemovePack)
+    document.getElementById('loadingScreen').style.display = 'none'
     star.style.display = "block"
     canvas.style.display = "none";
 }

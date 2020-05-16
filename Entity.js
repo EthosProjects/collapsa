@@ -39,16 +39,16 @@ module.exports = function (nsp, ns) {
             if(timeOfDay == 'day') timeOfDay = 'night'
             else if(timeOfDay == 'night') timeOfDay = 'day'
             setDayTimeout()
-        }, 36000)
+        }, 40000)
     }
     dayTimeout = new Timeout(() => {
         if(timeOfDay == 'day') timeOfDay = 'night'
         else if(timeOfDay == 'night') timeOfDay = 'day'
         setDayTimeout()
-    }, 36000)
+    }, 40000)
     this.map = {
-        width:7500,
-        height:7500
+        width:2000,
+        height:1000
     }
     
     let clans = new Map()
@@ -97,7 +97,7 @@ module.exports = function (nsp, ns) {
     }
     let walls = {
         top:Bodies.rectangle(this.map.width/2, -500, this.map.width, 1000, {isStatic:true}),
-          bottom:Bodies.rectangle(this.map.width/2, this.map.height + 500, this.map.width, 1000, {isStatic:true}),
+        bottom:Bodies.rectangle(this.map.width/2, this.map.height + 500, this.map.width, 1000, {isStatic:true}),
         left:Bodies.rectangle(-500, this.map.height/2, 1000, this.map.height, {isStatic:true}),
         right:Bodies.rectangle(this.map.width + 500, this.map.height/2, 1000, this.map.height, {isStatic:true})
     }
@@ -1431,7 +1431,7 @@ module.exports = function (nsp, ns) {
                                 if(r instanceof Emerald){restype = 'emerald'; resnum = 4}
                                 if(r instanceof Amethyst){restype = 'amethyst'; resnum = 5} 
                                 if(r instanceof Stone || r instanceof Iron || r instanceof Gold || r instanceof Diamond || r instanceof Amethyst || r instanceof Emerald){
-                                    if((un >= 3) || ((un > 0 && un < 3) && resnum <= 3) || (resnum == un)){
+                                    if((un >= 3) || ((un > 0 && un < 3) && resnum <= 3) || (resnum == un) || (un == 0 || resnum == 1)){
                                         rem = this.inventory.addItemMax(new Slot(restype, this.pickaxe[u].mines[resnum].count, restype, 255, false))
                                         this.score += this.pickaxe[u].mines[resnum].count * resnum + 2
                                     }
@@ -2145,6 +2145,7 @@ module.exports = function (nsp, ns) {
             path = this.path.map(pos => ({x:100 * pos[0] + 50, y: 100 * pos[1] + 50}))
             n = path[this.curr]
             if(Players.list.find(player => Vector.getDistance(this.hposfr, player.body.position) < this.hrad + player.rad)) this.move.att = true
+            else if(Walls.list.find(wall => Vector.getDistance(this.hposfr, wall.body.position) < this.hrad + 50)) this.move.att = true
             else this.move.att = false
             if(!n) return
             this.acc = Vector.create(0, 0)
@@ -3751,13 +3752,13 @@ module.exports = function (nsp, ns) {
                 var demon = Demons.list[i];
                 //demon.update();
                 if(timeOfDay == 'day'){
-                    demon.punch.damage = dayTimeout.percntDone * 1 + 0.5
+                    3
+                    4
+                    demon.hands.damage = dayTimeout.percntDone * 1 + 0.5
                     demon.maxHealth = dayTimeout.percntDone * 15 + 5
-                    if(demon.health > demon.maxHealth) demon.health = demon.maxHealth
-                    demon.maxSpd =  (-2 * Math.abs(dayTimeout.percntDone - 0.5) + 1) * 1 + 0.5
-                    demon.health *= 0.9
+                    demon.maxSpd =  (-2 * Math.abs(dayTimeout.percntDone - 0.5) + 1) * 1 + 1
                 }else {
-                    demon.punch.damage = 2 + (-2 * Math.abs(dayTimeout.percntDone - 0.5) + 1) * 2
+                    demon.hands.damage = 2 + (-2 * Math.abs(dayTimeout.percntDone - 0.5) + 1) * 2
                     demon.maxSpd = 2 + (-2 * Math.abs(dayTimeout.percntDone - 0.5) + 1) * 2
                 }
                 if (demon.health <= 0) {
@@ -3810,8 +3811,14 @@ module.exports = function (nsp, ns) {
                 var demon = Destroyers.list[i];
                 //demon.update();
                 if(timeOfDay == 'day'){
-                    demon.health -= 3/60
-                }else if(demon.health <= 0){
+                    demon.hands.damage = dayTimeout.percntDone * 1 + 0.5
+                    demon.maxHealth = dayTimeout.percntDone * 25 + 5
+                    demon.maxSpd =  (-2 * Math.abs(dayTimeout.percntDone - 0.5) + 1) * 0.5 + 1
+                }else {
+                    demon.hands.damage = 4 + (-2 * Math.abs(dayTimeout.percntDone - 0.5) + 1) * 2
+                    demon.maxSpd = 1.75 + (-2 * Math.abs(dayTimeout.percntDone - 0.5) + 1)
+                }
+                if(demon.health <= 0 && timeOfDay == 'night'){
                     let drops = [new Slot('diamond', 5, 'diamond'), new Slot('diamond', 5, 'diamond'), new Slot('diamond', 5, 'diamond'), new Slot('diamond', 5, 'diamond')]
                     let toDrop = drops
                     toDrop.forEach((slot, i) => {
@@ -4024,52 +4031,52 @@ module.exports = function (nsp, ns) {
     }
     setInterval(function(){
         let canAdd = []
-        if(STrees.list.length < 300){
+        if(STrees.list.length < 12){
             let p = getGoodPosition()
             new STree(p.x, p.y, 50)
         }
-        if(Stones.list.length < 210){
+        if(Stones.list.length < 7){
             let p = getGoodPosition()
             new Stone(p.x, p.y, 50)
         }
-        if(Irons.list.length < 80){
+        if(Irons.list.length < 6){
             let p = getGoodPosition()
             new Iron(p.x, p.y, 50)
             
         }
-        if(Golds.list.length < 20){
+        if(Golds.list.length < 3){
             let p = getGoodPosition()
             new Gold(p.x, p.y, 50)
         }
-        if(Diamonds.list.length < 10){
+        if(Diamonds.list.length < 2){
             let p = getGoodPosition()
             new Diamond(p.x, p.y, 50)
         }
-        if(Emeralds.list.length < 8){
+        if(Emeralds.list.length < 1){
             let p = getGoodPosition()
             new Emerald(p.x, p.y, 50)
 
         }
-        if(Amethysts.list.length < 6){
+        if(Amethysts.list.length < 1){
             let p = getGoodPosition()
             new Amethyst(p.x, p.y, 50)
         }
-        if(Demons.list.length < 36 && timeOfDay == 'night'){
+        if(Demons.list.length < 3 && timeOfDay == 'night'){
             let p = getGoodPosition()
             new Demon(p.x, p.y, 50)
             
         }
-        if(CarrotFarms.list.length < 32){
+        if(CarrotFarms.list.length < 3){
             let p = getGoodPosition()
             new CarrotFarm(p.x, p.y, 50)
             
         }
-        if(Destroyers.list.length < 28 && timeOfDay == 'night' && dayTimeout.percntDone > 0.25 && dayTimeout.percntDone < 0.75){
+        if(Destroyers.list.length < 1 && timeOfDay == 'night' && dayTimeout.percntDone > 0.25 && dayTimeout.percntDone < 0.75){
             let p = getGoodPosition()
             new Destroyer(p.x, p.y, 50)
             
         }
-        if(Rabbits.list.length < 16 && timeOfDay == 'day'){
+        if(Rabbits.list.length < 1 && timeOfDay == 'day'){
             let p = getGoodPosition()
             new Rabbit(p.x, p.y, 50)
         }
@@ -4077,11 +4084,79 @@ module.exports = function (nsp, ns) {
     this.nsp.on('connection', function (socket) {
         socket.emit('images', images)
         socket.on('log', log => console.log(log))
+        socket.on('startInitPackReq', () => {
+            var pack = {
+                player: [],
+                bullet: [],
+                tree:[],
+                stone:[],
+                iron:[],
+                gold:[],
+                diamond:[],
+                leaderboard: leaderboard.getUpdate(),
+                wall:[],
+                door:[],
+                floor:[],
+                demon:[],
+                destroyer:[],
+                ctable:[],
+                cfarm:[],
+                rabbit:[],
+                chest:[],
+                emerald:[],
+                amethyst:[],
+              
+            }
+            Players.list.forEach(function (player) {
+                pack.player.push(player.getUpdatePack())
+            })
+            Stones.list.forEach( stone => pack.stone.push(stone.getInitPack()))
+            STrees.list.forEach( tree => pack.tree.push(tree.getInitPack()))
+            Irons.list.forEach( iron => pack.iron.push(iron.getInitPack()))
+            Golds.list.forEach( gold => pack.gold.push(gold.getInitPack()))
+            Diamonds.list.forEach( diamond => pack.diamond.push(diamond.getInitPack()))
+            Emeralds.list.forEach( gold => pack.emerald.push(gold.getInitPack()))
+            Amethysts.list.forEach( diamond => pack.amethyst.push(diamond.getInitPack()))
+            Walls.list.forEach( wall => pack.wall.push(wall.getInitPack()))
+            Doors.list.forEach( door => pack.door.push(door.getInitPack()))
+            Floors.list.forEach( floor => pack.floor.push(floor.getInitPack()))
+            CraftingTables.list.forEach( ctable => pack.ctable.push(ctable.getInitPack()))
+            Chests.list.forEach( chest => pack.chest.push(chest.getInitPack()))
+            CarrotFarms.list.forEach( cfarm => pack.cfarm.push(cfarm.getInitPack()))
+            Rabbits.list.forEach( rabbit => pack.rabbit.push(rabbit.getUpdatePack()))
+            Demons.list.forEach(function (demon) {
+                pack.demon.push(demon.getUpdatePack())
+            })
+            Destroyers.list.forEach(function (demon) {
+                pack.destroyer.push(demon.getUpdatePack())
+            })
+            
+            /*
+            Bullets.list.forEach(function(bullet){
+                pack.bullet.push(bulle)
+            })*/
+            console.log('trying to fix')
+            let playa
+            if(playa = Players.list.find(p => p.id == socket.id)){
+                game.nsp.to(socket.id).emit('initPack', pack)
+                game.nsp.to(socket.id).emit('selfUpdate', playa.getSelfUpdatePack())
+            }else {
+                game.nsp.to(socket.id).emit('error', "game_start")
+            }
+        })
         socket.on('clan', () => {
             let playa = Players.list.find(player =>  player.id == socket.id)
             if(!playa) return
             playa.clanning = !playa.clanning
             playa.needsSelfUpdate = true
+        })
+        socket.on('recon', id => {
+            let playa = Players.list.find(p => p.id == id)
+            if(!playa) return
+            playa.id = socket.id
+            playa.socket = socket
+            game.nsp.to(socket.id).emit('selfUpdatePack', playa.getSelfUpdatePack())
+            game.nsp.to('recon')
         })
         socket.on('createClan', name => {
             if(clans.get(name)) return
@@ -4424,8 +4499,26 @@ module.exports = function (nsp, ns) {
                 }
             }
         }
-        
-        self.nsp.emit('state', pack)
+        /**
+         * @param {Player} playa
+         */
+        Players.list.forEach(player => {
+            /**
+             * @type {Player}
+             */
+            let playa = player
+            let personal = Object.assign({}, pack)
+            for(let prop in personal){
+                if(prop !== 'leaderboard' &&
+                prop !== 'dropped' &&
+                prop !== 'tod' &&
+                prop !== 'per' &&
+                prop !== 'ctable' &&  Array.isArray(personal[prop])){
+                    personal[prop] = personal[prop].filter(e => Math.abs(playa.body.position.y - e.y) < 500 && Math.abs(playa.body.position.x - e.x) < 800)
+                }
+            }
+            self.nsp.to(playa.id).emit('state', personal)
+        })
         alr = false
         for(let prop in removePack){
             if(alr === true) return
