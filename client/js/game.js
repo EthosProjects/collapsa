@@ -1,6 +1,7 @@
 //Sets a few core values and then sets up onsubmits
 
 /* global changelog io usr loadingTimer*/
+console.log(Math.sin(45), Math.cos(45))
 class Mapper extends Map {
     constructor(iterator){
         super(iterator)
@@ -92,6 +93,20 @@ var Img = {
                     if(imagesLoaded == imagesCount) allLoaded = true
                 }
                 Img[prop].src = `/client/img/${prop}.${extension}`
+                if(prop.match(/^(wood|stone|iron)wall$/)){
+                    let material = prop.replace('wall', '')
+                    let wallTypes = ["oneway",
+                    "twoway",
+                    "threeway",
+                    "fourway",
+                    "corner"]
+                    wallTypes.forEach(t => {
+                        let type = material + 'wall' + t
+                        let img = new Image()
+                        img.src = `/client/img/${type}.${extension}`
+                        Img[type] = img
+                    })
+                }
                 if(prop.match(/stone\/[a-z]+\-\d+$/)){
                     let p = prop.replace(/\-\d+$/, '')
                     p = p.replace(/stone\//, '')
@@ -1104,9 +1119,101 @@ var init = function(name) {
                 ctx.restore()
                 ctx.save()
                 ctx.globalAlpha =0.5
-                console.log(img)
-                if(/Wall|Door|Floor|Crafting Table/.test(this.mainHand)) ctx.drawImage(Img[img], this.posPlace.x - 50 + x, this.posPlace.y - 50 + y, 100, 100)
-                /*else if(/Chest/.test(this.mainHand)){ 
+                if(/Wall|Floor|Crafting Table/.test(this.mainHand)) ctx.drawImage(Img[img], this.posPlace.x - 50 + x, this.posPlace.y - 50 + y, 100, 100)
+                else if(/Door/.test(this.mainHand)){
+                    if(pang == 'up'){
+                        ctx.save()
+                        ctx.beginPath()
+                        ctx.fillStyle = '#767676'
+                        ctx.arc(this.posPlace.x + 50 + x, this.posPlace.y - 50 + y, 8, 0, 2 * Math.PI)
+                        '#FF7D36'
+                        ctx.fill()
+                        ctx.beginPath()
+                        ctx.fillStyle = '#c0c0c0'
+                        ctx.arc(this.posPlace.x + 50 + x, this.posPlace.y - 50 + y, 6, 0, 2 * Math.PI)
+                        ctx.fill()
+
+                        ctx.beginPath()
+                        ctx.fillStyle = '#767676'
+                        ctx.arc(this.posPlace.x - 15 + x, this.posPlace.y - 50 + y, 10, 0, 2 * Math.PI)
+                        ctx.fill()
+                        ctx.beginPath()
+                        ctx.fillStyle = '#80461B'
+                        ctx.arc(this.posPlace.x - 15 + x, this.posPlace.y - 50 + y, 7, 0, 2 * Math.PI)
+                        ctx.fill()
+                        ctx.restore()
+                    }
+                    if(pang == 'down'){
+                        ctx.save()
+                        ctx.beginPath()
+                        ctx.fillStyle = '#767676'
+                        ctx.arc(this.posPlace.x - 50 + x, this.posPlace.y + 50 + y, 8, 0, 2 * Math.PI)
+                        '#FF7D36'
+                        ctx.fill()
+                        ctx.beginPath()
+                        ctx.fillStyle = '#c0c0c0'
+                        ctx.arc(this.posPlace.x - 50 + x, this.posPlace.y + 50 + y, 6, 0, 2 * Math.PI)
+                        ctx.fill()
+
+                        ctx.beginPath()
+                        ctx.fillStyle = '#767676'
+                        ctx.arc(this.posPlace.x + 15 + x, this.posPlace.y + 50 + y, 10, 0, 2 * Math.PI)
+                        ctx.fill()
+                        ctx.beginPath()
+                        ctx.fillStyle = '#80461B'
+                        ctx.arc(this.posPlace.x + 15 + x, this.posPlace.y + 50 + y, 7, 0, 2 * Math.PI)
+                        ctx.fill()
+                        ctx.restore()
+                    }
+
+                    if(pang == 'left'){
+                        ctx.save()
+                        ctx.beginPath()
+                        ctx.fillStyle = '#767676'
+                        ctx.arc(this.posPlace.x - 50 + x, this.posPlace.y - 50 + y, 8, 0, 2 * Math.PI)
+                        '#FF7D36'
+                        ctx.fill()
+                        ctx.beginPath()
+                        ctx.fillStyle = '#c0c0c0'
+                        ctx.arc(this.posPlace.x - 50 + x, this.posPlace.y - 50 + y, 6, 0, 2 * Math.PI)
+                        ctx.fill()
+
+                        ctx.beginPath()
+                        ctx.fillStyle = '#767676'
+                        ctx.arc(this.posPlace.x - 50 + x, this.posPlace.y + 15 + y, 10, 0, 2 * Math.PI)
+                        ctx.fill()
+                        ctx.beginPath()
+                        ctx.fillStyle = '#80461B'
+                        ctx.arc(this.posPlace.x - 50 + x, this.posPlace.y + 15 + y, 7, 0, 2 * Math.PI)
+                        ctx.fill()
+                        ctx.restore()
+                    }
+                    if(pang == 'right'){
+                        ctx.save()
+                        ctx.beginPath()
+                        ctx.fillStyle = '#767676'
+                        ctx.arc(this.posPlace.x + 50 + x, this.posPlace.y + 50 + y, 8, 0, 2 * Math.PI)
+                        '#FF7D36'
+                        ctx.fill()
+                        ctx.beginPath()
+                        ctx.fillStyle = '#c0c0c0'
+                        ctx.arc(this.posPlace.x + 50 + x, this.posPlace.y + 50 + y, 6, 0, 2 * Math.PI)
+                        ctx.fill()
+
+                        ctx.beginPath()
+                        ctx.fillStyle = '#767676'
+                        ctx.arc(this.posPlace.x + 50 + x, this.posPlace.y - 15 + y, 10, 0, 2 * Math.PI)
+                        ctx.fill()
+                        ctx.beginPath()
+                        ctx.fillStyle = '#80461B'
+                        ctx.arc(this.posPlace.x + 50 + x, this.posPlace.y - 15 + y, 7, 0, 2 * Math.PI)
+                        ctx.fill()
+                        ctx.restore()
+                    }
+                    ctx.drawImage(Img[img], this.posPlace.x - 50 + x, this.posPlace.y - 50 + y, 100, 100)
+                }
+                /**
+                 * if(/Chest/.test(this.mainHand)){ 
                     ctx.save()
                     ctx.translate(this.posPlace.x + x, this.posPlace.y + y)
                     if(pang == 'left' || pang == 'right'){
@@ -1114,97 +1221,8 @@ var init = function(name) {
                     }
                     ctx.drawImage(Img[img], 0 - 47.5, 0 - 25, 95, 50)
                 }
-                if(/Door/.test(this.mainHand)){
-                      if(pang == 'up'){
-                          ctx.save()
-                          ctx.beginPath()
-                          ctx.fillStyle = '#767676'
-                          ctx.arc(this.posPlace.x + 50 + x, this.posPlace.y - 50 + y, 8, 0, 2 * Math.PI)
-                          '#FF7D36'
-                          ctx.fill()
-                          ctx.beginPath()
-                          ctx.fillStyle = '#c0c0c0'
-                          ctx.arc(this.posPlace.x + 50 + x, this.posPlace.y - 50 + y, 6, 0, 2 * Math.PI)
-                          ctx.fill()
-
-                          ctx.beginPath()
-                          ctx.fillStyle = '#767676'
-                          ctx.arc(this.posPlace.x - 15 + x, this.posPlace.y - 50 + y, 10, 0, 2 * Math.PI)
-                          ctx.fill()
-                          ctx.beginPath()
-                          ctx.fillStyle = '#80461B'
-                          ctx.arc(this.posPlace.x - 15 + x, this.posPlace.y - 50 + y, 7, 0, 2 * Math.PI)
-                          ctx.fill()
-                          ctx.restore()
-                      }
-                      if(pang == 'down'){
-                          ctx.save()
-                          ctx.beginPath()
-                          ctx.fillStyle = '#767676'
-                          ctx.arc(this.posPlace.x - 50 + x, this.posPlace.y + 50 + y, 8, 0, 2 * Math.PI)
-                          '#FF7D36'
-                          ctx.fill()
-                          ctx.beginPath()
-                          ctx.fillStyle = '#c0c0c0'
-                          ctx.arc(this.posPlace.x - 50 + x, this.posPlace.y + 50 + y, 6, 0, 2 * Math.PI)
-                          ctx.fill()
-
-                          ctx.beginPath()
-                          ctx.fillStyle = '#767676'
-                          ctx.arc(this.posPlace.x + 15 + x, this.posPlace.y + 50 + y, 10, 0, 2 * Math.PI)
-                          ctx.fill()
-                          ctx.beginPath()
-                          ctx.fillStyle = '#80461B'
-                          ctx.arc(this.posPlace.x + 15 + x, this.posPlace.y + 50 + y, 7, 0, 2 * Math.PI)
-                          ctx.fill()
-                          ctx.restore()
-                      }
-
-                      if(pang == 'left'){
-                          ctx.save()
-                          ctx.beginPath()
-                          ctx.fillStyle = '#767676'
-                          ctx.arc(this.posPlace.x - 50 + x, this.posPlace.y - 50 + y, 8, 0, 2 * Math.PI)
-                          '#FF7D36'
-                          ctx.fill()
-                          ctx.beginPath()
-                          ctx.fillStyle = '#c0c0c0'
-                          ctx.arc(this.posPlace.x - 50 + x, this.posPlace.y - 50 + y, 6, 0, 2 * Math.PI)
-                          ctx.fill()
-
-                          ctx.beginPath()
-                          ctx.fillStyle = '#767676'
-                          ctx.arc(this.posPlace.x - 50 + x, this.posPlace.y + 15 + y, 10, 0, 2 * Math.PI)
-                          ctx.fill()
-                          ctx.beginPath()
-                          ctx.fillStyle = '#80461B'
-                          ctx.arc(this.posPlace.x - 50 + x, this.posPlace.y + 15 + y, 7, 0, 2 * Math.PI)
-                          ctx.fill()
-                          ctx.restore()
-                      }
-                      if(pang == 'right'){
-                          ctx.save()
-                          ctx.beginPath()
-                          ctx.fillStyle = '#767676'
-                          ctx.arc(this.posPlace.x + 50 + x, this.posPlace.y + 50 + y, 8, 0, 2 * Math.PI)
-                          '#FF7D36'
-                          ctx.fill()
-                          ctx.beginPath()
-                          ctx.fillStyle = '#c0c0c0'
-                          ctx.arc(this.posPlace.x + 50 + x, this.posPlace.y + 50 + y, 6, 0, 2 * Math.PI)
-                          ctx.fill()
-
-                          ctx.beginPath()
-                          ctx.fillStyle = '#767676'
-                          ctx.arc(this.posPlace.x + 50 + x, this.posPlace.y - 15 + y, 10, 0, 2 * Math.PI)
-                          ctx.fill()
-                          ctx.beginPath()
-                          ctx.fillStyle = '#80461B'
-                          ctx.arc(this.posPlace.x + 50 + x, this.posPlace.y - 15 + y, 7, 0, 2 * Math.PI)
-                          ctx.fill()
-                          ctx.restore()
-                      }
-                }*/
+                
+                 */
                 ctx.restore()
             }
         }
@@ -1725,14 +1743,14 @@ var init = function(name) {
         show(x, y){
             ctx.save()
             ctx.translate(this.x + x, this.y + y)
-            if(this.material == 'stone'){
+            if(this.material.match(/stone|wood|iron/)){
                 if(
                     Walls.find(w => (w.x == this.x && w.y == this.y - 100), this) &&
                     Walls.find(w => (w.x == this.x && w.y == this.y + 100), this) &&
                     Walls.find(w => (w.x == this.x - 100 && w.y == this.y), this) &&
                     Walls.find(w => (w.x == this.x + 100 && w.y == this.y), this)
                 ){
-                    ctx.drawImage(Img['stonewallfourway'], -50, -50, 100, 100)
+                    ctx.drawImage(Img[this.material + 'wallfourway'], -50, -50, 100, 100)
                 
                 }else if(
                     (
@@ -1751,12 +1769,12 @@ var init = function(name) {
                         )
                     ){
                         if(Walls.find(w => w.x == this.x && w.y == this.y + 100)){
-                            ctx.drawImage(Img['stonewallthreeway'], -50, -50, 100, 100)
+                            ctx.drawImage(Img[this.material + 'wallthreeway'], -50, -50, 100, 100)
                         }else if(Walls.find(w => w.x == this.x && w.y == this.y - 100)){
                             ctx.rotate(180 * Math.PI/180)
-                            ctx.drawImage(Img['stonewallthreeway'], -50, -50, 100, 100)
+                            ctx.drawImage(Img[this.material + 'wallthreeway'], -50, -50, 100, 100)
                         }else {
-                            ctx.drawImage(Img['stonewalltwoway'], -50, -50, 100, 100)
+                            ctx.drawImage(Img[this.material + 'walltwoway'], -50, -50, 100, 100)
                         }
                     }else if(
                         (
@@ -1766,13 +1784,13 @@ var init = function(name) {
                     ){
                         if(Walls.find(w => w.x == this.x - 100 && w.y == this.y)){
                             ctx.rotate(90 * Math.PI/180)
-                            ctx.drawImage(Img['stonewallthreeway'], -50, -50, 100, 100)
+                            ctx.drawImage(Img[this.material + 'wallthreeway'], -50, -50, 100, 100)
                         }else if(Walls.find(w => w.x == this.x + 100 && w.y == this.y)){
                             ctx.rotate(270 * Math.PI/180)
-                            ctx.drawImage(Img['stonewallthreeway'], -50, -50, 100, 100)
+                            ctx.drawImage(Img[this.material + 'wallthreeway'], -50, -50, 100, 100)
                         }else {
                             ctx.rotate(90 * Math.PI/180)
-                            ctx.drawImage(Img['stonewalltwoway'], -50, -50, 100, 100)
+                            ctx.drawImage(Img[this.material + 'walltwoway'], -50, -50, 100, 100)
                         }
                     }
                     
@@ -1797,25 +1815,25 @@ var init = function(name) {
                     if(
                         Walls.find(w => w.x == this.x && w.y == this.y + 100) &&
                         Walls.find(w => w.x == this.x + 100 && w.y == this.y)
-                    )ctx.drawImage(Img['stonewallcorner'], -50, -50, 100, 100)
+                    )ctx.drawImage(Img[this.material + 'wallcorner'], -50, -50, 100, 100)
                     else if(
                         Walls.find(w => w.x == this.x && w.y == this.y + 100) &&
                         Walls.find(w => w.x == this.x - 100 && w.y == this.y)
                     ){
                         ctx.rotate(90 * Math.PI/180)
-                        ctx.drawImage(Img['stonewallcorner'], -50, -50, 100, 100)
+                        ctx.drawImage(Img[this.material + 'wallcorner'], -50, -50, 100, 100)
                     }else if(
                         Walls.find(w => w.x == this.x && w.y == this.y - 100) &&
                         Walls.find(w => w.x == this.x - 100 && w.y == this.y)
                     ){
                         ctx.rotate(180 * Math.PI/180)
-                        ctx.drawImage(Img['stonewallcorner'], -50, -50, 100, 100)
+                        ctx.drawImage(Img[this.material + 'wallcorner'], -50, -50, 100, 100)
                     }else if(
                         Walls.find(w => w.x == this.x && w.y == this.y - 100) &&
                         Walls.find(w => w.x == this.x + 100 && w.y == this.y)
                     ){
                         ctx.rotate(270 * Math.PI/180)
-                        ctx.drawImage(Img['stonewallcorner'], -50, -50, 100, 100)
+                        ctx.drawImage(Img[this.material + 'wallcorner'], -50, -50, 100, 100)
                     }
                 }else if(
                     Walls.find(w => w.x == this.x + 100 && w.y == this.y) ||
@@ -1823,19 +1841,19 @@ var init = function(name) {
                     Walls.find(w => w.x == this.x - 100 && w.y == this.y) ||
                     Walls.find(w => w.x == this.x && w.y == this.y - 100)
                 ){
-                    if(Walls.find(w => w.x == this.x + 100 && w.y == this.y)) ctx.drawImage(Img['stonewalloneway'], -50, -50, 100, 100)
+                    if(Walls.find(w => w.x == this.x + 100 && w.y == this.y)) ctx.drawImage(Img[this.material + 'walloneway'], -50, -50, 100, 100)
                     else if(Walls.find(w => w.x == this.x && w.y == this.y + 100)){
                         ctx.rotate(90 * Math.PI/180)
-                        ctx.drawImage(Img['stonewalloneway'], -50, -50, 100, 100)
+                        ctx.drawImage(Img[this.material + 'walloneway'], -50, -50, 100, 100)
                     }else if(Walls.find(w => w.x == this.x - 100 && w.y == this.y)){
                         ctx.rotate(180 * Math.PI/180)
-                        ctx.drawImage(Img['stonewalloneway'], -50, -50, 100, 100)
+                        ctx.drawImage(Img[this.material + 'walloneway'], -50, -50, 100, 100)
                     }else if(Walls.find(w => w.x == this.x && w.y == this.y - 100)){
                         ctx.rotate(270 * Math.PI/180)
-                        ctx.drawImage(Img['stonewalloneway'], -50, -50, 100, 100)
+                        ctx.drawImage(Img[this.material + 'walloneway'], -50, -50, 100, 100)
                     }
                 }else{
-                    ctx.drawImage(Img['stonewall'], -50, -50, 100, 100)
+                    ctx.drawImage(Img[this.material + 'wall'], -50, -50, 100, 100)
                 }
             }else ctx.drawImage(Img[this.material + 'wall'], -50, -50, 100, 100)
             ctx.restore()
@@ -2179,7 +2197,6 @@ var init = function(name) {
     readPack = pack => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        console.log(canvas.width, canvas.height)
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         if(tempSelf){
                 initPacks.forEach(readInitPack)
@@ -2283,10 +2300,7 @@ var init = function(name) {
                 ...CarrotFarms.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
             ]
             buildEntities.forEach(e => e.show(x, y))
-            leaderboard = pack.leaderboard
-
-            if(leaderboard.length > 10) var l = 10
-            else var l = leaderboard.length
+            
             /*for(var i = 0; i < l ;i++){
                 var player = leaderboard[i]
                 //ctx.fillText(i + 1, canvas.width - 100, 50 + i * 20)
@@ -2308,10 +2322,6 @@ var init = function(name) {
                 ctx.strokeText(player._score, canvas.width - 40, 50 + i * 20)
                 ctx.fillText(player._score, canvas.width - 40, 50 + i * 20)
             }*/
-            let offsetX = canvas.width - 250
-            let offsetY = 60
-            ctx.fillStyle = 'saddlebrown'
-            ctx.globalAlpha = 0.75
             function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
                 if (typeof stroke === 'undefined') {
                   stroke = true;
@@ -2339,35 +2349,7 @@ var init = function(name) {
                 ctx.quadraticCurveTo(x, y, x + radius.tl, y);
                 ctx.closePath();
             }
-            roundRect(ctx, offsetX - 10, offsetY - 20, 175 + 20, 200 + 10, 25, true, false)
-            ctx.fill()            
-            //ctx.fillRect(offsetX, offsetY - 15, 175, 200)
-            ctx.globalAlpha = 1
             
-            for(var i = 0; i < 10 ;i++){
-                var player = {
-                    name:"Haxor",
-                    score:100000000
-                }
-                //ctx.fillText(i + 1, canvas.width - 100, 50 + i * 20)
-                
-                
-                if(player.score > 1000000) player._score = Math.round(player.score/100000)/10 + 'm'
-                else if(player.score > 1000) player._score = Math.round(player.score/100)/10 + 'k'
-                else player._score = player.score
-                ctx.textStyle = 'start'
-                ctx.font = '15px Arial'
-                ctx.fillStyle = 'yellow'
-                ctx.lineWidth = '20px'
-                ctx.strokeText((i+1) + ".", offsetX, offsetY + i * 20)
-                ctx.fillText((i+1) + ".", offsetX, offsetY + i * 20)
-                
-                ctx.strokeText(player.name, offsetX + 15, offsetY + i * 20)
-                ctx.fillText(player.name, offsetX + 15, offsetY + i * 20)
-                
-                ctx.strokeText(player._score, offsetX + 120, offsetY + i * 20)
-                ctx.fillText(player._score, offsetX + 120, offsetY + i * 20)
-            }
             dropped = pack.dropped
             dropped.forEach(item => {
                 if(item.slot.image == 'stone' || item.slot.image == 'iron' || item.slot.image == 'gold' || item.slot.image == 'diamond'|| item.slot.image == 'emerald' || item.slot.image == 'amethyst'){
@@ -2448,6 +2430,50 @@ var init = function(name) {
                 rabbit.draw(x, y)
             })
             ctx.restore();
+            let offsetX = canvas.width - 250
+            let offsetY = 90
+            ctx.save()
+            ctx.globalAlpha = 0.75
+            ctx.fillStyle = '#B5651D'
+            roundRect(ctx, offsetX - 10, offsetY - 50, 175 + 20, 200 + 10 + 30, 25, true, false)
+            ctx.fill()
+            ctx.strokeStyle = '#521c18'
+            ctx.lineWidth = 5
+            ctx.stroke()
+            ctx.globalAlpha = 1
+            ctx.textAlign = 'center'
+            ctx.font = '20px Arial'
+            ctx.fillStyle = '#521c18'
+            ctx.lineWidth = 1
+            ctx.strokeText("Leaderboard", offsetX - 10 + (175 + 20)/2, offsetY - 20)
+            ctx.fillText("Leaderboard", offsetX - 10 + (175 + 20)/2, offsetY - 20)
+            leaderboard = pack.leaderboard
+
+            if(leaderboard.length > 10) var l = 10
+            else var l = leaderboard.length
+            for(var i = 0; i < l ;i++){
+                let player = leaderboard[i]
+                console.log(player)
+                //ctx.fillText(i + 1, canvas.width - 100, 50 + i * 20)
+                ctx.textAlign = 'left'
+                
+                if(player.score > 1000000) player._score = Math.round(player.score/100000)/10 + 'm'
+                else if(player.score > 1000) player._score = Math.round(player.score/100)/10 + 'k'
+                else player._score = player.score
+                ctx.textStyle = 'start'
+                ctx.font = '15px Arial'
+                ctx.fillStyle = '#521c18'
+                if(player.id == socket.id) ctx.fillStyle = 'white'
+                ctx.strokeText((i+1) + ".", offsetX, offsetY + i * 20)
+                ctx.fillText((i+1) + ".", offsetX, offsetY + i * 20)
+                
+                ctx.strokeText(player.name, offsetX + 15, offsetY + i * 20)
+                ctx.fillText(player.name, offsetX + 15, offsetY + i * 20)
+                
+                ctx.strokeText(player._score, offsetX + 120, offsetY + i * 20)
+                ctx.fillText(player._score, offsetX + 120, offsetY + i * 20)
+            }
+            ctx.restore()
             if(playa.clanning){
                 ctx.fillStyle = 'black'
                 ctx.lineWidth = 2

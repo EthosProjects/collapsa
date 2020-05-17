@@ -756,6 +756,17 @@ module.exports = function (nsp, ns) {
     class Inventory extends Storage {
         constructor(){
             super([
+                /**
+                 * ['1', new Slot('Wood Wall', 255, 'woodwall', 255, true)],
+                ['2', new Slot('Stone Wall', 255, 'stonewall', 255, true)],
+                ['3', new Slot('Iron Wall', 255, 'ironwall', 255, true)],
+                ['4', new Slot('Wood Door', 255, 'wooddoor', 255, true)],
+                ['5', 'empty'],
+                ['6', 'empty'],
+                ['7', 'empty'],
+                ['8', 'empty'],
+                ['9', 'empty'],
+                 */
                 ['1', 'empty'],
                 ['2', 'empty'],
                 ['3', 'empty'],
@@ -1257,6 +1268,7 @@ module.exports = function (nsp, ns) {
                         }
                         door.opentimeout = new Timeout(() => {door.open = !door.open; door.opening = false}, 1000)
                         door.opening = true
+                        door.openFun()
                         door.needsUpdate = true
                         this.alusd = true
                     }else if(!this.crafting && (((disd  == undefined && disctable  == undefined && dischest == undefined) && dis != undefined) || (dis > disctable && dis > disd && dis > dischest))){
@@ -1659,6 +1671,7 @@ module.exports = function (nsp, ns) {
                         if(/Stone/.test(this.mainHands)) this.structures.push(new Door(mvect.x, mvect.y, 'stone', this.pang))
                         if(/Iron/.test(this.mainHands)) this.structures.push(new Door(mvect.x, mvect.y, 'iron', this.pang))
                         this.alusd = true
+                        console.log(this.structures)
                     }
                     if(/Crafting Table/.test(this.mainHands) && this.move.att && !this.alusd){
                         mvect.y = Math.floor(mvect.y/100) * 100 + 50
@@ -3591,6 +3604,25 @@ module.exports = function (nsp, ns) {
             }
             Doors.list.push(this)
             initPack.door.push(pack)
+        }
+        openFun(){
+            if(door.ang == 'left' && !door.open){
+                Body.translate(door.body, Vector.create(-100, -100))
+            }
+            if(door.ang == 'up' && !door.open){
+                Body.translate(door.body, Vector.create(100, -100))
+            }
+            if(door.ang == 'right' && !door.open){
+                Body.translate(door.body, Vector.create(100, 100))
+            }
+            if(door.ang == 'down' && !door.open){
+                Body.translate(door.body, Vector.create(-100, 100))
+            }
+            if(door.open){
+                Body.translate(door.body, {x:door.x - door.body.position.x, y:door.y - door.body.position.y})
+            }
+            door.opentimeout = new Timeout(() => {door.open = !door.open; door.opening = false}, 1000)
+            door.opening = true
         }
         getInitPack(){
             let pack = {
