@@ -11,6 +11,8 @@ var changelog = {
         'and please send a screenshot and accurate description. I\'ll try to fix it asap. PS: By the end of next update, I will have added a page for reporting bugs'
     ],
     Plans: [
+        'Mods gay',
+        'Add leaderboard spot for losers',
         'Fix clan placement issue',
         'Add Leather and Vials',
         'Add Armor', 

@@ -755,6 +755,7 @@ module.exports = function (nsp, ns) {
     class Inventory extends Storage {
         constructor(){
             super([
+                /*
                 ['1', new Slot('Wood Wall', 255, 'woodwall', 255, true)],
                 ['2', new Slot('Stone Wall', 255, 'stonewall', 255, true)],
                 ['3', new Slot('Iron Wall', 255, 'ironwall', 255, true)],
@@ -764,7 +765,7 @@ module.exports = function (nsp, ns) {
                 ['7', 'empty'],
                 ['8', 'empty'],
                 ['9', 'empty'],
-                 /*
+                 */
                 ['1', 'empty'],
                 ['2', 'empty'],
                 ['3', 'empty'],
@@ -773,7 +774,7 @@ module.exports = function (nsp, ns) {
                 ['6', 'empty'],
                 ['7', 'empty'],
                 ['8', 'empty'],
-                ['9', 'empty'],*/
+                ['9', 'empty']
             ])
         }
         listItems(){
@@ -2071,7 +2072,7 @@ module.exports = function (nsp, ns) {
                 }else if(Players.list.find(player => Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 1500)){
                     let possible = new Mapper()
                     Players.list.forEach((player, i)=> {
-                        if(Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 1) possible.set(i, player)
+                        if(Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 1500) possible.set(i, player)
                     })
                     let dis
                     let nearest
@@ -2123,7 +2124,7 @@ module.exports = function (nsp, ns) {
         }
         updateSpd() {
             this.move.att = false
-            if(!this.path || !this.path.length || (this.agro.length && !this.agro.find(agro => agro == this.pos)) || Players.list.find(player => Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 1 && !this.pos instanceof Player)) this.updatePath()
+            if(!this.path || !this.path.length || (this.agro.length && !this.agro.find(agro => agro == this.pos)) || Players.list.find(player => Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 1500 && !this.pos instanceof Player)) this.updatePath()
             if(!this.path || !this.path.length) return
             this.move.ang = Math.atan2(this.pos.body.position.y - this.body.position.y, this.pos.body.position.x - this.body.position.x) * 180 / Math.PI
             while(this.agro.find(player => player.health <= 0)){
@@ -2389,10 +2390,10 @@ module.exports = function (nsp, ns) {
                         })
                     }    
                     this.pos = possible.get(nearest)
-                }else if(Players.list.find(player => Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 1)){
+                }else if(Players.list.find(player => Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 700)){
                     let possible = new Mapper()
                     Players.list.forEach((player, i)=> {
-                        if(Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 1) possible.set(i, player)
+                        if(Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 700) possible.set(i, player)
                     })
                     let dis
                     let nearest
@@ -2449,7 +2450,7 @@ module.exports = function (nsp, ns) {
             if(!this.path || !this.path.length || (this.agro.length && !this.agro.find(agro => agro == this.pos)) || 
                 Players.list.find(
                     player => Vector.getDistance(player.body.position, this.body.position) < 600 + this.rad && 
-                    player.score > 1 && 
+                    player.score > 700 && 
                     !this.pos instanceof Player
                 )) this.updatePath()
             if(!this.path || !this.path.length) return
