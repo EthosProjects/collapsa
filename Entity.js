@@ -50,7 +50,6 @@ module.exports = function (nsp, ns) {
         width:2000,
         height:1000
     }
-    
     let clans = new Map()
     let Entities = []
     class Clan {
@@ -756,8 +755,7 @@ module.exports = function (nsp, ns) {
     class Inventory extends Storage {
         constructor(){
             super([
-                /**
-                 * ['1', new Slot('Wood Wall', 255, 'woodwall', 255, true)],
+                ['1', new Slot('Wood Wall', 255, 'woodwall', 255, true)],
                 ['2', new Slot('Stone Wall', 255, 'stonewall', 255, true)],
                 ['3', new Slot('Iron Wall', 255, 'ironwall', 255, true)],
                 ['4', new Slot('Wood Door', 255, 'wooddoor', 255, true)],
@@ -766,7 +764,7 @@ module.exports = function (nsp, ns) {
                 ['7', 'empty'],
                 ['8', 'empty'],
                 ['9', 'empty'],
-                 */
+                 /*
                 ['1', 'empty'],
                 ['2', 'empty'],
                 ['3', 'empty'],
@@ -775,7 +773,7 @@ module.exports = function (nsp, ns) {
                 ['6', 'empty'],
                 ['7', 'empty'],
                 ['8', 'empty'],
-                ['9', 'empty'],
+                ['9', 'empty'],*/
             ])
         }
         listItems(){
@@ -1251,25 +1249,7 @@ module.exports = function (nsp, ns) {
                     //console.log(poschest)
                     if(!this.crafting && (((dis == undefined && disctable == undefined && dischest == undefined) && disd != undefined) || (disd > dis && disd > disctable && disd > dischest)) && !posd.get(nearestd).opening){
                         let door = posd.get(nearestd)
-                        if(door.ang == 'left' && !door.open){
-                            Body.translate(door.body, Vector.create(-100, -100))
-                        }
-                        if(door.ang == 'up' && !door.open){
-                            Body.translate(door.body, Vector.create(100, -100))
-                        }
-                        if(door.ang == 'right' && !door.open){
-                            Body.translate(door.body, Vector.create(100, 100))
-                        }
-                        if(door.ang == 'down' && !door.open){
-                            Body.translate(door.body, Vector.create(-100, 100))
-                        }
-                        if(door.open){
-                            Body.translate(door.body, {x:door.x - door.body.position.x, y:door.y - door.body.position.y})
-                        }
-                        door.opentimeout = new Timeout(() => {door.open = !door.open; door.opening = false}, 1000)
-                        door.opening = true
                         door.openFun()
-                        door.needsUpdate = true
                         this.alusd = true
                     }else if(!this.crafting && (((disd  == undefined && disctable  == undefined && dischest == undefined) && dis != undefined) || (dis > disctable && dis > disd && dis > dischest))){
                         let res = this.inventory.addItemMax(dropped[nearest].item)
@@ -1651,7 +1631,7 @@ module.exports = function (nsp, ns) {
                     if(/Door/.test(this.mainHands) && this.move.att && !this.alusd){
                         mvect.y = Math.floor(mvect.y/100) * 100 + 50
                         mvect.x = Math.floor(mvect.x/100) * 100 + 50
-                        if(Entities.find(e => 
+                        if(Entities.some(e => 
                               (
                                   (e.body.position.x == mvect.x && e.body.position.y == mvect.y) || 
                                   (
@@ -1671,7 +1651,6 @@ module.exports = function (nsp, ns) {
                         if(/Stone/.test(this.mainHands)) this.structures.push(new Door(mvect.x, mvect.y, 'stone', this.pang))
                         if(/Iron/.test(this.mainHands)) this.structures.push(new Door(mvect.x, mvect.y, 'iron', this.pang))
                         this.alusd = true
-                        console.log(this.structures)
                     }
                     if(/Crafting Table/.test(this.mainHands) && this.move.att && !this.alusd){
                         mvect.y = Math.floor(mvect.y/100) * 100 + 50
@@ -2092,7 +2071,7 @@ module.exports = function (nsp, ns) {
                 }else if(Players.list.find(player => Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 1500)){
                     let possible = new Mapper()
                     Players.list.forEach((player, i)=> {
-                        if(Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 1500) possible.set(i, player)
+                        if(Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 1) possible.set(i, player)
                     })
                     let dis
                     let nearest
@@ -2144,7 +2123,7 @@ module.exports = function (nsp, ns) {
         }
         updateSpd() {
             this.move.att = false
-            if(!this.path || !this.path.length || (this.agro.length && !this.agro.find(agro => agro == this.pos)) || Players.list.find(player => Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 1500 && !this.pos instanceof Player)) this.updatePath()
+            if(!this.path || !this.path.length || (this.agro.length && !this.agro.find(agro => agro == this.pos)) || Players.list.find(player => Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 1 && !this.pos instanceof Player)) this.updatePath()
             if(!this.path || !this.path.length) return
             this.move.ang = Math.atan2(this.pos.body.position.y - this.body.position.y, this.pos.body.position.x - this.body.position.x) * 180 / Math.PI
             while(this.agro.find(player => player.health <= 0)){
@@ -2410,10 +2389,10 @@ module.exports = function (nsp, ns) {
                         })
                     }    
                     this.pos = possible.get(nearest)
-                }else if(Players.list.find(player => Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 750)){
+                }else if(Players.list.find(player => Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 1)){
                     let possible = new Mapper()
                     Players.list.forEach((player, i)=> {
-                        if(Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 750) possible.set(i, player)
+                        if(Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 1) possible.set(i, player)
                     })
                     let dis
                     let nearest
@@ -2470,7 +2449,7 @@ module.exports = function (nsp, ns) {
             if(!this.path || !this.path.length || (this.agro.length && !this.agro.find(agro => agro == this.pos)) || 
                 Players.list.find(
                     player => Vector.getDistance(player.body.position, this.body.position) < 600 + this.rad && 
-                    player.score > 750 && 
+                    player.score > 1 && 
                     !this.pos instanceof Player
                 )) this.updatePath()
             if(!this.path || !this.path.length) return
@@ -3168,6 +3147,7 @@ module.exports = function (nsp, ns) {
         update:function(){
             var pack = []
             Doors.list.forEach(door => {
+                door.update()
                 pack.push(door.getUpdatePack())
                 if(door.health <= 0) {
                     removePack.door.push(door.id)
@@ -3602,27 +3582,93 @@ module.exports = function (nsp, ns) {
                 ang:this.ang,
                 open:false
             }
+            Entities.push(this)
             Doors.list.push(this)
             initPack.door.push(pack)
         }
         openFun(){
-            if(door.ang == 'left' && !door.open){
-                Body.translate(door.body, Vector.create(-100, -100))
+            if(this.opening) return
+            this.opentimeout = new Timeout(() => {this.open = !this.open; this.opening = false}, 1000)
+            this.opening = true
+            
+            this.needsUpdate = true
+        }
+        update(){
+            if((this.ang == 'left' || this.ang == 'right') && this.opening){
+                if(!this.open){
+                    let ang = this.opentimeout.percntDone * 180 * Math.PI/180
+                    let angle = (this.ang == 'left' ? -1 : 1)*ang + (this.ang == 'right' ? -1 : 1)*(45 * Math.PI/180)
+                    Matter.Body.setPosition(
+                        this.body, 
+                        Matter.Vector.create(
+                            this.x + Math.sin(angle) * 50 * Math.sqrt(2) + (this.ang == 'left' ? -1 : 1)*50, 
+                            this.y + (this.ang == 'right' ? -1 : 1)*(Math.cos(angle) * 50 * Math.sqrt(2)) + (this.ang == 'left' ? -1 : 1)*50
+                        )
+                    )
+                    Matter.Body.setAngle(this.body, ang)
+                }else {
+                    let ang = this.opentimeout.percntDone * 180 * Math.PI/180
+                    let angle = (this.ang == 'right' ? -1 : 1)*ang + (this.ang == 'right' ? -1 : 1)*(45 * Math.PI/180)
+                    Matter.Body.setPosition(
+                        this.body, 
+                        Matter.Vector.create(
+                            this.x + -(Math.sin(angle) * 50 * Math.sqrt(2)) + (this.ang == 'left' ? -1 : 1)*50, 
+                            this.y + -(this.ang == 'right' ? -1 : 1)*(Math.cos(angle) * 50 * Math.sqrt(2)) + (this.ang == 'left' ? -1 : 1)*50
+                        )
+                    )
+                    Matter.Body.setAngle(this.body, ang)
+                }
             }
-            if(door.ang == 'up' && !door.open){
-                Body.translate(door.body, Vector.create(100, -100))
+            if(this.ang == 'up' && this.opening){
+                if(!this.open){
+                    let ang = this.opentimeout.percntDone * 180 * Math.PI/180
+                    let angle = -ang - 45 * Math.PI/180
+                    Matter.Body.setPosition(
+                        this.body, 
+                        Matter.Vector.create(
+                            this.x + Math.sin(angle) * 50 * Math.sqrt(2) + 50, 
+                            this.y + Math.cos(angle) * 50 * Math.sqrt(2) - 50
+                        )
+                    )
+                    Matter.Body.setAngle(this.body, ang)
+                }else {
+                    let ang = this.opentimeout.percntDone * 180 * Math.PI/180
+                    let angle = ang - 45 * Math.PI/180
+                    Matter.Body.setPosition(
+                        this.body, 
+                        Matter.Vector.create(
+                            this.x + -(Math.sin(angle) * 50 * Math.sqrt(2)) + 50, 
+                            this.y + -(Math.cos(angle) * 50 * Math.sqrt(2)) - 50
+                        )
+                    )
+                    Matter.Body.setAngle(this.body, ang)
+                }
             }
-            if(door.ang == 'right' && !door.open){
-                Body.translate(door.body, Vector.create(100, 100))
+            if(this.ang == 'down' && this.opening){
+                if(!this.open){
+                    let ang = this.opentimeout.percntDone * 180 * Math.PI/180
+                    let angle = -ang - 45 * Math.PI/180
+                    Matter.Body.setPosition(
+                        this.body, 
+                        Matter.Vector.create(
+                            this.x + -(Math.sin(angle) * 50 * Math.sqrt(2)) - 50, 
+                            this.y + -(Math.cos(angle) * 50 * Math.sqrt(2)) + 50
+                        )
+                    )
+                    Matter.Body.setAngle(this.body, ang)
+                }else {
+                    let ang = this.opentimeout.percntDone * 180 * Math.PI/180
+                    let angle = ang - 45 * Math.PI/180
+                    Matter.Body.setPosition(
+                        this.body, 
+                        Matter.Vector.create(
+                            this.x + (Math.sin(angle) * 50 * Math.sqrt(2)) - 50, 
+                            this.y + (Math.cos(angle) * 50 * Math.sqrt(2)) + 50
+                        )
+                    )
+                    Matter.Body.setAngle(this.body, ang)
+                }
             }
-            if(door.ang == 'down' && !door.open){
-                Body.translate(door.body, Vector.create(-100, 100))
-            }
-            if(door.open){
-                Body.translate(door.body, {x:door.x - door.body.position.x, y:door.y - door.body.position.y})
-            }
-            door.opentimeout = new Timeout(() => {door.open = !door.open; door.opening = false}, 1000)
-            door.opening = true
         }
         getInitPack(){
             let pack = {
@@ -3645,6 +3691,7 @@ module.exports = function (nsp, ns) {
             return pack
         }
     }
+
     class Chest {
         constructor(x, y, ang){
             this.x = x
@@ -3687,8 +3734,10 @@ module.exports = function (nsp, ns) {
         list: [],
         onConnect: function (id, socket, nm) {
             var player = new Player(id, nm, socket, game)
+            player.needsSelfUpdate = true
             leaderboard.addPlayer(player)
-            game.nsp.to(id).emit('selfUpdate', player.getSelfUpdatePack())
+            let pack = player.getSelfUpdatePack()
+            socket.emit('selfUpdate', pack)
             socket.on('movement', function (data) {
                 if (Players.list.length > 0) {
                     var player = Players.list.find(function (element) {
@@ -3732,13 +3781,11 @@ module.exports = function (nsp, ns) {
                  */
                 var player = Players.list[i];
                 player.update();
-                if(player.needsSelfUpdate){
-                    player.needsSelfUpdate = false
                     game.nsp.to(player.id).emit('selfUpdate', player.getSelfUpdatePack())
-                }
+                
                 if (player.health <= 0) {
                     player.emit('death')
-                    removePack.player.push(player.id)
+                    if(Players.list.lengt > 1) removePack.player.push(player.id)
                     Players.list.splice(Players.list.findIndex(function (element) {
                         return element.id === player.id
                     }), 1);
@@ -3995,7 +4042,7 @@ module.exports = function (nsp, ns) {
         chest:[],
         emerald:[],
         amethyst:[],
-    } 
+    }
     let dropped = []
     var self = this
     class House {
@@ -4162,12 +4209,6 @@ module.exports = function (nsp, ns) {
             Destroyers.list.forEach(function (demon) {
                 pack.destroyer.push(demon.getUpdatePack())
             })
-            
-            /*
-            Bullets.list.forEach(function(bullet){
-                pack.bullet.push(bulle)
-            })*/
-            console.log('trying to fix')
             let playa
             if(playa = Players.list.find(p => p.id == socket.id)){
                 game.nsp.to(socket.id).emit('initPack', pack)
@@ -4400,6 +4441,7 @@ module.exports = function (nsp, ns) {
             playa.msg.set(msgID, msgObj)
         })
         socket.on('new player', function (usr) {
+            console.log('New Player')
             var uppedTrees = STrees.update()
             var pack = {
                 player: [],
@@ -4451,8 +4493,8 @@ module.exports = function (nsp, ns) {
             Bullets.list.forEach(function(bullet){
                 pack.bullet.push(bulle)
             })*/
-            this.nsp.to(socket.id).emit('initPack', pack)
             Players.onConnect(socket.id, socket, usr);
+            this.nsp.to(socket.id).emit('initPack', pack)
             
         });
     })
@@ -4546,8 +4588,16 @@ module.exports = function (nsp, ns) {
                 prop !== 'tod' &&
                 prop !== 'per' &&
                 prop !== 'ctable' &&  Array.isArray(personal[prop])){
-                    personal[prop] = personal[prop].filter(e => Math.abs(playa.body.position.y - e.y) < 500 && Math.abs(playa.body.position.x - e.x) < 800)
-                }
+                    if(prop == 'door'){
+                        personal[prop] = personal[prop].filter(es => {
+                            let e = Doors.list.find(d => d.id == es.id)
+                            if(!e) return false
+                            return Math.abs(playa.body.position.y - e.y) < 500 && Math.abs(playa.body.position.x - e.x) < 800
+                        })
+                    }else {
+                        personal[prop] = personal[prop].filter(e => Math.abs(playa.body.position.y - e.y) < 500 && Math.abs(playa.body.position.x - e.x) < 800)
+                    }
+                }   
             }
             self.nsp.to(playa.id).emit('state', personal)
         })

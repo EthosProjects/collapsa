@@ -197,12 +197,7 @@ var handlekeyDown,
 //game initialization
 nme.addEventListener('submit', function(e) {
     e.preventDefault();
-    //Either sets username equal to the input or defaults to quasar.io
-    window.usr = document.getElementById("nameyourself").value || "Omegalords.io"
-    star.style.display = "none"
-    //document.getElementById("chat").style.display = "block"
-    canvas.style.display = "block";
-    socket.emit('new player', usr);
+    window.usr = document.getElementById("nameyourself").value || " "
     init(usr);
 });
 //function to actually set up the canvas
@@ -215,7 +210,11 @@ document.getElementById('server').addEventListener('change', e => {
 })
 socket.on('disconnect', die)
 var init = function(name) {
-
+    //Either sets username equal to the input or defaults to quasar.io
+    star.style.display = "none"
+    //document.getElementById("chat").style.display = "block"
+    canvas.style.display = "block";
+    socket.emit('new player', usr);
     if(!allLoaded) Img.loadImages()
     let canJoin = true;
     var movement = {
@@ -2055,6 +2054,7 @@ var init = function(name) {
      * @param {array} pack.player
      * @param {array} pack.bullet
      */
+    console.log('New Game')
     var tempSelf
     var receivedFirstUpdate = false
     readSelfUpdatePack = function(pack) {
@@ -2205,7 +2205,6 @@ var init = function(name) {
                 removePacks = []   
         }
         if (!receivedFirstUpdate || !allLoaded) {
-            console.log(initPacks, socket.id, allLoaded, receivedFirstUpdate, initPacks, (socket.id))
             canvas.style.display = 'none'
             document.getElementById('loadingScreen').style.display = 'block'
             if(tempSelf) {
@@ -2215,7 +2214,7 @@ var init = function(name) {
                 removePacks = []
             }
             if(!loadingTimerRefresh) loadingTimerRefresh = setTimeout(() => {
-                location.reload()
+                //location.reload()
             }, 5000)
         } else if (playa) {
             if(tempSelf) tempSelf = null
@@ -2244,6 +2243,7 @@ var init = function(name) {
                 })
                 if(!toUpdate){
                     if(pack.id == socket.id){
+                        console.error('err')
                         die()
                         init(name)
                     }
@@ -2453,7 +2453,6 @@ var init = function(name) {
             else var l = leaderboard.length
             for(var i = 0; i < l ;i++){
                 let player = leaderboard[i]
-                console.log(player)
                 //ctx.fillText(i + 1, canvas.width - 100, 50 + i * 20)
                 ctx.textAlign = 'left'
                 
@@ -2972,6 +2971,10 @@ var die = function() {
     socket.removeListener('selfUpdate', readSelfUpdatePack)
     socket.removeListener('initPack', readInitPack)
     socket.removeListener('removePack', readRemovePack)
+    readPack = null
+    readSelfUpdatePack = null
+    readInitPack = null
+    readRemovePack = null
     document.getElementById('loadingScreen').style.display = 'none'
     star.style.display = "block"
     canvas.style.display = "none";
