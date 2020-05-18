@@ -755,17 +755,16 @@ module.exports = function (nsp, ns) {
     class Inventory extends Storage {
         constructor(){
             super([
-                /*
-                ['1', new Slot('Wood Wall', 255, 'woodwall', 255, true)],
+                /*['1', new Slot('Wood Wall', 255, 'woodwall', 255, true)],
                 ['2', new Slot('Stone Wall', 255, 'stonewall', 255, true)],
                 ['3', new Slot('Iron Wall', 255, 'ironwall', 255, true)],
                 ['4', new Slot('Wood Door', 255, 'wooddoor', 255, true)],
-                ['5', 'empty'],
+                ['5', new Slot('Wood Floor', 255, 'woodfloor', 255, true)],
                 ['6', 'empty'],
                 ['7', 'empty'],
                 ['8', 'empty'],
-                ['9', 'empty'],
-                 */
+                ['9', 'empty'],*/
+                
                 ['1', 'empty'],
                 ['2', 'empty'],
                 ['3', 'empty'],
@@ -1068,7 +1067,7 @@ module.exports = function (nsp, ns) {
                 mdis:0
             }
             this.carrot = {
-                food:1.5,
+                food:3,
                 timeout:null,
                 ready:true
             }
@@ -1606,19 +1605,23 @@ module.exports = function (nsp, ns) {
                     this.posPlace = mvect
                     this.needsSelfUpdate = true
                     if(/Wall/.test(this.mainHands) && this.move.att && !this.alusd){
-                        mvect.y = Math.floor(mvect.y/100) * 100 + 50
-                        mvect.x = Math.floor(mvect.x/100) * 100 + 50
                         if(Entities.find(e => 
-                              (
-                                  (e.body.position.x == mvect.x && e.body.position.y == mvect.y) || 
-                                  (
+                            (
+                                (
+                                    (e.body.position.x == mvect.x && e.body.position.y == mvect.y) || 
+                                    (
                                         (e instanceof Player || e instanceof Demon || e instanceof Destroyer || e instanceof Rabbit) &&
                                         RectCircleColliding(e.body.position.x, e.body.position.y, e.rad, mvect.x, mvect.y, 100, 100)
-                                  )
-                              ) && !(
-                                  this.structures.find(s => e == s && e instanceof Floor) || 
-                                  (this.clan && this.clan.members.find(member => member.structures.find(s => e == s && s instanceof Floor)))
-                              ) || (mvect.x < 50 || mvect.y < 50 || mvect.x > game.map.width || mvect.y > game.map.height)
+                                    )
+                                ) && 
+                                    !(
+                                        this.structures.find(s => e == s && e instanceof Floor) || 
+                                        (
+                                            this.clan && this.clan.members.find(member => member.structures.find(s => e == s && s instanceof Floor))
+                                        )
+                                )
+                            ) || 
+                            (mvect.x < 50 || mvect.y < 50 || mvect.x > game.map.width || mvect.y > game.map.height)
                         ))return this.canPlace = false
                         let slot = this.inventory.get(this.mainHand)
                         slot.count -= 1
@@ -1630,8 +1633,6 @@ module.exports = function (nsp, ns) {
                         this.alusd = true
                     }
                     if(/Door/.test(this.mainHands) && this.move.att && !this.alusd){
-                        mvect.y = Math.floor(mvect.y/100) * 100 + 50
-                        mvect.x = Math.floor(mvect.x/100) * 100 + 50
                         if(Entities.some(e => 
                               (
                                   (e.body.position.x == mvect.x && e.body.position.y == mvect.y) || 
@@ -1654,8 +1655,6 @@ module.exports = function (nsp, ns) {
                         this.alusd = true
                     }
                     if(/Crafting Table/.test(this.mainHands) && this.move.att && !this.alusd){
-                        mvect.y = Math.floor(mvect.y/100) * 100 + 50
-                        mvect.x = Math.floor(mvect.x/100) * 100 + 50
                         if(Entities.find(e => 
                               (
                                   (e.body.position.x == mvect.x && e.body.position.y == mvect.y) || 
@@ -1676,9 +1675,6 @@ module.exports = function (nsp, ns) {
                         this.alusd = true
                     }
                     if(/Floor/.test(this.mainHands) && this.move.att && !this.alusd){
-                        mvect.y = Math.floor(mvect.y/100) * 100 + 50
-                        mvect.x = Math.floor(mvect.x/100) * 100 + 50
-                        
                         if(Entities.find(e =>  
                               e.id != this.id &&
                               (
@@ -1704,9 +1700,6 @@ module.exports = function (nsp, ns) {
                         this.alusd = true
                     }
                     if(/Chest/.test(this.mainHands) && this.move.att && !this.alusd){
-                        mvect.y = Math.floor(mvect.y/100) * 100 + 50
-                        mvect.x = Math.floor(mvect.x/100) * 100 + 50
-                        
                         if(Entities.find(e =>  
                               e.id != this.id &&
                               (
@@ -2109,6 +2102,7 @@ module.exports = function (nsp, ns) {
             Irons.list.forEach(tree => grid.setWalkableAt((tree.x - 50)/100, (tree.y - 50)/100, false))
             Golds.list.forEach(tree => grid.setWalkableAt((tree.x - 50)/100, (tree.y - 50)/100, false))
             Diamonds.list.forEach(tree => grid.setWalkableAt((tree.x - 50)/100, (tree.y - 50)/100, false))
+            CarrotFarms.list.forEach(tree => grid.setWalkableAt((tree.x - 50)/100, (tree.y - 50)/100, false))
             if(this.pos.x) grid.setWalkableAt((this.pos.x - 50)/100, (this.pos.y - 50)/100, true)
             let x = Math.roundToDeca(this.body.position.x - 50, 100)/100
             let y = Math.roundToDeca(this.body.position.y - 50, 100)/100
