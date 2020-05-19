@@ -1210,9 +1210,7 @@ var init = function(name) {
                         ctx.restore()
                     }
                     ctx.drawImage(Img[img], this.posPlace.x - 50 + x, this.posPlace.y - 50 + y, 100, 100)
-                }
-                /**
-                 * if(/Chest/.test(this.mainHand)){ 
+                }if(/Chest/.test(this.mainHand)){ 
                     ctx.save()
                     ctx.translate(this.posPlace.x + x, this.posPlace.y + y)
                     if(pang == 'left' || pang == 'right'){
@@ -1220,8 +1218,6 @@ var init = function(name) {
                     }
                     ctx.drawImage(Img[img], 0 - 47.5, 0 - 25, 95, 50)
                 }
-                
-                 */
                 ctx.restore()
             }
         }
@@ -2355,7 +2351,7 @@ var init = function(name) {
                 if(item.slot.image == 'stone' || item.slot.image == 'iron' || item.slot.image == 'gold' || item.slot.image == 'diamond'|| item.slot.image == 'emerald' || item.slot.image == 'amethyst'){
                     ctx.drawImage(Img[item.slot.image], item.x + x - 20, item.y + y - 20, 40, 40)
                 }
-                if(/^leather$/.test(item.slot.type)) ctx.drawImage(Img[item.slot.image], item.x + x - 24.5, item.y + y - 28.5, 49, 57)
+                if(/^Leather$/.test(item.slot.type)) ctx.drawImage(Img[item.slot.image], item.x + x - 24.5, item.y + y - 28.5, 49, 57)
                 if(/Axe|Pickaxe|Sword|Hammer/.test(item.slot.type)){
                     ctx.save()
                     ctx.translate(item.x + x, item.y + y)
@@ -2646,7 +2642,7 @@ var init = function(name) {
                 ctx.lineWidth = 2
                 ctx.beginPath()
                 ctx.globalAlpha = 0.5
-                
+                // 60 vs 90
                 ctx.rect((canvas.width - 300)/2, (canvas.height - 300)/2, 300, 300)
                 ctx.fill()
                 playa.chestables.forEach((item, i) => {
@@ -2664,18 +2660,67 @@ var init = function(name) {
                     if(/^leather$/.test(item.type)) ctx.drawImage(Img[item.image], item.x + x - 24.5, item.y + y - 28.5, 49, 57)
                     if(/^(stone|iron|gold|diamond|emerald|amethyst)$/.test(item.type)){
                         ctx.save()
-                        ctx.translate((canvas.width)/10 + (canvas.width)/10 * i , canvas.height - 100)
-                        ctx.rotate(Math.PI/ 180 * 0)
-                        ctx.drawImage(Img[item.image], 0 - 20, 0 - 20, 40, 40)
+                        ctx.translate((canvas.width - 300)/2 + offSetX + 70, (canvas.height - 300)/2 + offSetY + 70)
+                        ctx.save()
+                        ctx.rotate(0)
+                        ctx.drawImage(Img[item.image], 0 - 20 * 60/90, 0 - 20 * 60/90, 40 * 60/90, 40 * 60/90)
                         ctx.restore()
                         ctx.beginPath()
-                        ctx.lineWidth = 1.5
-                        ctx.font = "15px Arial"
+                        ctx.lineWidth = 1
+                        ctx.font = "10px Arial"
                         ctx.strokeStyle = 'black'
                         ctx.fillStyle = 'white'
-                        ctx.strokeText(item.count, (canvas.width)/10 + (canvas.width)/10 * i  + 18, canvas.height - 58)
-                        ctx.fillText(item.count, (canvas.width)/10 + (canvas.width)/10 * i  + 18, canvas.height - 58)
+                        ctx.strokeText(item.count, 0  + 12, 42 * 2/3)
+                        ctx.fillText(item.count, 0  + 12, 42 * 2/3)
                         ctx.stroke()
+                        ctx.restore()
+                    }
+                    
+                    if(item.type == 'wood'){
+                        ctx.save()
+                        ctx.translate((canvas.width - 300)/2 + offSetX + 70, (canvas.height - 300)/2 + offSetY + 70)
+                        ctx.save()
+                        ctx.scale(2/3, 2/3)
+                        ctx.beginPath()
+                        ctx.lineJoin = ctx.lineCap = 'round';
+                        ctx.lineWidth = 10
+                        ctx.strokeStyle = 'maroon'
+                        ctx.moveTo(0 - 45 + 75, 0 - 45 + 27.857)
+                        ctx.lineTo(0 - 45 + 15, 0 - 45 + 62.143)
+                        ctx.stroke()
+                        
+                        ctx.lineJoin = ctx.lineCap = 'round';
+                        ctx.lineWidth = 7
+                        ctx.strokeStyle = 'saddlebrown'
+                        ctx.moveTo(0 - 45 + 75, 0 - 45 + 27.857)
+                        ctx.lineTo(0 - 45 + 15, 0 - 45 + 62.143)
+                        ctx.stroke()
+                        
+                        ctx.beginPath()
+                        ctx.lineJoin = ctx.lineCap = 'round';
+                        ctx.lineWidth = 10
+                        ctx.strokeStyle = 'maroon'
+                        ctx.moveTo(0 - 45 + 15, 0 - 45 + 27.857)
+                        ctx.lineTo(0 - 45 + 75, 0 - 45 + 62.143)
+                        ctx.stroke()
+                        
+                        ctx.lineJoin = ctx.lineCap = 'round';
+                        ctx.lineWidth = 7
+                        ctx.strokeStyle = 'saddlebrown'
+                        ctx.beginPath()
+                        ctx.moveTo(0 - 45 + 15, 0 - 45 + 27.857)
+                        ctx.lineTo(0 - 45 + 75, 0 - 45 + 62.143)
+                        ctx.stroke()
+                        ctx.restore()
+                        ctx.beginPath()
+                        ctx.lineWidth = 1
+                        ctx.font = "10px Arial"
+                        ctx.strokeStyle = 'black'
+                        ctx.fillStyle = 'white'
+                        ctx.strokeText(item.count, 0  + 12, 42 * 2/3)
+                        ctx.fillText(item.count, 0  + 12, 42 * 2/3)
+                        ctx.stroke()
+                        ctx.restore()
                     }
                     if(/Axe|Pickaxe|Sword|Hammer/.test(item.type)){
                         ctx.globalAlpha = 1
@@ -2692,8 +2737,8 @@ var init = function(name) {
                         ctx.rotate(Math.PI/180 * 8)
                         ctx.drawImage(Img[item.image], 0 - 15, 0 - 15, 30, 30)
                         ctx.restore()
-                        ctx.lineWidth = 3/4
-                        ctx.font = "11.25 Arial"
+                        ctx.lineWidth = 1
+                        ctx.font = "10px Arial"
                         ctx.strokeStyle = 'black'
                         ctx.fillStyle = 'white'
                         ctx.strokeText(item.count, (canvas.width - 300)/2 + 40 + offSetX + 27.5 + 10, (canvas.height - 300)/2 + 40 + offSetY + 60 - 6)
@@ -2792,7 +2837,7 @@ var init = function(name) {
                     ctx.fillText(slot.count, (canvas.width)/10 + (canvas.width)/10 * i  + 18, canvas.height - 58)
                     ctx.stroke()
                 }
-                if(/^leather$/.test(slot.type)){
+                if(/^Leather$/.test(slot.type)){
                     ctx.save()
                     ctx.translate((canvas.width)/10 + (canvas.width)/10 * i , canvas.height - 100)
                     ctx.rotate(Math.PI/ 180 * 0)

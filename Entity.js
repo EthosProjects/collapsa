@@ -755,13 +755,14 @@ module.exports = function (nsp, ns) {
     class Inventory extends Storage {
         constructor(){
             super([
-                /*['1', new Slot('Wood Wall', 255, 'woodwall', 255, true)],
+                /*
+                ['1', new Slot('Wood Wall', 255, 'woodwall', 255, true)],
                 ['2', new Slot('Stone Wall', 255, 'stonewall', 255, true)],
                 ['3', new Slot('Iron Wall', 255, 'ironwall', 255, true)],
                 ['4', new Slot('Wood Door', 255, 'wooddoor', 255, true)],
                 ['5', new Slot('Wood Floor', 255, 'woodfloor', 255, true)],
-                ['6', 'empty'],
-                ['7', 'empty'],
+                ['6', new Slot('Chest', 255, 'chest', 255, true)],
+                ['7', new Slot('Leather', 255, 'leather', 255)],
                 ['8', 'empty'],
                 ['9', 'empty'],*/
                 
@@ -1605,7 +1606,7 @@ module.exports = function (nsp, ns) {
                     this.posPlace = mvect
                     this.needsSelfUpdate = true
                     if(/Wall/.test(this.mainHands) && this.move.att && !this.alusd){
-                        if(Entities.find(e => 
+                        if(Entities.some(e => 
                             (
                                 (
                                     (e.body.position.x == mvect.x && e.body.position.y == mvect.y) || 
@@ -1615,14 +1616,16 @@ module.exports = function (nsp, ns) {
                                     )
                                 ) && 
                                     !(
-                                        this.structures.find(s => e == s && e instanceof Floor) || 
+                                        this.structures.some(s => e == s && e instanceof Floor) || 
                                         (
-                                            this.clan && this.clan.members.find(member => member.structures.find(s => e == s && s instanceof Floor))
+                                            this.clan && this.clan.members.some(member => member.structures.some(s => e == s && s instanceof Floor))
                                         )
                                 )
                             ) || 
                             (mvect.x < 50 || mvect.y < 50 || mvect.x > game.map.width || mvect.y > game.map.height)
-                        ))return this.canPlace = false
+                        )){
+                            return this.canPlace = false
+                        }
                         let slot = this.inventory.get(this.mainHand)
                         slot.count -= 1
                         if(slot.count == 0){ this.inventory.set(this.mainHand, 'empty'); this.mainHand = '-1'}

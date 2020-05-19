@@ -16,6 +16,9 @@ Math = require('./math.js')
 var Vector = require('./Vector.js')
 // Aliases
 
+io.on('connection', socket => {
+    console.log('aaa')
+})
 server.listen(
     port,
     function() {
@@ -28,7 +31,6 @@ app.get('/', function(request, response) {
 app.get('/404.js', function(request, response) {
     response.sendFile(path.join(__dirname, '/404.js'));
 });
-
 app.get('/404.css', function(request, response) {
     response.sendFile(path.join(__dirname, '/404.css'));
 });
