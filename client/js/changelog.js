@@ -12,6 +12,10 @@ var changelog = {
         'and please send a screenshot and accurate description. I\'ll try to fix it asap. PS: By the end of next update, I will have added a page for reporting bugs'
     ],
     Plans: [
+        'Add a high score board',
+        'Fix wall images',
+        'Create voting system for next update',
+        'Make inventory items draggable',
         'Fix chest glitch',
         'Add leaderboard spot for losers',
         'Add Leather and Vials',
