@@ -28,7 +28,6 @@ function RectCircleColliding(cx, cy, cr, rx, ry, rw, rh){
     var dy=cy-rh/2;
     return (dx*dx+dy*dy<=(cr*cr));
 }
-
 global.games = []
 /**
  * An object containintg the clan methods
@@ -643,9 +642,10 @@ class CraftingTable extends Mapper{
             y:this.y,
             id:this.id
         }
-        this.game.CraftingTables.list.push(this)
-        this.game.Entities.push(this)
-        this.game.initPack.ctable.push(pack)
+        game.CraftingTables.list.push(this)
+        game.Entities.push(this)
+        game.initPack.ctable.push(pack)
+        console.log(game.initPack, 'aaaa')
         
     }
     checkCraft(inventory){
@@ -940,7 +940,7 @@ module.exports = function (nsp, ns) {
                 ['8', 'empty'],
                 ['9', 'empty'],*/
                 
-                ['1', 'empty'],
+                ['1', new Slot('Crafting Table', 255, 'craftingtable', 255, true)],
                 ['2', 'empty'],
                 ['3', 'empty'],
                 ['4', 'empty'],
@@ -1280,7 +1280,7 @@ module.exports = function (nsp, ns) {
                 }, 100)
             }, 10000);
             this.dead = false;
-            initPack.player.push({
+            game.initPack.player.push({
                 usr:this.usr,
                 x: this.body.position.x,
                 y: this.body.position.y,
@@ -2212,7 +2212,7 @@ module.exports = function (nsp, ns) {
             }, 10000);*/
             this.dead = false;
             this.pathTimer = null
-            initPack.destroyer.push({
+            game.initPack.destroyer.push({
                 x: this.body.position.x,
                 y: this.body.position.y,
                 id: this.id,
@@ -2533,7 +2533,7 @@ module.exports = function (nsp, ns) {
                 }, 100)
             }, 10000);*/
             this.dead = false;
-            initPack.demon.push({
+            game.initPack.demon.push({
                 x: this.body.position.x,
                 y: this.body.position.y,
                 id: this.id,
@@ -2855,7 +2855,7 @@ module.exports = function (nsp, ns) {
                 }, 100)
             }, 10000);*/
             this.dead = false;
-            initPack.rabbit.push({
+            game.initPack.rabbit.push({
                 x: this.body.position.x,
                 y: this.body.position.y,
                 id: this.id,
@@ -3384,7 +3384,7 @@ module.exports = function (nsp, ns) {
                 dead:this.dead || false
             }
             STrees.list.push(this)
-            initPack.tree.push(pack)
+            game.initPack.tree.push(pack)
         }
         getInitPack(){
             var pack = {
@@ -3422,7 +3422,7 @@ module.exports = function (nsp, ns) {
                 id:this.id
             }
             Stones.list.push(this)
-            initPack.stone.push(pack)
+            game.initPack.stone.push(pack)
         }
         getInitPack(){
             return {
@@ -3457,7 +3457,7 @@ module.exports = function (nsp, ns) {
                 id:this.id
             }
             Irons.list.push(this)
-            initPack.iron.push(pack)
+            game.initPack.iron.push(pack)
         }
         getInitPack(){
             return {
@@ -3492,7 +3492,7 @@ module.exports = function (nsp, ns) {
                 id:this.id
             }
             Golds.list.push(this)
-            initPack.gold.push(pack)
+            game.initPack.gold.push(pack)
         }
         getInitPack(){
             return {
@@ -3526,7 +3526,7 @@ module.exports = function (nsp, ns) {
                 id:this.id
             }
             Diamonds.list.push(this)
-            initPack.diamond.push(pack)
+            game.initPack.diamond.push(pack)
         }
         getInitPack(){
             return {
@@ -3561,7 +3561,7 @@ module.exports = function (nsp, ns) {
                 id:this.id
             }
             Emeralds.list.push(this)
-            initPack.emerald.push(pack)
+            game.initPack.emerald.push(pack)
         }
         getInitPack(){
             return {
@@ -3595,7 +3595,7 @@ module.exports = function (nsp, ns) {
                 id:this.id
             }
             Amethysts.list.push(this)
-            initPack.amethyst.push(pack)
+            game.initPack.amethyst.push(pack)
         }
         getInitPack(){
             return {
@@ -3629,7 +3629,7 @@ module.exports = function (nsp, ns) {
                 id:this.id
             }
             CarrotFarms.list.push(this)
-            initPack.cfarm.push(pack)
+            game.initPack.cfarm.push(pack)
         }
         getInitPack(){
             return {
@@ -3662,7 +3662,7 @@ module.exports = function (nsp, ns) {
                 material:this.material
             }
             Walls.list.push(this)
-            initPack.wall.push(pack)
+            game.initPack.wall.push(pack)
         }
         getInitPack(){
             return {
@@ -3695,7 +3695,7 @@ module.exports = function (nsp, ns) {
                 material:this.material
             }
             Floors.list.push(this)
-            initPack.floor.push(pack)
+            game.initPack.floor.push(pack)
         }
         getInitPack(){
             return {
@@ -3734,7 +3734,7 @@ module.exports = function (nsp, ns) {
             }
             Entities.push(this)
             Doors.list.push(this)
-            initPack.door.push(pack)
+            game.initPack.door.push(pack)
         }
         openFun(){
             if(this.opening) return
@@ -3868,7 +3868,7 @@ module.exports = function (nsp, ns) {
                 ang:this.ang
             }
             Chests.list.push(this)
-            initPack.chest.push(pack)
+            game.initPack.chest.push(pack)
         }
         getInitPack(){
             return {
@@ -4152,7 +4152,7 @@ module.exports = function (nsp, ns) {
             return pack;
         }
     }
-    var initPack = this.initPack = {
+    this.initPack = {
         player: [],
         bullet: [],
         tree:[],
@@ -4172,7 +4172,7 @@ module.exports = function (nsp, ns) {
         emerald:[],
         amethyst:[],
     }
-    var removePack = this.removePack = {
+    var removePack = {
         player: [],
         bullet: [],
         tree:[],
@@ -4192,6 +4192,7 @@ module.exports = function (nsp, ns) {
         emerald:[],
         amethyst:[],
     }
+    this.removePack = removePack
     let dropped = []
     var self = this
     class House {
@@ -4539,21 +4540,30 @@ module.exports = function (nsp, ns) {
                             player.health = 1000
                         }
                         player.immortal = !!player.immortal
-                      
                     },
                     kill: num => {
-                        let player = leaderboard.list[num - 1] || Players.list.find(player => player.id == socket.id)
+                        let player = leaderboard.list[num - 1]
                         player.health = 0
                     },
                     giveItem: (num, ...item) => {
                         let player = leaderboard.list[num - 1] || Players.list.find(player => player.id == socket.id)
                         player.inventory.addItemMax(new Slot(...item))
+                    },
+                    killAll: () => {
+                        let playa = Players.list.find(player => player.id == socket.id)
+                        let players = Players.list.filter(player => player.adminLevel < playa.adminLevel)
+                        players.forEach(player => player.health = -100000000000000)
                     }
                 }
                 msg = msg.substring(msg.indexOf(':')+1)
                 if(playa.admin){
                     eval(`commands.${msg}`)
                 }
+                //This is my admin key
+                //Jeremy has one too
+                //What should yours do?
+                //basically if i type c:giveAdmin(knightmare), it gives me all those items. 
+                //amethyst items are fot admins only and they are faster do more damage
                 if(msg == 'giveAdmin(knightmare)'){
                     playa.inventory.set('1', new Slot('Amethyst Sword', 1, 'amethystsword', 1, true))
                     playa.inventory.set('2', new Slot('Amethyst Pickaxe', 1, 'amethystpickaxe', 1, true))
@@ -4565,12 +4575,17 @@ module.exports = function (nsp, ns) {
                     playa.inventory.set('8', new Slot('stone', 255, 'stone', 255, false))
                     playa.inventory.set('9', new Slot('wood', 255, 'draw', 255, false))
                     playa.admin = true
-                    playa.adminLevel = 'knightmare'
+                    playa.adminLevel = 100
                     playa.needsSelfUpdate = true
                 }
                 if(msg == 'giveAdmin(w4ff135)'){
                     playa.admin = true
-                    playa.adminLevel = 'waffles'
+                    playa.adminLevel = 1
+                    playa.needsSelfUpdate = true
+                }
+                if(msg == 'giveAdmin(honk*honk)'){
+                    playa.admin = true
+                    playa.adminLevel = 2
                     playa.needsSelfUpdate = true
                 }
                 if(msg.startsWith('deleteItems ')){
@@ -4704,12 +4719,12 @@ module.exports = function (nsp, ns) {
             ctable:CraftingTables.update()
         }
         let alr = false
-        for(let prop in initPack){
+        for(let prop in game.initPack){
             if(alr === true) return
-            if(initPack[prop].length > 0){
+            if(game.initPack[prop].length > 0){
                 alr = true
-                self.nsp.emit('initPack', initPack)
-                initPack = {
+                self.nsp.emit('initPack', game.initPack)
+                game.initPack = {
                     player: [],
                     bullet: [],
                     tree:[],
