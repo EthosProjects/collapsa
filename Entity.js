@@ -315,7 +315,7 @@ class Crafter extends Mapper{
                         {id:'stone', count:10},
                     ],
                     output:{
-                        count:2,
+                        count:1,
                         image:'craftingtable',
                         stackSize:255,
                         equipable:true
@@ -1301,6 +1301,7 @@ module.exports = function (nsp, ns) {
             this.on('death', function(){
                 game.nsp.to(this.id).emit('death')
             })
+            this.immortal = false
         }
         updateSpd() {
           var m = this.move
@@ -1429,7 +1430,7 @@ module.exports = function (nsp, ns) {
                     }else if(!this.crafting && (((disd  == undefined && disctable  == undefined && dischest == undefined) && dis != undefined) || (dis > disctable && dis > disd && dis > dischest))){
                         let res = this.inventory.addItemMax(dropped[nearest].item)
                         if(!res){ 
-                            clearTimeout(droped[nearest].timeout.timeout)
+                            clearTimeout(dropped[nearest].timeout.timeout)
                             dropped.splice(nearest, 1)
                         }
                         this.needsSelfUpdate = true
@@ -4537,9 +4538,17 @@ module.exports = function (nsp, ns) {
                             player.maxHealth = 1000
                             player.health = 1000
                         }
-                         player.immortal = !!player.immortal
+                        player.immortal = !!player.immortal
                       
                     },
+                    kill: num => {
+                        let player = leaderboard.list[num - 1] || Players.list.find(player => player.id == socket.id)
+                        player.health = 0
+                    },
+                    giveItem: (num, ...item) => {
+                        let player = leaderboard.list[num - 1] || Players.list.find(player => player.id == socket.id)
+                        player.inventory.addItemMax(new Slot(...item))
+                    }
                 }
                 msg = msg.substring(msg.indexOf(':')+1)
                 if(playa.admin){
