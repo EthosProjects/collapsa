@@ -1006,7 +1006,7 @@ module.exports = function (nsp, ns) {
     class Inventory extends Storage {
         constructor(){
             super([
-                
+                /*
                 ['1', new Slot('Wood Wall', 255, 'woodwall', 255, true)],
                 ['2', new Slot('Stone Wall', 255, 'stonewall', 255, true)],
                 ['3', new Slot('Iron Wall', 255, 'ironwall', 255, true)],
@@ -1015,8 +1015,8 @@ module.exports = function (nsp, ns) {
                 ['6', new Slot('Chest', 255, 'chest', 255, true)],
                 ['7', new Slot('Leather', 255, 'leather', 255)],
                 ['8', 'empty'],
-                ['9', 'empty'],
-                /*
+                ['9', 'empty'],*/
+                
                 ['1', 'empty'],
                 ['2', 'empty'],
                 ['3', 'empty'],
@@ -1025,7 +1025,7 @@ module.exports = function (nsp, ns) {
                 ['6', 'empty'],
                 ['7', 'empty'],
                 ['8', 'empty'],
-                ['9', 'empty']*/
+                ['9', 'empty']
             ])
         }
         listItems(){
@@ -1505,7 +1505,10 @@ module.exports = function (nsp, ns) {
                         this.alusd = true
                     }else if(!this.crafting && (((disd  == undefined && disctable  == undefined && dischest == undefined) && dis != undefined) || (dis > disctable && dis > disd && dis > dischest))){
                         let res = this.inventory.addItemMax(dropped[nearest].item)
-                        if(!res) dropped.splice(nearest, 1);
+                        if(!res){ 
+                            clearTimeout(droped[nearest].timeout.timeout)
+                            dropped.splice(nearest, 1)
+                        }
                         this.needsSelfUpdate = true
                         this.alusd = true
                     }else if(!this.crafting && (((disd  == undefined && disctable  == undefined && dis == undefined) && dischest != undefined) || (dischest > dis && dischest > disd && dischest > disctable))){
