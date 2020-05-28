@@ -6,6 +6,8 @@ const {Engine, Render, World, Bodies, Body, Vector} = require('matter-js')
 const EventEmitter = require('events')
 const PF = require('pathfinding')
 const socketIO = require('socket.io')
+const Day = require('./library/day.js')
+const Mapper = require('./library/mapper.js')
 Vector.getDistance = function (vectorA, vectorB) {  
     return Math.sqrt(Math.pow(vectorA.x - vectorB.x, 2) + Math.pow(vectorA.y - vectorB.y, 2))
 };
@@ -26,86 +28,7 @@ function RectCircleColliding(cx, cy, cr, rx, ry, rw, rh){
     var dy=cy-rh/2;
     return (dx*dx+dy*dy<=(cr*cr));
 }
-/**
- * Map with added functionality
- */
-class Mapper extends Map {
-    
-    constructor(iterator){
-        super(iterator)
-    }
-    find(fn, thisArg){
-        if (typeof thisArg !== 'undefined') fn = fn.bind(thisArg);
-        for (const [key, val] of this) {
-            if (fn(val, key, this)) return val;
-        }
-        return undefined;
-    }
-    findKey(fn, thisArg){
-        if (typeof thisArg !== 'undefined') fn = fn.bind(thisArg);
-        for (const [key, val] of this) {
-            if (fn(val, key, this)) return key;
-        }
-        return undefined;
-    }
-    findAll(fn, thisArg) {
-        if (typeof thisArg !== 'undefined') fn = fn.bind(thisArg);
-        const results = [];
-        for (const [key, val] of this) {
-          if (fn(val, key, this)) results.push(val);
-        }
-        return results;
-    }
-    keysArray(fn){
-        if(fn) return [...this.keys()].map(fn)
-        else return [...this.keys()]
-    }
-    valuesArray(fn){
-        if(fn) return [...this.values()].map(fn)
-        else return [...this.values()]
-    }
-}
-/**
- * Object containing data about what time it is
- * @typedef day
- * @property {string} times koo
- */
-class Day {
-    /**
-     * This is a constructor for a day 
-     * @param {Map.<string, number>} [states=new Map(['day', 20000], ['night', 20000])] 
-     */
-    constructor(states = new Mapper([['day', 20000], ['night', 20000]])){
-        /**
-         * This is the different states the day can be.
-         * @type {Map.<string, number>} 
-         */
-        this.states = states
-        /**
-         * This is how long the day is
-         * @type {Number} 
-         */
-        //It turns the map into a map iterator of it's values into an array and then it adds them all up
-        this.length = [...this.states.values()].reduce((a, b) => a + b)
-        /**
-         * This is the current state
-         * @type {Number} 
-         */
-        this.index = 0
-        /**
-         * This is the timeout defining the day
-         * @type {Timeout} 
-         */
-        this.timeout = new Timeout(() => this.setTimeout(), [...this.states.values()][this.index])
-    }
-    get time(){
-        return [...this.states.keys()][this.index]
-    }
-    setTimeout() {
-        if(++this.index >= this.length) this.index = 0
-        this.timeout = new Timeout(() => this.setTimeout(), [...this.states.values()][this.index])
-    }
-}
+
 global.games = []
 /**
  * An object containintg the clan methods
@@ -4365,19 +4288,19 @@ module.exports = function (nsp, ns) {
             let p = getGoodPosition()
             new Amethyst(p.x, p.y, 50)
         }
-        if(Demons.list.length < 3 && timeOfDay == 'night'){
-            let p = getGoodPosition()
-            new Demon(p.x, p.y, 50)
-            
+        if(Players.list.some(player => player.score > 700)){
+            if(Demons.list.length < 3 && timeOfDay == 'night'){
+                let p = getGoodPosition()
+                new Demon(p.x, p.y, 50)
+            }
+            if(Destroyers.list.length < 1 && timeOfDay == 'night' && dayTimeout.percntDone > 0.25 && dayTimeout.percntDone < 0.75){
+                let p = getGoodPosition()
+                new Destroyer(p.x, p.y, 50)   
+            }
         }
         if(CarrotFarms.list.length < 3){
             let p = getGoodPosition()
             new CarrotFarm(p.x, p.y, 50)
-            
-        }
-        if(Destroyers.list.length < 1 && timeOfDay == 'night' && dayTimeout.percntDone > 0.25 && dayTimeout.percntDone < 0.75){
-            let p = getGoodPosition()
-            new Destroyer(p.x, p.y, 50)
             
         }
         if(Rabbits.list.length < 1 && timeOfDay == 'day'){
