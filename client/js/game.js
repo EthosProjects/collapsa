@@ -178,6 +178,14 @@ socket.on('images', images => {
     Img.countImages()
     Img.loadImages()
 })
+let BasicRecipes
+let TableRecipes
+let Resources
+socket.on('items', items => {
+    BasicRecipes = new Mapper(items[0])
+    TableRecipes = new Mapper(items[1])
+    Resources = new Mapper(items[2])
+})
 loadingTimer = 0;
 //canvas.width = 900
 //canvas.height = 450
@@ -210,6 +218,8 @@ document.getElementById('server').addEventListener('change', e => {
 })
 socket.on('disconnect', die)
 var init = function(name) {
+    let clientX = 0
+    let clientY = 0
     //Either sets username equal to the input or defaults to quasar.io
     star.style.display = "none"
     //document.getElementById("chat").style.display = "block"
@@ -231,8 +241,16 @@ var init = function(name) {
         chatting:false,
         clanning:false
     }
+    let dragging = false
+    let _dragging = false
+    let dragTimeout = null
     let pang = 'left'
     let chatString = ''
+    let categories = [
+        ['Structure', 'woodwall', 1, 8],
+        ['Tool', 'stonepickaxe', 1.25, 45]
+    ]
+    let category = 'Tool'
     socket.on('unable', function() {
 
     })
@@ -356,9 +374,16 @@ var init = function(name) {
             if(e.clientX > (canvas.width)/10 + (canvas.width)/10 * i - 45 && e.clientX < (canvas.width)/10 + (canvas.width)/10 * i - 45 + 90 
               && e.clientY > canvas.height - 100 - 45 && e.clientY < canvas.height - 100 - 45 + 90){
                 found = true
+                _dragging = [slot, i]
+                dragTimeout = setTimeout(() => {
+                    if(_dragging){
+                        dragging = _dragging
+                    }else {
+                        if(e.button == 0) socket.emit('lc', i + 1)
+                        else if(e.button == 2) socket.emit('rc', i + 1)
+                    }
+                }, 120)
                 if(slot == ' ') return
-                if(e.button == 0) socket.emit('lc', i + 1)
-                else if(e.button == 2) socket.emit('rc', i + 1)
             }
         })
         if(playa.armor){
@@ -447,12 +472,16 @@ var init = function(name) {
                 }
                 
             })
-        }
+        }   
         if(playa.crafting && playa.craftablesEx){
-            playa.craftablesEx.forEach((craft, i) => {
-                let offSetX = ((i - Math.floor(i/13) * 13) * 80)
-                let offSetY = (Math.floor(i / 13) * 80)
-                if(e.clientX > offSetX + 120 && e.clientX < offSetX + 120 + 60
+            categories.forEach((c, i) => {
+                if(e.clientX > 350 && e.clientX < 450 &&
+                    e.clientY > 100 + 100 * i && e.clientY < 200 + 100 * i) category = c[0]
+            })
+            playa.craftablesEx.filter(craft => TableRecipes.get(craft.craft).type == category).forEach((craft, i) => {
+                let offSetX = ((i - Math.floor(i/8) * 8) * 80)
+                let offSetY = (Math.floor(i / 8) * 80)
+                if(e.clientX > offSetX + 470 && e.clientX < offSetX + 470 + 60
                   && e.clientY > offSetY + 120 && e.clientY < offSetY + 120 + 60){
                     found = true
                      if(craft.craftable) socket.emit('craftEx', craft.craft)
@@ -498,13 +527,38 @@ var init = function(name) {
         if(!found) movement.pressingAttack = true;
     }
     document.addEventListener('mousedown', handlemouseDown);
-    handlemouseUp = function(event) {
+    handlemouseUp = function(e) {
+        playa.inventory.forEach((slot, i) => {
+            if(dragging && e.clientX > (canvas.width)/10 + (canvas.width)/10 * i - 45 && e.clientX < (canvas.width)/10 + (canvas.width)/10 * i - 45 + 90 
+              && e.clientY > canvas.height - 100 - 45 && e.clientY < canvas.height - 100 - 45 + 90){
+                found = true
+                socket.emit('swap', [i + 1, dragging[1] + 1])
+            }
+        })
+        dragging = false
+        _dragging = false
         movement.pressingAttack = false;
     }
     document.addEventListener('mouseup', handlemouseUp);
-    handlemouseMove = function(event) {
-        var x = -window.innerWidth / 2 + event.clientX;
-        var y = -window.innerHeight / 2 + event.clientY;
+    let hover = null
+    handlemouseMove = function(e) {
+        clientX = e.clientX
+        clientY = e.clientY
+        hover = null
+        var x = -window.innerWidth / 2 + e.clientX;
+        var y = -window.innerHeight / 2 + e.clientY;
+        playa.inventory.forEach((slot, i) => {
+            if(e.clientX > (canvas.width)/10 + (canvas.width)/10 * i - 45 && e.clientX < (canvas.width)/10 + (canvas.width)/10 * i - 45 + 90 
+              && e.clientY > canvas.height - 100 - 45 && e.clientY < canvas.height - 100 - 45 + 90){
+                if(playa.inventory[i].type == 'wood') return hover = [Resources.get('wood'), i]
+                hover = [Resources.get(playa.inventory[i].type), i]
+                if(hover[0]) return
+                hover = [BasicRecipes.get(playa.inventory[i].type), i]
+                if(hover[0]) return
+                hover = [TableRecipes.get(playa.inventory[i].type), i]
+                if(hover[0]) return
+            }
+        })
         var radian = Math.atan2(y, x);
         let mousedis = Math.sqrt(Math.pow(0 - x, 2) + Math.pow(0 - y, 2))
         if (radian < 0) {
@@ -2190,6 +2244,45 @@ var init = function(name) {
     socket.on('initPack', pack => {initPacks.push(pack)})
     socket.on('removePack', pack => {removePacks.push(pack)})
     let loadingTimerRefresh
+    const drawWood = (x, y, scale = 1) => {
+        ctx.save()
+        ctx.translate(x, y)
+        ctx.scale(scale, scale)
+        ctx.beginPath()
+        ctx.lineJoin = ctx.lineCap = 'round';
+        ctx.lineWidth = 10
+        ctx.strokeStyle = 'maroon'
+        ctx.moveTo(0 - 45 + 75, 0 - 45 + 27.857)
+        ctx.lineTo(0 - 45 + 15, 0 - 45 + 62.143)
+        ctx.stroke()
+        ctx.lineJoin = ctx.lineCap = 'round';
+        ctx.lineWidth = 7
+        ctx.strokeStyle = 'saddlebrown'
+        ctx.moveTo(0 - 45 + 75, 0 - 45 + 27.857)
+        ctx.lineTo(0 - 45 + 15, 0 - 45 + 62.143)
+        ctx.stroke()
+        
+        ctx.beginPath()
+        ctx.lineJoin = ctx.lineCap = 'round';
+        ctx.lineWidth = 10
+        ctx.strokeStyle = 'maroon'
+        ctx.moveTo(0 - 45 + 15, 0 - 45 + 27.857)
+        ctx.lineTo(0 - 45 + 75, 0 - 45 + 62.143)
+        ctx.stroke()
+        
+        ctx.lineJoin = ctx.lineCap = 'round';
+        ctx.lineWidth = 7
+        ctx.strokeStyle = 'saddlebrown'
+        ctx.moveTo(0 - 45 + 15, 0 - 45 + 27.857)
+        ctx.lineTo(0 - 45 + 75, 0 - 45 + 62.143)
+        ctx.stroke()
+        
+        ctx.beginPath()
+        ctx.lineWidth = 1.5
+        ctx.strokeStyle = 'black'
+        ctx.fillStyle = 'white'
+        ctx.restore()
+    }
     readPack = pack => {
         let zoomLevel
         var screenCssPixelRatio = (window.outerWidth) / window.innerWidth;
@@ -2216,7 +2309,7 @@ var init = function(name) {
         } else {
             zoomLevel = "unknown";
         }
-        console.log(zoomLevel, Math.round(screenCssPixelRatio * 100) + '%', window.innerWidth, window.outerWidth)
+        //console.log(zoomLevel, Math.round(screenCssPixelRatio * 100) + '%', window.innerWidth, window.outerWidth)
         canvas.width = window.innerWidth * screenCssPixelRatio;
         canvas.height = window.innerHeight * screenCssPixelRatio;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -2371,7 +2464,9 @@ var init = function(name) {
                 ctx.quadraticCurveTo(x, y, x + radius.tl, y);
                 ctx.closePath();
             }
-            
+            ctx.roundRect = () => {
+                roundRect(ctx, ...arguments)
+            }
             dropped = pack.dropped
             dropped.forEach(item => {
                 if(item.slot.image == 'stone' || item.slot.image == 'iron' || item.slot.image == 'gold' || item.slot.image == 'diamond'|| item.slot.image == 'emerald' || item.slot.image == 'amethyst'){
@@ -2457,7 +2552,7 @@ var init = function(name) {
             ctx.save()
             ctx.globalAlpha = 0.75
             ctx.fillStyle = '#B5651D'
-            roundRect(ctx, offsetX - 10, offsetY - 50, 175 + 20, 200 + 10 + 30, 25, true, false)
+            roundRect(ctx, offsetX - 10, offsetY - 50, 175 + 20, 200 + 10 + 30, 25)
             ctx.fill()
             ctx.strokeStyle = '#521c18'
             ctx.lineWidth = 5
@@ -2518,7 +2613,6 @@ var init = function(name) {
                     ctx.fillStyle = 'red'
                     ctx.globalAlpha = 0.75
                     ctx.fillRect(400 + canvas.width - 900, canvas.height - 150, 75, 25)
-                    'MMMMMMMMMMMMMMMM'
                     
                     playa.clanMembers.forEach((player, i) => {
                         let offSetX = ((i - Math.floor(i/2) * 2) * (canvas.width - 1000)/2)
@@ -2582,7 +2676,82 @@ var init = function(name) {
             ctx.strokeStyle = 'black'
             
             if(playa.crafting && playa.craftablesEx){
-                ctx.fillStyle = 'black'
+                ctx.save()
+                ctx.globalAlpha = 0.75
+                ctx.fillStyle = '#B5651D'
+                roundRect(ctx, 350, 100, canvas.width - 700, canvas.height - 300, 20)
+                ctx.fill()
+                ctx.strokeStyle = '#521c18'
+                ctx.lineWidth = 5
+                ctx.stroke()
+                ctx.strokeStyle = '#521c18'
+                ctx.lineWidth = 5
+                ctx.beginPath()
+                ctx.moveTo(450, 100)
+                ctx.lineTo(450, canvas.height - 200)
+                ctx.stroke()
+                
+                categories.forEach((c, i) => {
+                    ctx.save()
+                    ctx.translate(375 + 25, 125 + 100 * i + 25)
+                    ctx.rotate(c[3] * Math.PI/180)
+                    ctx.scale(c[2], c[2])
+                    ctx.drawImage(Img[c[1]], -25, -25, 50, 50)
+                    ctx.restore()
+                    ctx.beginPath()
+                    ctx.moveTo(350, 200 + 100 * i)
+                    ctx.lineTo(450, 200 + 100 * i)
+                    ctx.stroke()
+                    
+                })
+                let craftablesEx = playa.craftablesEx.filter(craft => {
+                    if(TableRecipes.get(craft.craft).type == category) return true
+                })
+                craftablesEx.forEach((craft, i) => {
+                    ctx.lineWidth = 2
+                    let offSetX = ((i - Math.floor(i/8) * 8) * 80)
+                    let offSetY = (Math.floor(i / 8) * 80)
+                    ctx.beginPath()
+                    ctx.globalAlpha = 0.875
+                    ctx.rect(470 + offSetX, 120 + offSetY, 60, 60)
+                    ctx.stroke()
+                    if(craft.craftable) ctx.fillStyle = 'black'
+                    else ctx.fillStyle = 'red'
+                    ctx.globalAlpha = 0.5
+                    ctx.beginPath()
+                    ctx.fillRect(470 + offSetX, 120 + offSetY, 60, 60)
+                    if(/Axe|Pickaxe|Sword|Hammer/.test(craft.craft)){
+                        let img = craft.craft.toLowerCase().replace(/\s/, '')
+                        ctx.globalAlpha = 1
+                        ctx.save()
+                        ctx.translate(470 + offSetX + 27.5, 120 + offSetY + 27.5 + 5)
+                        ctx.rotate(Math.PI/180 * 45)
+                        ctx.drawImage(Img[img], 0 - 27.5, 0 - 27.5, 55, 55)
+                        ctx.restore()
+                    }
+                    if(/Wall|Door|Floor|Crafting Table|Chest|Armor/.test(craft.craft)){
+                        let img = craft.craft.toLowerCase().replace(/\s/, '')
+                        ctx.globalAlpha = 1
+                        ctx.save()
+                        ctx.translate(470 + offSetX + 30, 120 + offSetY + 30)
+                        ctx.rotate(Math.PI/180 * 8)
+                        if(craft.craft == 'Chest') ctx.drawImage(Img[img], 0 - 12.75, 0 - 7.5, 25.5, 15)
+                        else ctx.drawImage(Img[img], 0 - 15, 0 - 15, 30, 30)
+                        ctx.restore()
+                    }
+                })
+                /*ctx.save()
+                ctx.translate(375 + 25, 125 + 25)
+                ctx.rotate(8 * Math.PI/180)
+                ctx.drawImage(Img['woodwall'], -25, -25, 50, 50)
+                ctx.restore()
+
+                ctx.save()
+                ctx.translate(375 + 25, 225 + 25)
+                ctx.rotate(45 * Math.PI/180)
+                ctx.drawImage(Img['stonepickaxe'], -25, -25, 50, 50)
+                ctx.restore()*/
+                /**ctx.fillStyle = 'black'
                 ctx.lineWidth = 2
                 ctx.beginPath()
                 ctx.globalAlpha = 0.5
@@ -2622,10 +2791,9 @@ var init = function(name) {
                         ctx.restore()
                     }
                 })
-                ctx.globalAlpha = 1
+                ctx.globalAlpha = 1*/
             } else {
-                playa.craftables.forEach((craft, i) => {
-                    
+                playa.craftables.forEach((craft, i) => {                
                     if(/Axe|Pickaxe|Sword|Hammer/.test(craft)){
                         let img = craft.toLowerCase().replace(/\s/, '')
                         ctx.globalAlpha = 0.875
@@ -2949,6 +3117,104 @@ var init = function(name) {
                 //if(playa.inventory[i] != ' ') ctx.drawImage(Img[playa.inventory[i]], 200  + 120.75 * i - 50, canvas.height - 100 - 50, 100, 100)
                 
             })
+            if(hover && hover[0] && playa.inventory[hover[1]].type){
+                if(hover[0].type == 'Resource'){
+                    ctx.save()
+                    ctx.globalAlpha = 0.8
+                    ctx.fillStyle = 'black'
+                    ctx.font = "15px Arial"
+                    let desc = hover[0].description
+                    let name = playa.inventory[hover[1]].type
+                    let capitalize = s => {
+                        s = [...s]
+                        s.unshift(s.shift().toUpperCase())
+                        return s.join('')
+                    }
+                    let w = ctx.measureText(desc).width
+                    //ctx.fillRect((canvas.width)/10 + (canvas.width)/10 * hover[1]  - 45, canvas.height - 100 - 45 - 95, w + 10, 50)
+                    roundRect(
+                        ctx,
+                        (canvas.width)/10 + (canvas.width)/10 * hover[1]  - 45, 
+                        canvas.height - 100 - 45 - 55, 
+                        w + 10, 
+                        50, 
+                        10
+                    )
+                    ctx.fill()
+                    ctx.beginPath()
+                    ctx.strokeStyle = 'yellow'
+                    ctx.strokeText(capitalize(name), 5 + (canvas.width)/10 + (canvas.width)/10 * hover[1]  - 45, canvas.height - 100 - 45 - 55 + 20)
+                    ctx.strokeStyle = 'grey'
+                    ctx.strokeText(desc, 5 + (canvas.width)/10 + (canvas.width)/10 * hover[1]  - 45, canvas.height - 100 - 45 - 55 + 37)
+                    
+                    ctx.stroke()
+                    ctx.restore()
+                }
+                if(hover[0].type == 'Structure'){
+                    ctx.save()
+                    ctx.globalAlpha = 0.8
+                    ctx.fillStyle = 'black'
+                    ctx.font = "15px Arial"
+                    let desc = hover[0].description
+                    let name = playa.inventory[hover[1]].type
+                    let capitalize = s => {
+                        s = [...s]
+                        s.unshift(s.shift().toUpperCase())
+                        return s.join('')
+                    }
+                    let w = ctx.measureText(desc).width
+                    //ctx.fillRect((canvas.width)/10 + (canvas.width)/10 * hover[1]  - 45, canvas.height - 100 - 45 - 95, w + 10, 50)
+                    roundRect(
+                        ctx,
+                        (canvas.width)/10 + (canvas.width)/10 * hover[1]  - 45, 
+                        canvas.height - 100 - 45 - 55, 
+                        w + 10, 
+                        50, 
+                        10
+                    )
+                    ctx.fill()
+                    ctx.beginPath()
+                    ctx.strokeStyle = 'yellow'
+                    ctx.strokeText(capitalize(name), 5 + (canvas.width)/10 + (canvas.width)/10 * hover[1]  - 45, canvas.height - 100 - 45 - 55 + 20)
+                    ctx.strokeStyle = 'grey'
+                    ctx.strokeText(desc, 5 + (canvas.width)/10 + (canvas.width)/10 * hover[1]  - 45, canvas.height - 100 - 45 - 55 + 37)
+                    
+                    ctx.stroke()
+                    ctx.restore()
+                }
+                if(hover[0].type == 'Tool'){
+                    ctx.save()
+                    ctx.globalAlpha = 0.8
+                    ctx.fillStyle = 'black'
+                    ctx.font = "15px Arial"
+                    let desc = hover[0].description
+                    let name = playa.inventory[hover[1]].type
+                    let capitalize = s => {
+                        s = [...s]
+                        s.unshift(s.shift().toUpperCase())
+                        return s.join('')
+                    }
+                    let w = ctx.measureText(desc).width
+                    //ctx.fillRect((canvas.width)/10 + (canvas.width)/10 * hover[1]  - 45, canvas.height - 100 - 45 - 95, w + 10, 50)
+                    roundRect(
+                        ctx,
+                        (canvas.width)/10 + (canvas.width)/10 * hover[1]  - 45, 
+                        canvas.height - 100 - 45 - 55, 
+                        w + 10, 
+                        50, 
+                        10
+                    )
+                    ctx.fill()
+                    ctx.beginPath()
+                    ctx.strokeStyle = 'yellow'
+                    ctx.strokeText(capitalize(name), 5 + (canvas.width)/10 + (canvas.width)/10 * hover[1]  - 45, canvas.height - 100 - 45 - 55 + 20)
+                    ctx.strokeStyle = 'grey'
+                    ctx.strokeText(desc, 5 + (canvas.width)/10 + (canvas.width)/10 * hover[1]  - 45, canvas.height - 100 - 45 - 55 + 37)
+                    
+                    ctx.stroke()
+                    ctx.restore()
+                }
+            }
             ctx.fillStyle = '#696969'
             ctx.beginPath()
             ctx.lineWidth = 1.5
@@ -3024,6 +3290,89 @@ var init = function(name) {
             ctx.arc(canvas.width - 100, canvas.height - 200, 10, 0, 2 * Math.PI)
             ctx.fill()
             ctx.lineCap = 'butt'
+        }    
+        if(dragging){
+            let slot = dragging[0]
+            console.log(slot)
+            ctx.lineWidth = 1.5
+            ctx.font = "20px Arial"
+            ctx.fillStyle = '#696969'
+            ctx.globalAlpha = 0.75
+            ctx.rect(clientX - 45, clientY - 45, 90, 90)
+            ctx.fillRect(clientX - 45, clientY - 45, 90, 90)
+            ctx.globalAlpha = 1
+            ctx.stroke();
+            if(dragging[0].type == 'wood'){ 
+                drawWood(clientX,clientY)
+            }else {
+                if(/Axe|Pickaxe|Sword|Hammer/.test(slot.type)){
+                    //let img = slot.image.toLowerCase().replace(/\s/, '')
+                    ctx.save()
+                    ctx.translate(clientX, clientY + 90 - 100 + 7 + 10)
+                    ctx.rotate(Math.PI/ 180 * 45)
+                    ctx.drawImage(Img[slot.image], 0 - 40, 0 - 40, 80 , 80 )
+                    ctx.restore()
+                }
+                if(/^(stone|iron|gold|diamond|emerald|amethyst)$/.test(slot.image)){
+                    ctx.save()
+                    ctx.translate(clientX, clientY + 90 - 100 + 10)
+                    ctx.rotate(Math.PI/ 180 * 0)
+                    ctx.drawImage(Img[slot.image], 0 - 20, 0 - 20, 40, 40)
+                    ctx.restore()
+                    ctx.beginPath()
+                    ctx.lineWidth = 1.5
+                    ctx.font = "15px Arial"
+                    ctx.strokeStyle = 'black'
+                    ctx.fillStyle = 'white'
+                    ctx.strokeText(slot.count, 0 + 18, 0 - 58)
+                    ctx.fillText(slot.count, 0 + 18, 0 - 58)
+                    ctx.stroke()
+                }
+                if(/^Leather$/.test(slot.type)){
+                    ctx.save()
+                    ctx.translate(clientX, clientY + 90 - 100)
+                    ctx.rotate(Math.PI/ 180 * 0)
+                    ctx.drawImage(Img[slot.image], 0 - 24.5, 0 - 28.5, 49, 57)
+                    ctx.restore()
+                    ctx.beginPath()
+                    ctx.lineWidth = 1.5
+                    ctx.font = "15px Arial"
+                    ctx.strokeStyle = 'black'
+                    ctx.fillStyle = 'white'
+                    ctx.strokeText(slot.count, 0 + 18, 0 - 58)
+                    ctx.fillText(slot.count, 0 + 18, 0 - 58)
+                    ctx.stroke()
+                }
+                if(/Wall|Door|Floor|Crafting Table|Chest|Armor/.test(slot.type)){
+                    ctx.save()
+                    ctx.translate(clientX, clientY + 90 - 100 + 7 + 12.5)
+                    ctx.rotate(Math.PI/ 180 * 10)
+                    if(slot.type == 'Chest') ctx.drawImage(Img[slot.image], 0 - 23.75, 0 - 12.5, 47.5 , 25)
+                    else ctx.drawImage(Img[slot.image], 0 - 25, 0 - 25, 50 , 50)
+                    ctx.restore()
+                    ctx.lineWidth = 1.5
+                    ctx.font = "15px Arial"
+                    ctx.strokeStyle = 'black'
+                    ctx.fillStyle = 'white'
+                    ctx.strokeText(slot.count, 0 + 18, 0 - 58)
+                    ctx.fillText(slot.count, 0 + 18, 0 - 58)
+                    ctx.stroke()
+                }
+                if(slot.type == 'carrot'){
+                    ctx.save()
+                    ctx.translate(clientX, clientY + 90 - 100 + 7 + 10)
+                    ctx.rotate(Math.PI/ 180 * 45)
+                    ctx.drawImage(Img[slot.image], -20, -20, 40, 40)
+                    ctx.restore()
+                    ctx.lineWidth = 1.5
+                    ctx.font = "15px Arial"
+                    ctx.strokeStyle = 'black'
+                    ctx.fillStyle = 'white'
+                    ctx.strokeText(slot.count, 0 + 18, 0 - 58)
+                    ctx.fillText(slot.count, 0 + 18, 0 - 58)
+                    ctx.stroke()
+                }
+            }
         }
     }
     socket.on('state', readPack);

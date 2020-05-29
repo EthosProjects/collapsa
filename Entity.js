@@ -12,6 +12,7 @@ Vector.getDistance = function (vectorA, vectorB) {
     return Math.sqrt(Math.pow(vectorA.x - vectorB.x, 2) + Math.pow(vectorA.y - vectorB.y, 2))
 };
 const {astar, Graph} = require('./astar.js')
+const {BasicRecipes, TableRecipes, Resources} = require('./items.js')
 // create an engine
 const sleep = ms => {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -189,173 +190,7 @@ class Slot {
 }
 class Crafter extends Mapper{
     constructor(){
-        super([
-            [
-                'Stone Axe', 
-                {
-                    recipe:[
-                        {id:'wood', count:5},
-                        {id:'stone', count:5}
-                    ],
-                    output:{
-                        count:1,
-                        image:'stoneaxe',
-                        stackSize:1,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Stone Pickaxe', 
-                {
-                    recipe:[
-                        {id:'wood', count:10},
-                        {id:'stone', count:5}
-                    ],
-                    output:{
-                        count:1,
-                        image:'stonepickaxe',
-                        stackSize:1,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Stone Sword', 
-                {
-                    recipe:[
-                        {id:'wood', count:5},
-                        {id:'stone', count:10}
-                    ],
-                    output:{
-                        count:1,
-                        image:'stonesword',
-                        stackSize:1,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Stone Hammer', 
-                {
-                    recipe:[
-                        {id:'stone', count:20},
-                        {id:'wood', count:15},
-                    ],
-                    output:{
-                        count:1,
-                        image:'stonehammer',
-                        stackSize:1,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Wood Wall', 
-                {
-                    recipe:[
-                        {id:'wood', count:20},
-                    ],
-                    output:{
-                        count:2,
-                        image:'woodwall',
-                        stackSize:255,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Stone Wall', 
-                {
-                    recipe:[
-                        {id:'stone', count:20},
-                    ],
-                    output:{
-                        count:1,
-                        image:'stonewall',
-                        stackSize:255,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Wood Floor', 
-                {
-                    recipe:[
-                        {id:'wood', count:10},
-                    ],
-                    output:{
-                        count:4,
-                        image:'woodfloor',
-                        stackSize:255,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Stone Floor', 
-                {
-                    recipe:[
-                        {id:'stone', count:10},
-                    ],
-                    output:{
-                        count:4,
-                        image:'stonefloor',
-                        stackSize:255,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Crafting Table', 
-                {
-                    recipe:[
-                        {id:'wood', count:10},
-                        {id:'stone', count:10},
-                    ],
-                    output:{
-                        count:1,
-                        image:'craftingtable',
-                        stackSize:255,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Wood Door', 
-                {
-                    recipe:[
-                        {id:'wood', count:11},
-                        {id:'stone', count:1},
-                        {id:'iron', count:1},
-                    ],
-                    output:{
-                        count:2,
-                        image:'wooddoor',
-                        stackSize:255,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Stone Door', 
-                {
-                    recipe:[
-                        {id:'wood', count:1},
-                        {id:'stone', count:11},
-                        {id:'iron', count:1},
-                    ],
-                    output:{
-                        count:2,
-                        image:'stonedoor',
-                        stackSize:255,
-                        equipable:true
-                    }
-                }
-            ],
-            //['Spear', [{id:'wood', count:15, output:1, image;'spear'}]],
-            //['Black Ability', [{id:'wood', count:20}]]
-        ])
+        super(BasicRecipes)
     }
     checkCraft(inventory){
         let craftables = []
@@ -398,237 +233,7 @@ class Crafter extends Mapper{
 
 class CraftingTable extends Mapper{
     constructor(game, x, y){
-        super([
-            [
-                'Iron Axe', 
-                {
-                    recipe:[
-                        {id:'iron', count:20},
-                        {id:'stone', count:10}
-                    ],
-                    output:{
-                        count:1,
-                        image:'ironaxe',
-                        stackSize:1,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Iron Pickaxe', 
-                {
-                    recipe:[
-                        {id:'iron', count:20},
-                        {id:'stone', count:15}
-                    ],
-                    output:{
-                        count:1,
-                        image:'ironpickaxe',
-                        stackSize:1,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Iron Sword', 
-                {
-                    recipe:[
-                        {id:'iron', count:10},
-                        {id:'stone', count:15},
-                        {id:'wood', count:10}
-                      
-                    ],
-                    output:{
-                        count:1,
-                        image:'ironsword',
-                        stackSize:1,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Iron Hammer', 
-                {
-                    recipe:[
-                        {id:'iron', count:20},
-                        {id:'stone', count:15},
-                    ],
-                    output:{
-                        count:1,
-                        image:'ironhammer',
-                        stackSize:1,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Gold Axe', 
-                {
-                    recipe:[
-                        {id:'gold', count:20},
-                        {id:'iron', count:10}
-                    ],
-                    output:{
-                        count:1,
-                        image:'goldaxe',
-                        stackSize:1,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Gold Pickaxe', 
-                {
-                    recipe:[
-                        {id:'gold', count:20},
-                        {id:'iron', count:15}
-                    ],
-                    output:{
-                        count:1,
-                        image:'goldpickaxe',
-                        stackSize:1,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Gold Sword', 
-                {
-                    recipe:[
-                        {id:'gold', count:10},
-                        {id:'iron', count:15},
-                        {id:'stone', count:10}
-                    ],
-                    output:{
-                        count:1,
-                        image:'goldsword',
-                        stackSize:1,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Gold Hammer', 
-                {
-                    recipe:[
-                        {id:'gold', count:20},
-                        {id:'iron', count:15},
-                    ],
-                    output:{
-                        count:1,
-                        image:'goldhammer',
-                        stackSize:1,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Diamond Axe', 
-                {
-                    recipe:[
-                        {id:'diamond', count:20},
-                        {id:'iron', count:10}
-                    ],
-                    output:{
-                        count:1,
-                        image:'diamondaxe',
-                        stackSize:1,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Diamond Pickaxe', 
-                {
-                    recipe:[
-                        {id:'diamond', count:20},
-                        {id:'iron', count:15}
-                    ],
-                    output:{
-                        count:1,
-                        image:'diamondpickaxe',
-                        stackSize:1,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Diamond Sword', 
-                {
-                    recipe:[
-                        {id:'diamond', count:10},
-                        {id:'iron', count:15},
-                        {id:'gold', count:10}
-                    ],
-                    output:{
-                        count:1,
-                        image:'diamondsword',
-                        stackSize:1,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Diamond Hammer', 
-                {
-                    recipe:[
-                        {id:'diamond', count:20},
-                        {id:'iron', count:15},
-                    ],
-                    output:{
-                        count:1,
-                        image:'diamondhammer',
-                        stackSize:1,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Iron Wall', 
-                {
-                    recipe:[
-                        {id:'iron', count:20}
-                    ],
-                    output:{
-                        count:1,
-                        image:'ironwall',
-                        stackSize:255,
-                        equipable:true
-                    }
-                }
-            ],
-            [
-                'Chest',
-                {
-                    recipe:[
-                        {id:'wood', count:50},
-                        {id:'gold', count:10}
-                    ],
-                    output:{
-                        count:1,
-                        image:'chest',
-                        stackSize:255,
-                        equipable:true
-                    }
-                    
-                }
-            ],
-            [
-                'Iron Armor', 
-                {
-                    recipe:[
-                        {id:'iron', count:20},
-                    ],
-                    output:{
-                        count:1,
-                        image:'ironarmor',
-                        stackSize:1,
-                        armorable:true,
-                        
-                    }
-                }
-            ],
-        ])
+        super(TableRecipes)
         this.game = game
         this.x = x
         this.y = y
@@ -940,7 +545,7 @@ module.exports = function (nsp, ns) {
                 ['8', 'empty'],
                 ['9', 'empty'],*/
                 
-                ['1', new Slot('Crafting Table', 255, 'craftingtable', 255, true)],
+                ['1', 'empty'],
                 ['2', 'empty'],
                 ['3', 'empty'],
                 ['4', 'empty'],
@@ -1047,6 +652,7 @@ module.exports = function (nsp, ns) {
             this.clan = null
             this.clans = null
             this.msg = new Map()
+            this.adminLevel = 0
             let tempx = Math.getRandomInt(0, game.map.width/100 - 1) * 100 + 50
             let tempy = Math.getRandomInt(0, game.map.height/100 - 1) * 100 + 50
             let inWay = false
@@ -4312,6 +3918,7 @@ module.exports = function (nsp, ns) {
     }, 10)
     this.nsp.on('connection', function (socket) {
         socket.emit('images', images)
+        socket.emit('items', [BasicRecipes, TableRecipes, Resources])
         socket.on('log', log => console.log(log))
         socket.on('startInitPackReq', () => {
             var pack = {
@@ -4447,6 +4054,17 @@ module.exports = function (nsp, ns) {
             }
             if(slot.equipable || slot.edible) return playa.mainHand = slotnum
         })
+        socket.on('swap', ([slotnum, toSwap]) => {
+            slotnum = slotnum.toString()
+            toSwap = toSwap.toString()
+            let playa = Players.list.find(player => player.id == socket.id)
+            if(!playa) return
+            let swapSlot = playa.inventory.get(slotnum)
+            let sSwapSlot = playa.inventory.get(toSwap)
+            playa.inventory.set(slotnum, sSwapSlot)
+            playa.inventory.set(toSwap, swapSlot)
+            if(playa.mainHand == slotnum || playa.mainHand == toSwap) playa.mainHand = '-1'
+        })
         socket.on('unequip', type => {
             let playa = Players.list.find(player => player.id == socket.id)
             if(!playa) return
@@ -4539,11 +4157,11 @@ module.exports = function (nsp, ns) {
                             player.maxHealth = 1000
                             player.health = 1000
                         }
-                        player.immortal = !!player.immortal
+                        player.immortal = !player.immortal
                     },
                     kill: num => {
                         let player = leaderboard.list[num - 1]
-                        player.health = 0
+                        player.health = -1
                     },
                     giveItem: (num, ...item) => {
                         let player = leaderboard.list[num - 1] || Players.list.find(player => player.id == socket.id)
@@ -4564,7 +4182,7 @@ module.exports = function (nsp, ns) {
                 //What should yours do?
                 //basically if i type c:giveAdmin(knightmare), it gives me all those items. 
                 //amethyst items are fot admins only and they are faster do more damage
-                if(msg == 'giveAdmin(knightmare)'){
+                if(msg == 'giveAdmin(logos)'){
                     playa.inventory.set('1', new Slot('Amethyst Sword', 1, 'amethystsword', 1, true))
                     playa.inventory.set('2', new Slot('Amethyst Pickaxe', 1, 'amethystpickaxe', 1, true))
                     playa.inventory.set('3', new Slot('Amethyst Axe', 1, 'amethystaxe', 1, true))
@@ -4584,6 +4202,11 @@ module.exports = function (nsp, ns) {
                     playa.needsSelfUpdate = true
                 }
                 if(msg == 'giveAdmin(honk*honk)'){
+                    playa.admin = true
+                    playa.adminLevel = 2
+                    playa.needsSelfUpdate = true
+                }
+                if(msg == 'giveAdmin(feldtiv)'){
                     playa.admin = true
                     playa.adminLevel = 2
                     playa.needsSelfUpdate = true

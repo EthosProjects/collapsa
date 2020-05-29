@@ -448,5 +448,42 @@ module.exports = {
                 }
             }
         ],
+    ],
+    Resources:[
+        [
+            'wood',
+            {
+                description: "It's brown and sticky",
+                type:'Resource',
+            }
+        ],
+        [
+            'stone',
+            {
+                description: "It's a rock",
+                type:'Resource',
+            }
+        ],
+        [
+            'iron',
+            {
+                description: "It's hard",
+                type:'Resource',
+            }
+        ],
+        [
+            'gold',
+            {
+                description: "It's shiny",
+                type:'Resource',
+            }
+        ],
+        [
+            'diamond',
+            {
+                description: "It's blue",
+                type:'Resource',
+            }
+        ],
     ]
 }

@@ -15,7 +15,6 @@ new game(io.of('/usaeast2'), '/usaeast2');
 Math = require('./math.js')
 var Vector = require('./Vector.js')
 // Aliases
-
 io.on('connection', socket => {
     console.log('aaa')
 })
