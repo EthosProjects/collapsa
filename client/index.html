@@ -15,6 +15,15 @@
     </head>
     <body>
         <div class ="modal" id="start">
+            <br>
+            <div id="login">
+                <button class="accountButton" id='loginButton'><h1>Login</h1></button>
+            
+                <button class="accountButton" id='signupButton'><h1>Sign Up</h1></button>
+            
+                <button class="accountButton" id='accountButton'><h1>Account</h1></button>
+            </div>
+                
             <div id="instructions">
                 <h1>How to play?</h1>
                 <p>
@@ -29,8 +38,9 @@
               </p>
             </div>
             
+            
             <form class="modal-content" id="enterForm">
-                <h1 id="title">Collapsa.io</h1>
+                <h1 class="title">Collapsa.io</h1>
                 <h3 id="enter">Join the collapse</h3>
                 <label id="server-label" for="server">
                     <select id="server">
@@ -75,7 +85,65 @@
             </div>
             
         </div>
-
+        <div class="accountModal" id="loginModal">
+            <div class="accountModalContent" id="loginModalContent">
+                <a href='javascript:void(0)' class='closebtn'>×</a>
+                <form id="loginForm">
+                    <h1 class="accountModalTitle">Login</h1>
+                    <p class='invalid' id='loginErr'>Incorrect username or password</p>
+                    <label class='enter-label'>
+                        <b>Username:</b>
+                        <br>
+                        <input id="loginUsername" class="input" placeholder="Input Username"/>
+                    </label>
+                    <br>
+                    <label class='enter-label'>
+                        <b>Password:</b>
+                        <br>
+                        <input id="loginPassword" class="input" placeholder="Input Password" type="password"/>
+                        <button type='button' for="loginPassword" class="mask"><img for="passwordLogin" src="https://i.stack.imgur.com/Oyk1g.png" class="maski"></button>
+                    </label>
+                    <br>
+                    <br>
+                    <button class="submit" type="submit">Login</button>
+                </form>
+            </div>
+        </div>
+        <div class="accountModal" id="signupModal">
+            <div class="accountModalContent" id="signupModalContent">
+                <a href='javascript:void(0)' class='closebtn'>×</a>
+                <form id="signupForm">
+                    <h1 class="accountModalTitle">Sign Up</h1>
+                    <p class='signupErr invalid'>That username is taken</p>
+                    <label class='enter-label'>
+                        <b>Username:</b>
+                        <br>
+                        <input id='signupUsername' class="input" placeholder="Input Username"/>
+                    </label>
+                    <br>
+                    <label class='enter-label'>
+                        <b>Password:</b>
+                        <br>
+                        <input id='signupPassword' class="input" placeholder="Input Password" type="password"/>
+                        <button type='button' for="signupPassword" class="mask"><img for="passwordLogin" src="https://i.stack.imgur.com/Oyk1g.png" class="maski"></button>
+                    </label>
+                    <br>
+                    <p class="invalid" id="numval">1 Number</p>
+                    <p class="invalid" id="lowercaseval">1 Lowercase Letter</p>
+                    <p class="invalid" id="uppercaseval">1 Uppercase Letter</p>
+                    <p class='signupErr invalid'>That email is taken</p>
+                    <label class='enter-label'>
+                        <b>Email:</b>
+                        <br>
+                        <input id='signupEmail' class="input" placeholder="Input Email"/>
+                    </label>
+                    <br>
+                    <p class='invalid' id='emailerr'>Invalid Email</p>
+                    <br>
+                    <button class="submit" type="submit" id="signupModalSubmit" disabled>Sign up</button>
+                </form>
+            </div>
+        </div>
         <div class="modal" id="loadingScreen">
             <div class="modal-content">
                <h1 id="LoadingTitle">Loading</h1>
@@ -92,5 +160,6 @@
         </div>
         -->
     </body>
+    <script src="/client/js/account.js"></script>
     <script src="/client/js/game.js"></script>
 </html>
