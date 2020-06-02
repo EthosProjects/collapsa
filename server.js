@@ -1,6 +1,7 @@
 // Dependencies
 var express = require('express');
 var http = require('http');
+var https = require('https');
 var path = require('path');
 var fs = require('fs');
 var app = express();
@@ -20,11 +21,14 @@ const mLab = new mlabInteractor('4unBPu8hpfod29vxgQI57c0NMUqMObzP', ['lexybase',
 let collapsa
 let collapsauserbase
 let reqCount = 0
+let formFormat = data => Object.keys(data).map(k => `${k}=${encodeURIComponent(data[k])}`).join('&')
 mLab.on('ready', () => {
     console.log('Mlab interface loaded')
     collapsa = mLab.databases.get('collapsa')
     collapsauserbase = collapsa.collections.get('collapsauserbase')
 })
+let res = {"access_token": "WhrfuCsaMImBQY9Ws483RsZJ519XtM", "expires_in": 604800, "refresh_token": "pCdNT5xWeypLmvSRfVO5UwSTfrkdbU", "scope": "identify email", "token_type": "Bearer"}
+
 let zeroFill = (s, w) => new Array(w - s.length).fill('0').join('') + s
 const genSnowflake = (increment, processID, workerID) => {
     let timestamp = zeroFill((new Date().getTime() - 1591092539000).toString(2), 42)
@@ -56,7 +60,6 @@ app.route('/api/login')
         let successful = await bcrypt.compare(password, document.data.password)
         if(successful) res.send(JSON.stringify({token:document.data.id}))
         else res.send(JSON.stringify({message:"Incorrect username or password"}))
-        console.log(req.params, req.body)
     })
 app.route('/api/signup')
     .post(async (req, res) => {
@@ -123,6 +126,89 @@ app.route('/api/signup')
             else if(!valid[2]) res.send({message:'The email is invalid', err:true}) 
         }
         res.end()
+    })
+app.route('/api/discordLogin')
+    .get(async (req, res) => {
+        if(!req.query.code) return res.redirect('../../')
+        //res.sendFile(path.join(__dirname, '/client/index.html'));
+        let client_id = '710904657811079258'
+        let client_secret = 'ZabZmWdAlMZFPl2O7xGRqtqpZhIar9tE'
+        let redirect_uri = 'http://localhost:3000/api/discordLogin'
+        let code = req.query.code
+        let obj = {
+            'code': code,
+            'client_id': client_id,
+            'client_secret': client_secret,
+            'redirect_uri': redirect_uri,
+            'scope': 'identify email'
+        }
+        let tokens = await new Promise((resolve, reject) => {
+            let tokenReq = https.request({
+                host:'discord.com',
+                path:`/api/oauth2/token?grant_type=authorization_code`,
+                method:"POST",
+                headers:{
+                    'content-type':'application/x-www-form-urlencoded'
+                }
+            })
+            .on('response', res => {
+                let buffer = []
+                console.log(res.statusCode)
+                res.on('data', data => buffer.push(data))
+                .on('end', () => resolve(JSON.parse(buffer.join(''))))
+            })
+            tokenReq.write(formFormat(obj))
+            tokenReq.end()
+        })
+        if(tokens.error){ 
+            res.status(404)
+            return res.send(JSON.stringify({error: "invalid token"}))
+        }
+        let access_token = tokens.access_token
+        let user = await new Promise((resolve, reject) => {
+            https.get({
+                host:'discord.com',
+                path:`/api/v6/users/@me`,
+                headers: {
+                    "Authorization": `Bearer ${access_token}`
+                }
+            })
+            .on('response', res => {
+                let buffer = []
+                res.on('data', data => buffer.push(data))
+                res.on('end', () => resolve(JSON.parse(buffer.join(''))))
+            })
+        })
+        if(user.error){ 
+            res.status(404)
+            return res.send(JSON.stringify({error: "invalid user"}))
+        }
+        if(collapsauserbase.findDocument(document => document.data.discordid == user.id)){
+            let userbase = collapsauserbase.findDocument(document => document.data.discordid == user.id)
+            var d = new Date();
+            d.setTime(d.getTime() + (30 * 24 * 60 * 60 * 1000));
+            var expires = "Expires="+ d.toUTCString();
+            console.log(`token=${userbase.data.token}; ${expires}`)
+            res.set('Set-Cookie', `token=${userbase.data.token}; ${expires}; path=/`)
+            res.redirect('../../')
+        }else {
+            let id = genSnowflake(reqCount.toString(2), '2', '0')
+            let token = await bcrypt.genSalt(10)
+            let random = Math.floor(Math.random() * 100).toString()
+            token = 'Aph_' + (random.length == 2 ? random : '0' + random) + 'yght' + token.substr(7)
+            await collapsauserbase.addDocument({
+                id:id,
+                token:token,
+                discordid:user.id,
+                username:user.username,
+                email:user.email
+            })
+            var d = new Date();
+            d.setTime(d.getTime() + (30 * 24 * 60 * 60 * 1000));
+            var expires = "Expires="+ d.toUTCString();
+            res.set('Set-Cookie', `token=${token}; ${expires}; path=/`)
+            res.redirect('../../')
+        }
     })
 var Vector = require('./Vector.js')
 // Aliases

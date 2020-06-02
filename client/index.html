@@ -2,6 +2,8 @@
     <head>
     <title>Collapsa.io</title>
     <link rel="stylesheet" type="text/css" href="/client/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/client/css/widget.css">
+    <link rel="stylesheet" type="text/css" href="/client/css/account.css">
     <script src="/socket.io/socket.io.js"></script>
     <link rel='icon' href='/client/img/favicon.ico' type='image/x-icon'/>
     <meta property="og:title" content="Collapsa.io">
@@ -17,13 +19,11 @@
         <div class ="modal" id="start">
             <br>
             <div id="login">
-                <div class='dropdown'>
-                    <button class="accountButton" id='loginButton'><h1>Login</h1></button>
-                    <div class="dropdown-content">
-                        <a href="#">Link 1</a>
-                        <a href="#">Link 2</a>
-                        <a href="#">Link 3</a>
-                      </div>
+                <button class="accountButton" id='loginButton'><h1>Login</h1></button>
+                <div id="dropdown-content">
+                    <a href="https://discord.com/api/oauth2/authorize?client_id=710904657811079258&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2FdiscordLogin&response_type=code&scope=identify%20email">
+                        <img class="loginwithIcon" src="https://discord.com/assets/192cb9459cbc0f9e73e2591b700f1857.svg">
+                    </a>
                 </div>
                 <button class="accountButton" id='signupButton'><h1>Sign Up</h1></button>
             

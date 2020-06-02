@@ -1,4 +1,8 @@
+const state = { 'page_id': 1, 'user_id': 5 }
+const title = ''
+const url = '/'
 
+history.pushState(state, title, url)
 function setCookie(cname, cvalue, exdays) {
     var d = new Date();
     d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
@@ -28,6 +32,19 @@ let signupForm = document.getElementById('signupForm')
 let loginModal = document.getElementById('loginModal');
 let signupModal = document.getElementById('signupModal');
 let signupModalSubmit = document.querySelectorAll('.submit')[1];
+let loginDropdown = document.getElementById('dropdown-content')
+loginButton.addEventListener('mouseover', () => {
+    loginDropdown.style.display = 'block'
+})
+loginButton.addEventListener('mouseout', () => {
+    loginDropdown.style.display = 'none'
+})
+loginDropdown.addEventListener('mouseover', () => {
+    loginDropdown.style.display = 'block'
+})
+loginDropdown.addEventListener('mouseout', () => {
+    loginDropdown.style.display = 'none'
+})
 let valid = [0, 0, 0];
 if(getCookie('token')){
     (async () => {
