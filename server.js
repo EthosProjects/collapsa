@@ -19,20 +19,35 @@ const mlabInteractor = require('../mlab-promise')
 const mLab = new mlabInteractor('4unBPu8hpfod29vxgQI57c0NMUqMObzP', ['lexybase', 'chatbase'])
 let collapsa
 let collapsauserbase
+let reqCount = 0
 mLab.on('ready', () => {
     console.log('Mlab interface loaded')
     collapsa = mLab.databases.get('collapsa')
     collapsauserbase = collapsa.collections.get('collapsauserbase')
-    console.log(collapsauserbase)
 })
+let zeroFill = (s, w) => new Array(w - s.length).fill('0').join('') + s
+const genSnowflake = (increment, processID, workerID) => {
+    let timestamp = zeroFill((new Date().getTime() - 1591092539000).toString(2), 42)
+    increment = zeroFill(reqCount.toString(2), 12)
+    processID = zeroFill(processID, 5)
+    workerID = zeroFill(workerID, 5)
+    return parseInt(timestamp + processID + workerID + increment, 2)
+}
+console.log(genSnowflake(reqCount.toString(2), '1', '0'))
 Math = require('./math.js')
 app.use(bodyParser.json())
+app.route('/api')
+    .get(async (req, res) => {
+        reqCount++
+        res.send('hello')
+    })
 app.route('/api/login')
     .post(async (req, res) => {
+        reqCount++
         let username = req.body.username
         let password = req.body.password
         if(req.body.token){
-            if(!collapsauserbase.findDocument(d => d.name == req.body.token)) res.send(JSON.stringify({message:"invalidToken", err:true}))
+            if(!collapsauserbase.findDocument(d => d.data.token == req.body.token)) res.send(JSON.stringify({message:"invalidToken", err:true}))
             else res.send(JSON.stringify({message:"validToken"}))
             return
         }
@@ -45,6 +60,7 @@ app.route('/api/login')
     })
 app.route('/api/signup')
     .post(async (req, res) => {
+        reqCount++
         let username = req.body.username
         let password = req.body.password
         let email = req.body.email
@@ -82,13 +98,15 @@ app.route('/api/signup')
         validateUsername(username)
         validateEmail(email)
         if(valid.every(d => d)){
+            let id = genSnowflake(reqCount.toString(2), '2', '0')
             let token = await bcrypt.genSalt(10)
             let psw = await bcrypt.hash(password, 10)
             let random = Math.floor(Math.random() * 100).toString()
             token = 'Aph_' + (random.length == 2 ? random : '0' + random) + 'yght' + token.substr(7)
             console.log(token, psw, await bcrypt.compare(password, psw))
             await collapsauserbase.addDocument({
-                id:token,
+                id:id,
+                token:token,
                 password:psw,
                 username:username,
                 email:email

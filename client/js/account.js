@@ -35,7 +35,7 @@ if(getCookie('token')){
     signupButton.style.display = 'none'
     accountButton.style.display = 'block'
     let token = getCookie('token')
-    let req = await fetch('http://localhost:3000/api/login', {
+    let req = await fetch(`${window.location.href}api/login`, {
         method:'POST',
         headers:{
             'content-type':'application/json'
@@ -156,7 +156,7 @@ loginForm.addEventListener('submit', async e => {
     let password = document.getElementById('loginPassword').value
     let username = document.getElementById('loginUsername').value
     let loginErr = document.getElementById('loginErr')
-    let req = await fetch('http://localhost:3000/api/login', {
+    let req = await fetch(`${window.location.href}api/login`, {
         method:'POST',
         headers:{
             'content-type':'application/json'
@@ -183,7 +183,7 @@ signupForm.addEventListener('submit', async e => {
     let password = document.getElementById('signupPassword').value
     let username = document.getElementById('signupUsername').value
     let email = document.getElementById('signupEmail').value
-    let req = await fetch('http://localhost:3000/api/signup', {
+    let req = await fetch(`${window.location.href}api/signup`, {
         method:'POST',
         headers:{
             'content-type':'application/json'

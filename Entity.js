@@ -346,7 +346,7 @@ class Game extends EventEmitter {
         this.ns = ns
     }
 }
-console.log(new Day())
+//console.log(new Day())
 //console.log(new Game())
 module.exports = function (nsp, ns) {
     this.engine = Engine.create(); 
