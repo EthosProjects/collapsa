@@ -18,7 +18,7 @@ var game = require("./Entity.js")
 new game(io.of('/usaeast1'), '/usaeast1');
 //new game(io.of('/usaeast2'), '/usaeast2');
 const discordRoute = require('./api/routes/discord')
-const mlabInteractor = require('../mlab-promise')
+const mlabInteractor = require(process.env.local ? '../mlab-promise' : 'mlab-promise')
 const mLab = new mlabInteractor('4unBPu8hpfod29vxgQI57c0NMUqMObzP', ['lexybase', 'chatbase'])
 let collapsa
 let collapsauserbase
