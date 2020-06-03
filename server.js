@@ -138,7 +138,7 @@ app.route('/api/discordLogin')
         //res.sendFile(path.join(__dirname, '/client/index.html'));
         let client_id = '710904657811079258'
         let client_secret = 'ZabZmWdAlMZFPl2O7xGRqtqpZhIar9tE'
-        let redirect_uri = process.env.local ? 'http://localhost:3000/api/discordLogin' : 'http://collapsa.io/api/discordLogin'
+        let redirect_uri = process.env.local ? 'http://localhost:3000/api/discordLogin' : 'http://www.collapsa.io/api/discordLogin'
         let code = req.query.code
         let obj = {
             'code': code,
