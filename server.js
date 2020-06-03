@@ -8,6 +8,8 @@ var app = express();
 var server = http.Server(app);
 const bodyParser = require('body-parser')
 const bcrypt = require('bcrypt')
+let dotenv = require('dotenv')
+dotenv.config();
 var port = process.env.PORT || 3000;
 var socketIO = require('socket.io');
 var io = socketIO(server);
@@ -52,11 +54,18 @@ app.route('/api/login')
         let password = req.body.password
         if(req.body.token){
             if(!collapsauserbase.findDocument(d => d.data.token == req.body.token)) res.send(JSON.stringify({message:"invalidToken", err:true}))
-            else res.send(JSON.stringify({message:"validToken"}))
+            let userbase = collapsauserbase.findDocument(d => d.data.token == req.body.token)
+            res.send(JSON.stringify({message:"validToken", username:userbase.data.username, email:userbase.data.email}))
             return
         }
         if(!collapsauserbase.findDocument(d => d.data.username == username)) return res.send(JSON.stringify({message:"Incorrect username or password", err:true}))
+        
         let document = collapsauserbase.findDocument(d => d.data.username == username)
+        if(!document.data.password){
+            let acceptedLogins = []
+            if(document.data.discordid) acceptedLogins.push('Discord')
+            return res.send(JSON.stringify({acceptedLogins, err:true}))
+        }
         let successful = await bcrypt.compare(password, document.data.password)
         if(successful) res.send(JSON.stringify({token:document.data.id}))
         else res.send(JSON.stringify({message:"Incorrect username or password"}))
@@ -71,20 +80,11 @@ app.route('/api/signup')
         if(collapsauserbase.findDocument(d => d.data.email == email)) return res.send(JSON.stringify({message:"emailTaken", err:true}))
         let valid = [0, 0, 0]
         let validatePassword = sup => {
-            var lowerCaseLetters = /[a-z]/g;
-
-            // Validate capital letters
-            var upperCaseLetters = /[A-Z]/g;
-
-            // Validate numbers
-            var numbers = /[0-9]/g;
-            if(
-                sup.match(numbers) && 
-                sup.match(upperCaseLetters) && 
-                sup.match(lowerCaseLetters) && sup.length > 7) valid[1] = 1
+            if(sup.match(/^(?=.*[a-zA-Z0-9]).{8,16}$/)) valid[1] = 1
         }
         let validateEmail = sue => {
             let email = /^\w.+@\w{2,253}\.\w{2,63}$/;
+            console.log(sue.match(email))
             if(sue.match(email)) {  
                 valid[2] = 1
             } else if(sue.length == 0){
@@ -114,13 +114,18 @@ app.route('/api/signup')
                 username:username,
                 email:email
             })
-            res.send({token})
+            var d = new Date();
+            d.setTime(d.getTime() + (30 * 24 * 60 * 60 * 1000));
+            var expires = "Expires="+ d.toUTCString();
+            console.log(`token=${userbase.data.token}; ${expires}`)
+            res.set('Set-Cookie', `token=${token}; ${expires}; path=/`)
+            res.send({message:'signupSuccess'})
         }
         else {
             if(!valid[0] && !valid[1] && !valid[2]) res.send({message:'This request is faulty', err:true}) 
             else if(!valid[0] && !valid[1]) res.send({message:'The username and password are invalid', err:true}) 
             else if(!valid[0] && !valid[2]) res.send({message:'The username and email are invalid', err:true}) 
-            else if(!valid[1] && !valid[1]) res.send({message:'The password and email are invalid', err:true}) 
+            else if(!valid[1] && !valid[2]) res.send({message:'The password and email are invalid', err:true}) 
             else if(!valid[0]) res.send({message:'The username is invalid', err:true})
             else if(!valid[1]) res.send({message:'The password is invalid', err:true})
             else if(!valid[2]) res.send({message:'The email is invalid', err:true}) 
@@ -133,7 +138,7 @@ app.route('/api/discordLogin')
         //res.sendFile(path.join(__dirname, '/client/index.html'));
         let client_id = '710904657811079258'
         let client_secret = 'ZabZmWdAlMZFPl2O7xGRqtqpZhIar9tE'
-        let redirect_uri = 'http://localhost:3000/api/discordLogin'
+        let redirect_uri = process.env.local ? 'http://localhost:3000/api/discordLogin' : 'http://collapsa.io/api/discordLogin'
         let code = req.query.code
         let obj = {
             'code': code,

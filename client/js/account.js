@@ -24,6 +24,16 @@ function getCookie(cname) {
     }
     return "";
 }
+console.log(location.href)
+let loginwithDiscordURL = {
+    client_id:"710904657811079258",
+    redirect_uri:location.origin + '/api/discordLogin',
+    response_type:'code',
+    scope:'identify email'
+}
+let formFormat = data => Object.keys(data).map(k => `${k}=${encodeURIComponent(data[k])}`).join('&')
+loginwithDiscordURL = formFormat(loginwithDiscordURL)
+loginwithDiscordWrapper.href = `https://discord.com/api/oauth2/authorize?${loginwithDiscordURL}`
 let loginButton = document.getElementById('loginButton')
 let signupButton = document.getElementById('signupButton')
 let accountButton = document.getElementById('accountButton')
@@ -31,7 +41,6 @@ let loginForm = document.getElementById('loginForm')
 let signupForm = document.getElementById('signupForm')
 let loginModal = document.getElementById('loginModal');
 let signupModal = document.getElementById('signupModal');
-let signupModalSubmit = document.querySelectorAll('.submit')[1];
 let loginDropdown = document.getElementById('dropdown-content')
 loginButton.addEventListener('mouseover', () => {
     loginDropdown.style.display = 'block'
@@ -46,11 +55,14 @@ loginDropdown.addEventListener('mouseout', () => {
     loginDropdown.style.display = 'none'
 })
 let valid = [0, 0, 0];
+accountButton.addEventListener('click', e => {
+    accountModal.style.display = 'block'
+})
 if(getCookie('token')){
-    (async () => {
     loginButton.style.display = 'none'
     signupButton.style.display = 'none'
-    accountButton.style.display = 'block'
+    accountButton.style.display = 'block';
+    (async () => {
     let token = getCookie('token')
     let req = await fetch(`${window.location.href}api/login`, {
         method:'POST',
@@ -66,31 +78,36 @@ if(getCookie('token')){
         signupButton.style.display = 'block'
         accountButton.style.display = 'none'
         setCookie('token', '', -30)
-    }})()
+    }else {
+        sessionStorage.setItem('username', res.username)
+        accountUsername.value = res.username
+        sessionStorage.setItem('email', res.email)
+        accountEmail.value = res.email
+        document.getElementById("nameyourself").value = res.username
+    }
+    })()
 }
+signout.addEventListener('click', e => {
+    setCookie('token', '', -1)
+    accountModal.style.display = 'none'
+    loginButton.style.display = 'block'
+    signupButton.style.display = 'block'
+    accountButton.style.display = 'none'
+});
 [...signupModal.getElementsByClassName('input')].forEach((element, index) => {
     let validate = () => {
         let validatePassword = sup => {
-            var letter = document.getElementById('lowercaseval')
-            var capital = document.getElementById('uppercaseval')
-            var number = document.getElementById('numval')
-            var lowerCaseLetters = /[a-z]/g;
-            if(sup.match(lowerCaseLetters)) {  
+            var letter = signupModal.querySelector('.letter')
+            var number = signupModal.querySelector('.numval')
+            var length = signupModal.querySelector('.length')
+            console.log(letter)
+            let letters = /[a-zA-Z]/g;
+            if(sup.match(letters)) {  
                 letter.classList.remove("invalid");
                 letter.classList.add("valid");
             } else {
                 letter.classList.remove("valid");
                 letter.classList.add("invalid");
-            }
-
-            // Validate capital letters
-            var upperCaseLetters = /[A-Z]/g;
-            if(sup.match(upperCaseLetters)) {  
-                capital.classList.remove("invalid");
-                capital.classList.add("valid");
-            } else {
-                capital.classList.remove("valid");
-                capital.classList.add("invalid");
             }
 
             // Validate numbers
@@ -102,16 +119,16 @@ if(getCookie('token')){
                 number.classList.remove("valid");
                 number.classList.add("invalid");
             }
-            if(
-                !sup.match(numbers) || 
-                !sup.match(upperCaseLetters) || 
-                !sup.match(lowerCaseLetters)) valid[1] = 0
+            var lengths = /^\w{8,16}$/g;
+            if(sup.match(lengths)) {  
+                length.classList.remove("invalid");
+                length.classList.add("valid");
+            } else {
+                length.classList.remove("valid");
+                length.classList.add("invalid");
+            }
+            if(!sup.match(/^(?=.*[a-zA-Z0-9]).{8,16}$/)) valid[1] = 0
             else valid[1] = 1
-            console.log(signupModalSubmit.disabled, !sup.match(numbers) || 
-            !sup.match(upperCaseLetters) || 
-            !sup.match(lowerCaseLetters) )
-            // Validate length
-            if(sup.length < 8) valid[1] = 0
         }
         let validateEmail = sue => {
             let email = /^\w.+@\w{2,253}\.\w{2,63}$/;
@@ -127,12 +144,14 @@ if(getCookie('token')){
             }
         }
         let validateUsername = suu => {
-            if(suu.length < 6 || suu.match(/^\d/) || suu.match(/\W/)) valid[0] = 0
-            else valid[0] = 1
+            if(suu.match(/^[a-zA-Z]{1}\w{5,11}$/)) valid[0] = 1
+            else valid[0] = 0
+            console.log(valid[0])
         }
         if(index == 0) validateUsername(element.value)
         if(index == 1) validatePassword(element.value)
         if(index == 2) validateEmail(element.value)
+        console.log(valid)
         if(valid.every(v => v)) signupModalSubmit.disabled = false
         else signupModalSubmit.disabled = true
     }
@@ -140,7 +159,6 @@ if(getCookie('token')){
     element.addEventListener('keydown', validate)
     validate(element)
 });
-
 [...document.getElementsByClassName('accountModalContent')].forEach(modal => {
     let closebtn = modal.getElementsByClassName('closebtn')[0]
     closebtn.addEventListener('click', e => {
@@ -181,11 +199,15 @@ loginForm.addEventListener('submit', async e => {
         body:JSON.stringify({username:username, password:password})
     })
     let res = await req.json()
-    console.log(res)
     loginErr.style.display = 'none'
-    console.log(res)
     if(res.err){
         loginErr.style.display = 'block'
+        if(res.acceptedLogins){
+            console.log(res.acceptedLogins.length, res.acceptedLogins[0])
+            if(res.acceptedLogins.length == 1 && res.acceptedLogins[0] == 'Discord') loginErr.textContent = 'You can only log in through discord'
+        }else {
+            loginErr.textContent = 'Incorrect username or password'
+        }
     }else {
         setCookie('token', res.token, 30)
         loginErr.style.display = 'none'
@@ -197,9 +219,10 @@ loginForm.addEventListener('submit', async e => {
 })
 signupForm.addEventListener('submit', async e => {
     e.preventDefault()
-    let password = document.getElementById('signupPassword').value
-    let username = document.getElementById('signupUsername').value
-    let email = document.getElementById('signupEmail').value
+    let password = signupPassword.value
+    let username = signupUsername.value
+    let email = signupEmail.value
+    signupModalSubmit.disabled = true
     let req = await fetch(`${window.location.href}api/signup`, {
         method:'POST',
         headers:{
@@ -209,14 +232,17 @@ signupForm.addEventListener('submit', async e => {
     })
     let res = await req.json();
     let signupErrs = signupForm.querySelectorAll('.signupErr');
+    signupModalSubmit.disabled = false;
     [...signupErrs].forEach(e => e.style.display = 'none')
-    console.log(res)
     if(res.err){
         if(res.message == 'usernameTaken') signupErrs[0].style.display = 'block'
         if(res.message == 'emailTaken') signupErrs[1].style.display = 'block'
     }else {
-        setCookie('token', res.token, 30)
-        console.log(getCookie('token'))
+        sessionStorage.setItem('username', username)
+        accountUsername.value = username
+        sessionStorage.setItem('email', email)
+        accountEmail.value = email
+        document.getElementById("nameyourself").value = username
         loginButton.style.display = 'none'
         signupButton.style.display = 'none'
         accountButton.style.display = 'block'

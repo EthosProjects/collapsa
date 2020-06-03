@@ -21,8 +21,8 @@
             <div id="login">
                 <button class="accountButton" id='loginButton'><h1>Login</h1></button>
                 <div id="dropdown-content">
-                    <a href="https://discord.com/api/oauth2/authorize?client_id=710904657811079258&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2FdiscordLogin&response_type=code&scope=identify%20email">
-                        <img class="loginwithIcon" src="https://discord.com/assets/192cb9459cbc0f9e73e2591b700f1857.svg">
+                    <a id="loginwithDiscordWrapper">
+                        <img id="loginwithDiscordIcon" class="loginwithIcon" src="https://discord.com/assets/192cb9459cbc0f9e73e2591b700f1857.svg">
                     </a>
                 </div>
                 <button class="accountButton" id='signupButton'><h1>Sign Up</h1></button>
@@ -107,11 +107,48 @@
                         <b>Password:</b>
                         <br>
                         <input id="loginPassword" class="input" placeholder="Input Password" type="password"/>
-                        <button type='button' for="loginPassword" class="mask"><img for="passwordLogin" src="https://i.stack.imgur.com/Oyk1g.png" class="maski"></button>
+                        <button type='button' for="loginPassword" class="mask" tabindex="-1"><img for="passwordLogin" src="https://i.stack.imgur.com/Oyk1g.png" class="maski"></button>
                     </label>
                     <br>
                     <br>
                     <button class="submit" type="submit">Login</button>
+                </form>
+            </div>
+        </div>
+        <div class="accountModal" id="accountModal">
+            <div class="accountModalContent" id="accountModalContent">
+                <a href='javascript:void(0)' class='closebtn'>×</a>
+                <button href='javascript:void(0)' id='signout'>×Sign out</button>
+                <form id="accountForm">
+                    <h1 class="accountModalTitle">Account</h1>
+                    <label class='enter-label'>
+                        <b>Username:</b>
+                        <br>
+                        <input id="accountUsername" class="input" placeholder="Input Username"/>
+                    </label>
+                    <br>
+                    <label class='enter-label'>
+                        <b>Email:</b>
+                        <br>
+                        <input id="accountEmail" class="input" placeholder="Input Email"/>
+                    </label>
+                    <br>
+                    <label class='enter-label'>
+                        <b>New Password:</b>
+                        <br>
+                        <input id="accountNewPassword" class="input" placeholder="Input New Password" type="password"/>
+                        <button type='button'class="mask" tabindex="-1"><img src="https://i.stack.imgur.com/Oyk1g.png" class="maski"></button>
+                    </label>
+                    <br>
+                    <label class='enter-label'>
+                        <b>Password:</b>
+                        <br>
+                        <input id="accountPassword" class="input" placeholder="Input Password" type="password"/>
+                        <button type='button'class="mask" tabindex="-1"><img src="https://i.stack.imgur.com/Oyk1g.png" class="maski"></button>
+                    </label>
+                    <br>
+                    <br>
+                    <button class="submit" type="submit" disabled>Sign up</button>
                 </form>
             </div>
         </div>
@@ -124,19 +161,19 @@
                     <label class='enter-label'>
                         <b>Username:</b>
                         <br>
-                        <input id='signupUsername' class="input" placeholder="Input Username"/>
+                        <input class="input" id="signupUsername" placeholder="Input Username"/>
                     </label>
                     <br>
                     <label class='enter-label'>
                         <b>Password:</b>
                         <br>
-                        <input id='signupPassword' class="input" placeholder="Input Password" type="password"/>
-                        <button type='button' for="signupPassword" class="mask"><img for="passwordLogin" src="https://i.stack.imgur.com/Oyk1g.png" class="maski"></button>
+                        <input class="input" id="signupPassword" placeholder="Input Password" type="password"/>
+                        <button type='button' for="signupPassword" class="mask" tabindex="-1"><img for="passwordLogin" src="https://i.stack.imgur.com/Oyk1g.png" class="maski"></button>
                     </label>
                     <br>
-                    <p class="invalid" id="numval">1 Number</p>
-                    <p class="invalid" id="lowercaseval">1 Lowercase Letter</p>
-                    <p class="invalid" id="uppercaseval">1 Uppercase Letter</p>
+                    <p class="invalid numval">1 Number</p>
+                    <p class="invalid letter">1 Letter</p>
+                    <p class="invalid length">Between 8 and 16 characters in length</p>
                     <p class='signupErr invalid'>That email is taken</p>
                     <label class='enter-label'>
                         <b>Email:</b>
