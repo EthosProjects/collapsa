@@ -34,10 +34,13 @@ const {Engine, Render, World, Bodies, Body, Vector} = require('matter-js')
 const EventEmitter = require('events')
 const PF = require('pathfinding')
 const socketIO = require('socket.io')
+const Day = require('./library/day.js')
+const Mapper = require('./library/mapper.js')
 Vector.getDistance = function (vectorA, vectorB) {  
     return Math.sqrt(Math.pow(vectorA.x - vectorB.x, 2) + Math.pow(vectorA.y - vectorB.y, 2))
 };
 const {astar, Graph} = require('./astar.js')
+const {BasicRecipes, TableRecipes, Resources} = require('./items.js')
 // create an engine
 const sleep = ms => {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -54,47 +57,6 @@ function RectCircleColliding(cx, cy, cr, rx, ry, rw, rh){
     var dy=cy-rh/2;
     return (dx*dx+dy*dy&lt;=(cr*cr));
 }
-/**
- * Object containing data about what time it is
- * @typedef day
- * @property {string} times koo
- */
-class Day {
-    /**
-     * This is a constructor for a day 
-     * @param {Map.&lt;string, number>} [states=new Map(['day', 20000], ['night', 20000])] 
-     */
-    constructor(states = new Map([['day', 20000], ['night', 20000]])){
-        /**
-         * This is the different states the day can be.
-         * @type {Map.&lt;string, number>} 
-         */
-        this.states = states
-        /**
-         * This is how long the day is
-         * @type {Number} 
-         */
-        //It turns the map into a map iterator of it's values into an array and then it adds them all up
-        this.length = [...this.states.values()].reduce((a, b) => a + b)
-        /**
-         * This is the current state
-         * @type {Number} 
-         */
-        this.index = 0
-        /**
-         * This is the timeout defining the day
-         * @type {Timeout} 
-         */
-        this.timeout = new Timeout(() => this.setTimeout(), [...this.states.values()][this.index])
-    }
-    get time(){
-        return [...this.states.keys()][this.index]
-    }
-    setTimeout() {
-        if(++this.index >= this.length) this.index = 0
-        this.timeout = new Timeout(() => this.setTimeout(), [...this.states.values()][this.index])
-    }
-}
 global.games = []
 /**
  * An object containintg the clan methods
@@ -102,10 +64,15 @@ global.games = []
 class Clan {
     /**
      * Creates a new clan instance
+     * @param {Game} game
      * @param {String} name 
      * @param {Player} owner 
      */
-    constructor(name, owner){
+    constructor(game, name, owner){
+        /**
+         * @type {Game}
+         */
+        this.game = game
         /**
          * The owner of the clan
          * @type {Player}
@@ -128,7 +95,7 @@ class Clan {
          * The requests to join the clan
          */
         this.joinReqs = []
-        clans.set(this.name, this)
+        game.clans.set(this.name, this)
     }
     /**
      * Adds a member to the clan
@@ -148,7 +115,7 @@ class Clan {
     removeMember(member){
         if(!member) return
         if(this.owner == member){
-            clans.delete(this.name)
+            this.game.clans.delete(this.name)
             this.members.forEach(mem => {
                 mem.clan = null
                 mem.needsSelfUpdate = true
@@ -237,9 +204,135 @@ class Leaderboard {
         return pack
     }
 }
+class Slot {
+    constructor(type, count, image, stackSize = 255, equipable = false, edible = false, armorable = false, hatables = false){
+        this.id = type
+        this.count = count
+        this.image = image
+        this.stackSize = stackSize
+        this.equipable = equipable
+        this.edible = edible
+        this.armorable = armorable
+        this.hatables = hatables
+    }
+}
+class Crafter extends Mapper{
+    constructor(){
+        super(BasicRecipes)
+    }
+    checkCraft(inventory){
+        let craftables = []
+        for(const [key, val] of this){
+            let craftable = true
+            val.recipe.forEach(supply => {
+                if(!inventory.find(slot => slot.count >= supply.count &amp;&amp; slot.id == supply.id)) return craftable = false 
+            })
+            if(craftable) craftables.push(key)
+        }
+        return craftables;
+    }
+    craftItem(item, inventory){
+        if(!this.checkCraft(inventory).find(craftable => craftable == item)) return console.log('Not found')
+        var recipe = this.get(item).recipe
+        let output =  this.get(item).output
+        recipe.forEach(req => {
+            let r = JSON.parse(JSON.stringify(req))
+            inventory.forEach((slot, num) => {
+                if(slot == 'empty') return
+                if(r.count == 0) return
+                if(slot.id != req.id) return
+                if(r.count &lt; slot.count){
+                    slot.count -= r.count
+                    r.count = 0
+                }else if(r.count > slot.count){
+                    r.count -= slot.count
+                    slot.count = 0
+                }else {
+                    r.count = 0
+                    slot.count = 0
+                }
+                if(slot.count == 0)inventory.set(num, 'empty')
+            })
+        })
+        inventory.addItemMax(new Slot(item, output.count, output.image, output.stackSize, output.equipable))
+        //if(inventory.findKey(slot => slot == 'empty')) inventory.set(inventory.findKey(slot => slot == 'empty'), {id: 'Axe', count:1, image:'draw'})\
+    }
+}
+
+class CraftingTable extends Mapper{
+    constructor(game, x, y){
+        super(TableRecipes)
+        this.game = game
+        this.x = x
+        this.y = y
+        this.id = Math.random()
+        this.health = 100
+        this.body = Bodies.rectangle(this.x, this.y, 100, 100, {isStatic:true})
+        World.addBody(this.game.engine.world, this.body)
+        this.needsUpdate = false
+        var pack = {
+            x:this.x,
+            y:this.y,
+            id:this.id
+        }
+        game.CraftingTables.list.push(this)
+        game.Entities.push(this)
+        game.initPack.ctable.push(pack)
+        console.log(game.initPack, 'aaaa')
+        
+    }
+    checkCraft(inventory){
+        let craftables = []
+        for(const [key, val] of this){
+            let craftable = true
+            val.recipe.forEach(supply => {
+                if(!inventory.find(slot => slot.count >= supply.count &amp;&amp; slot.id == supply.id)) return craftable = false 
+            })
+            if(craftable) craftables.push({craft:key, craftable:true})
+            else craftables.push({craft:key, craftable:false})
+        }
+        
+        return craftables;
+    }
+    craftItem(item, inventory){
+        if(!this.checkCraft(inventory).find(craftable => craftable.craft == item)) return console.log('Not found')
+        var recipe = this.get(item).recipe
+        let output =  this.get(item).output
+        recipe.forEach(req => {
+            let r = JSON.parse(JSON.stringify(req))
+            inventory.forEach((slot, num) => {
+                if(slot == 'empty') return
+                if(r.count == 0) return
+                if(slot.id != req.id) return
+                if(r.count &lt; slot.count){
+                    slot.count -= r.count
+                    r.count = 0
+                }else if(r.count > slot.count){
+                    r.count -= slot.count
+                    slot.count = 0
+                }else {
+                    r.count = 0
+                    slot.count = 0
+                }
+                console.log(item, output)
+                if(slot.count == 0)inventory.set(num, 'empty')
+            })
+        })
+        inventory.addItem(new Slot(item, output.count, output.image, output.stackSize, output.equipable, output.edible, output.armorable, output.hatable))
+        //if(inventory.findKey(slot => slot == 'empty')) inventory.set(inventory.findKey(slot => slot == 'empty'), {id: 'Axe', count:1, image:'draw'})\
+    }
+    getInitPack(){
+        return {
+            x:this.x,
+            y:this.y,
+            id:this.id
+        }
+    }
+}
 /**
  * Container function for games. The method for maintaining which game a player is in and making the games is handled in the server file
  */
+
 class Game extends EventEmitter {
     /**
      * 
@@ -259,9 +352,29 @@ class Game extends EventEmitter {
          * @type {Day}
          */
         this.day = new Day()
+        this.Clans = new Mapper()
+        this.Entities = new Mapper()
+        this.map = {
+            width:2000,
+            height:1000
+        }
+        this.walls = {
+            top:Bodies.rectangle(this.map.width/2, -500, this.map.width, 1000, {isStatic:true}),
+            bottom:Bodies.rectangle(this.map.width/2, this.map.height + 500, this.map.width, 1000, {isStatic:true}),
+            left:Bodies.rectangle(-500, this.map.height/2, 1000, this.map.height, {isStatic:true}),
+            right:Bodies.rectangle(this.map.width + 500, this.map.height/2, 1000, this.map.height, {isStatic:true})
+        }
+        World.add(this.engine.world, [ 
+            this.walls.top, 
+            this.walls.bottom,
+            this.walls.left,
+            this.walls.right
+        ])
+        this.nsp = nsp
+        this.ns = ns
     }
 }
-console.log(new Day())
+//console.log(new Day())
 //console.log(new Game())
 module.exports = function (nsp, ns) {
     this.engine = Engine.create(); 
@@ -288,7 +401,8 @@ module.exports = function (nsp, ns) {
         height:1000
     }
     let clans = new Map()
-    let Entities = []
+    let Entities = this.Entities = []
+
     class Clan {
         constructor(name, owner){
             this.owner = owner
@@ -358,551 +472,7 @@ module.exports = function (nsp, ns) {
             Vector.add(this.position, this.velocity, this.position);
         }
     }
-    class Mapper extends Map {
-        constructor(iterator){
-            super(iterator)
-        }
-        find(fn, thisArg){
-            if (typeof thisArg !== 'undefined') fn = fn.bind(thisArg);
-            for (const [key, val] of this) {
-                if (fn(val, key, this)) return val;
-            }
-            return undefined;
-        }
-        findKey(fn, thisArg){
-            if (typeof thisArg !== 'undefined') fn = fn.bind(thisArg);
-            for (const [key, val] of this) {
-                if (fn(val, key, this)) return key;
-            }
-            return undefined;
-        }
-        findAll(fn, thisArg) {
-            if (typeof thisArg !== 'undefined') fn = fn.bind(thisArg);
-            const results = [];
-            for (const [key, val] of this) {
-              if (fn(val, key, this)) results.push(val);
-            }
-            return results;
-        }
-    }
-    class Crafter extends Mapper{
-        constructor(){
-            super([
-                [
-                    'Stone Axe', 
-                    {
-                        recipe:[
-                            {id:'wood', count:5},
-                            {id:'stone', count:5}
-                        ],
-                        output:{
-                            count:1,
-                            image:'stoneaxe',
-                            stackSize:1,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Stone Pickaxe', 
-                    {
-                        recipe:[
-                            {id:'wood', count:10},
-                            {id:'stone', count:5}
-                        ],
-                        output:{
-                            count:1,
-                            image:'stonepickaxe',
-                            stackSize:1,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Stone Sword', 
-                    {
-                        recipe:[
-                            {id:'wood', count:5},
-                            {id:'stone', count:10}
-                        ],
-                        output:{
-                            count:1,
-                            image:'stonesword',
-                            stackSize:1,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Stone Hammer', 
-                    {
-                        recipe:[
-                            {id:'stone', count:20},
-                            {id:'wood', count:15},
-                        ],
-                        output:{
-                            count:1,
-                            image:'stonehammer',
-                            stackSize:1,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Wood Wall', 
-                    {
-                        recipe:[
-                            {id:'wood', count:20},
-                        ],
-                        output:{
-                            count:2,
-                            image:'woodwall',
-                            stackSize:255,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Stone Wall', 
-                    {
-                        recipe:[
-                            {id:'stone', count:20},
-                        ],
-                        output:{
-                            count:1,
-                            image:'stonewall',
-                            stackSize:255,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Wood Floor', 
-                    {
-                        recipe:[
-                            {id:'wood', count:10},
-                        ],
-                        output:{
-                            count:4,
-                            image:'woodfloor',
-                            stackSize:255,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Stone Floor', 
-                    {
-                        recipe:[
-                            {id:'stone', count:10},
-                        ],
-                        output:{
-                            count:4,
-                            image:'stonefloor',
-                            stackSize:255,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Crafting Table', 
-                    {
-                        recipe:[
-                            {id:'wood', count:10},
-                            {id:'stone', count:10},
-                        ],
-                        output:{
-                            count:2,
-                            image:'craftingtable',
-                            stackSize:255,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Wood Door', 
-                    {
-                        recipe:[
-                            {id:'wood', count:11},
-                            {id:'stone', count:1},
-                            {id:'iron', count:1},
-                        ],
-                        output:{
-                            count:2,
-                            image:'wooddoor',
-                            stackSize:255,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Stone Door', 
-                    {
-                        recipe:[
-                            {id:'wood', count:1},
-                            {id:'stone', count:11},
-                            {id:'iron', count:1},
-                        ],
-                        output:{
-                            count:2,
-                            image:'stonedoor',
-                            stackSize:255,
-                            equipable:true
-                        }
-                    }
-                ],
-                //['Spear', [{id:'wood', count:15, output:1, image;'spear'}]],
-                //['Black Ability', [{id:'wood', count:20}]]
-            ])
-        }
-        checkCraft(inventory){
-            let craftables = []
-            for(const [key, val] of this){
-                let craftable = true
-                val.recipe.forEach(supply => {
-                    if(!inventory.find(slot => slot.count >= supply.count &amp;&amp; slot.id == supply.id)) return craftable = false 
-                })
-                if(craftable) craftables.push(key)
-            }
-            return craftables;
-        }
-        craftItem(item, inventory){
-            if(!this.checkCraft(inventory).find(craftable => craftable == item)) return console.log('Not found')
-            var recipe = this.get(item).recipe
-            let output =  this.get(item).output
-            recipe.forEach(req => {
-                let r = JSON.parse(JSON.stringify(req))
-                inventory.forEach((slot, num) => {
-                    if(slot == 'empty') return
-                    if(r.count == 0) return
-                    if(slot.id != req.id) return
-                    if(r.count &lt; slot.count){
-                        slot.count -= r.count
-                        r.count = 0
-                    }else if(r.count > slot.count){
-                        r.count -= slot.count
-                        slot.count = 0
-                    }else {
-                        r.count = 0
-                        slot.count = 0
-                    }
-                    if(slot.count == 0)inventory.set(num, 'empty')
-                })
-            })
-            inventory.addItem(new Slot(item, output.count, output.image, output.stackSize, output.equipable))
-            //if(inventory.findKey(slot => slot == 'empty')) inventory.set(inventory.findKey(slot => slot == 'empty'), {id: 'Axe', count:1, image:'draw'})\
-        }
-    }
-    class CraftingTable extends Mapper{
-        constructor(x, y){
-            super([
-                [
-                    'Iron Axe', 
-                    {
-                        recipe:[
-                            {id:'iron', count:20},
-                            {id:'stone', count:10}
-                        ],
-                        output:{
-                            count:1,
-                            image:'ironaxe',
-                            stackSize:1,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Iron Pickaxe', 
-                    {
-                        recipe:[
-                            {id:'iron', count:20},
-                            {id:'stone', count:15}
-                        ],
-                        output:{
-                            count:1,
-                            image:'ironpickaxe',
-                            stackSize:1,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Iron Sword', 
-                    {
-                        recipe:[
-                            {id:'iron', count:10},
-                            {id:'stone', count:15},
-                            {id:'wood', count:10}
-                          
-                        ],
-                        output:{
-                            count:1,
-                            image:'ironsword',
-                            stackSize:1,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Iron Hammer', 
-                    {
-                        recipe:[
-                            {id:'iron', count:20},
-                            {id:'stone', count:15},
-                        ],
-                        output:{
-                            count:1,
-                            image:'ironhammer',
-                            stackSize:1,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Gold Axe', 
-                    {
-                        recipe:[
-                            {id:'gold', count:20},
-                            {id:'iron', count:10}
-                        ],
-                        output:{
-                            count:1,
-                            image:'goldaxe',
-                            stackSize:1,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Gold Pickaxe', 
-                    {
-                        recipe:[
-                            {id:'gold', count:20},
-                            {id:'iron', count:15}
-                        ],
-                        output:{
-                            count:1,
-                            image:'goldpickaxe',
-                            stackSize:1,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Gold Sword', 
-                    {
-                        recipe:[
-                            {id:'gold', count:10},
-                            {id:'iron', count:15},
-                            {id:'stone', count:10}
-                        ],
-                        output:{
-                            count:1,
-                            image:'goldsword',
-                            stackSize:1,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Gold Hammer', 
-                    {
-                        recipe:[
-                            {id:'gold', count:20},
-                            {id:'iron', count:15},
-                        ],
-                        output:{
-                            count:1,
-                            image:'goldhammer',
-                            stackSize:1,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Diamond Axe', 
-                    {
-                        recipe:[
-                            {id:'diamond', count:20},
-                            {id:'iron', count:10}
-                        ],
-                        output:{
-                            count:1,
-                            image:'diamondaxe',
-                            stackSize:1,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Diamond Pickaxe', 
-                    {
-                        recipe:[
-                            {id:'diamond', count:20},
-                            {id:'iron', count:15}
-                        ],
-                        output:{
-                            count:1,
-                            image:'diamondpickaxe',
-                            stackSize:1,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Diamond Sword', 
-                    {
-                        recipe:[
-                            {id:'diamond', count:10},
-                            {id:'iron', count:15},
-                            {id:'gold', count:10}
-                        ],
-                        output:{
-                            count:1,
-                            image:'diamondsword',
-                            stackSize:1,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Diamond Hammer', 
-                    {
-                        recipe:[
-                            {id:'diamond', count:20},
-                            {id:'iron', count:15},
-                        ],
-                        output:{
-                            count:1,
-                            image:'diamondhammer',
-                            stackSize:1,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Iron Wall', 
-                    {
-                        recipe:[
-                            {id:'iron', count:20}
-                        ],
-                        output:{
-                            count:1,
-                            image:'ironwall',
-                            stackSize:255,
-                            equipable:true
-                        }
-                    }
-                ],
-                [
-                    'Chest',
-                    {
-                        recipe:[
-                            {id:'wood', count:50},
-                            {id:'gold', count:10}
-                        ],
-                        output:{
-                            count:1,
-                            image:'chest',
-                            stackSize:255,
-                            equipable:true
-                        }
-                        
-                    }
-                ],
-                [
-                    'Iron Armor', 
-                    {
-                        recipe:[
-                            {id:'iron', count:20},
-                        ],
-                        output:{
-                            count:1,
-                            image:'ironarmor',
-                            stackSize:1,
-                            armorable:true,
-                            
-                        }
-                    }
-                ],
-            ])
-            this.x = x
-            this.y = y
-            this.id = Math.random()
-            this.health = 100
-            this.body = Bodies.rectangle(this.x, this.y, 100, 100, {isStatic:true})
-            World.addBody(engine.world, this.body)
-            this.needsUpdate = false
-            var pack = {
-                x:this.x,
-                y:this.y,
-                id:this.id
-            }
-            CraftingTables.list.push(this)
-            Entities.push(this)
-            initPack.ctable.push(pack)
-            
-        }
-        checkCraft(inventory){
-            let craftables = []
-            for(const [key, val] of this){
-                let craftable = true
-                val.recipe.forEach(supply => {
-                    if(!inventory.find(slot => slot.count >= supply.count &amp;&amp; slot.id == supply.id)) return craftable = false 
-                })
-                if(craftable) craftables.push({craft:key, craftable:true})
-                else craftables.push({craft:key, craftable:false})
-            }
-            
-            return craftables;
-        }
-        craftItem(item, inventory){
-            if(!this.checkCraft(inventory).find(craftable => craftable.craft == item)) return console.log('Not found')
-            var recipe = this.get(item).recipe
-            let output =  this.get(item).output
-            recipe.forEach(req => {
-                let r = JSON.parse(JSON.stringify(req))
-                inventory.forEach((slot, num) => {
-                    if(slot == 'empty') return
-                    if(r.count == 0) return
-                    if(slot.id != req.id) return
-                    if(r.count &lt; slot.count){
-                        slot.count -= r.count
-                        r.count = 0
-                    }else if(r.count > slot.count){
-                        r.count -= slot.count
-                        slot.count = 0
-                    }else {
-                        r.count = 0
-                        slot.count = 0
-                    }
-                    console.log(item, output)
-                    if(slot.count == 0)inventory.set(num, 'empty')
-                })
-            })
-            inventory.addItem(new Slot(item, output.count, output.image, output.stackSize, output.equipable, output.edible, output.armorable, output.hatable))
-            //if(inventory.findKey(slot => slot == 'empty')) inventory.set(inventory.findKey(slot => slot == 'empty'), {id: 'Axe', count:1, image:'draw'})\
-        }
-        getInitPack(){
-            return {
-                x:this.x,
-                y:this.y,
-                id:this.id
-            }
-        }
-    }
-    class Slot {
-        constructor(type, count, image, stackSize = 255, equipable = false, edible = false, armorable = false, hatables = false){
-            this.id = type
-            this.count = count
-            this.image = image
-            this.stackSize = stackSize
-            this.equipable = equipable
-            this.edible = edible
-            this.armorable = armorable
-            this.hatables = hatables
-        }
-    }
+    
     class Storage extends Mapper {
         constructor(base, length){
             if(!base){
@@ -992,7 +562,7 @@ module.exports = function (nsp, ns) {
     class Inventory extends Storage {
         constructor(){
             super([
-                
+                /*
                 ['1', new Slot('Wood Wall', 255, 'woodwall', 255, true)],
                 ['2', new Slot('Stone Wall', 255, 'stonewall', 255, true)],
                 ['3', new Slot('Iron Wall', 255, 'ironwall', 255, true)],
@@ -1001,8 +571,8 @@ module.exports = function (nsp, ns) {
                 ['6', new Slot('Chest', 255, 'chest', 255, true)],
                 ['7', new Slot('Leather', 255, 'leather', 255)],
                 ['8', 'empty'],
-                ['9', 'empty'],
-                /*
+                ['9', 'empty'],*/
+                
                 ['1', 'empty'],
                 ['2', 'empty'],
                 ['3', 'empty'],
@@ -1011,7 +581,7 @@ module.exports = function (nsp, ns) {
                 ['6', 'empty'],
                 ['7', 'empty'],
                 ['8', 'empty'],
-                ['9', 'empty']*/
+                ['9', 'empty']
             ])
         }
         listItems(){
@@ -1110,6 +680,7 @@ module.exports = function (nsp, ns) {
             this.clan = null
             this.clans = null
             this.msg = new Map()
+            this.adminLevel = 0
             let tempx = Math.getRandomInt(0, game.map.width/100 - 1) * 100 + 50
             let tempy = Math.getRandomInt(0, game.map.height/100 - 1) * 100 + 50
             let inWay = false
@@ -1343,7 +914,7 @@ module.exports = function (nsp, ns) {
                 }, 100)
             }, 10000);
             this.dead = false;
-            initPack.player.push({
+            game.initPack.player.push({
                 usr:this.usr,
                 x: this.body.position.x,
                 y: this.body.position.y,
@@ -1364,6 +935,7 @@ module.exports = function (nsp, ns) {
             this.on('death', function(){
                 game.nsp.to(this.id).emit('death')
             })
+            this.immortal = false
         }
         updateSpd() {
           var m = this.move
@@ -1491,7 +1063,10 @@ module.exports = function (nsp, ns) {
                         this.alusd = true
                     }else if(!this.crafting &amp;&amp; (((disd  == undefined &amp;&amp; disctable  == undefined &amp;&amp; dischest == undefined) &amp;&amp; dis != undefined) || (dis > disctable &amp;&amp; dis > disd &amp;&amp; dis > dischest))){
                         let res = this.inventory.addItemMax(dropped[nearest].item)
-                        if(!res) dropped.splice(nearest, 1);
+                        if(!res){ 
+                            clearTimeout(dropped[nearest].timeout.timeout)
+                            dropped.splice(nearest, 1)
+                        }
                         this.needsSelfUpdate = true
                         this.alusd = true
                     }else if(!this.crafting &amp;&amp; (((disd  == undefined &amp;&amp; disctable  == undefined &amp;&amp; dis == undefined) &amp;&amp; dischest != undefined) || (dischest > dis &amp;&amp; dischest > disd &amp;&amp; dischest > disctable))){
@@ -1911,7 +1486,7 @@ module.exports = function (nsp, ns) {
                         slot.count -= 1
                         if(slot.count == 0){ this.inventory.set(this.mainHand, 'empty'); this.mainHand = '-1'}
                         this.needsSelfUpdate = true
-                        this.structures.push(new CraftingTable(mvect.x, mvect.y))
+                        this.structures.push(new CraftingTable(game, mvect.x, mvect.y))
                         this.alusd = true
                     }
                     if(/Floor/.test(this.mainHands) &amp;&amp; this.move.att &amp;&amp; !this.alusd){
@@ -2271,7 +1846,7 @@ module.exports = function (nsp, ns) {
             }, 10000);*/
             this.dead = false;
             this.pathTimer = null
-            initPack.destroyer.push({
+            game.initPack.destroyer.push({
                 x: this.body.position.x,
                 y: this.body.position.y,
                 id: this.id,
@@ -2592,7 +2167,7 @@ module.exports = function (nsp, ns) {
                 }, 100)
             }, 10000);*/
             this.dead = false;
-            initPack.demon.push({
+            game.initPack.demon.push({
                 x: this.body.position.x,
                 y: this.body.position.y,
                 id: this.id,
@@ -2914,7 +2489,7 @@ module.exports = function (nsp, ns) {
                 }, 100)
             }, 10000);*/
             this.dead = false;
-            initPack.rabbit.push({
+            game.initPack.rabbit.push({
                 x: this.body.position.x,
                 y: this.body.position.y,
                 id: this.id,
@@ -3324,7 +2899,7 @@ module.exports = function (nsp, ns) {
             return pack
         }
     }
-    var Floors = {
+    var Floors = this.Floors = {
         list:[],
         update:function(){
             var pack = []
@@ -3344,7 +2919,7 @@ module.exports = function (nsp, ns) {
             return pack
         }
     }
-    var Doors = {
+    var Doors = this.Doors = {
         list:[],
         update:function(){
             var pack = []
@@ -3369,7 +2944,7 @@ module.exports = function (nsp, ns) {
         }
     }
     let globalDoors = []
-    var CraftingTables = {
+    var CraftingTables = this.CraftingTables = {
         list:[],
         update:function(){
             var pack = []
@@ -3390,7 +2965,7 @@ module.exports = function (nsp, ns) {
             return pack
         }
     }
-    var Chests = {
+    var Chests = this.Chests = {
         list:[],
         update:function(){
             var pack = []
@@ -3426,6 +3001,7 @@ module.exports = function (nsp, ns) {
                 removePack.tree.push(this.id)
                 STrees.list.splice(STrees.list.findIndex(element => element.id === this.id), 1);
                 World.remove(engine.world, this.body)
+                Entities.splice(Entities.findIndex(e => e.id === this.id), 1);
             }, 300000)
             this.body = Bodies.circle(this.x, this.y, 50, {isStatic:true})
             Entities.push(this)
@@ -3442,7 +3018,7 @@ module.exports = function (nsp, ns) {
                 dead:this.dead || false
             }
             STrees.list.push(this)
-            initPack.tree.push(pack)
+            game.initPack.tree.push(pack)
         }
         getInitPack(){
             var pack = {
@@ -3466,6 +3042,7 @@ module.exports = function (nsp, ns) {
                 clearTimeout(this.growInterval)
                 removePack.stone.push(this.id)
                 Stones.list.splice(Stones.list.findIndex(element => element.id === this.id), 1);
+                Entities.splice(Entities.findIndex(e => e.id === this.id), 1);
                 World.remove(engine.world, this.body)
             }, 400000)
             this.body = Bodies.circle(this.x, this.y, 50, {isStatic:true})
@@ -3479,7 +3056,7 @@ module.exports = function (nsp, ns) {
                 id:this.id
             }
             Stones.list.push(this)
-            initPack.stone.push(pack)
+            game.initPack.stone.push(pack)
         }
         getInitPack(){
             return {
@@ -3501,6 +3078,7 @@ module.exports = function (nsp, ns) {
                 removePack.iron.push(this.id)
                 Irons.list.splice(Irons.list.findIndex(element => element.id === this.id), 1);
                 World.remove(engine.world, this.body)
+                Entities.splice(Entities.findIndex(e => e.id === this.id), 1);
             }, 600000)
             this.body = Bodies.circle(this.x, this.y, 50, {isStatic:true})
             Entities.push(this)
@@ -3513,7 +3091,7 @@ module.exports = function (nsp, ns) {
                 id:this.id
             }
             Irons.list.push(this)
-            initPack.iron.push(pack)
+            game.initPack.iron.push(pack)
         }
         getInitPack(){
             return {
@@ -3535,6 +3113,7 @@ module.exports = function (nsp, ns) {
                 removePack.gold.push(this.id)
                 Golds.list.splice(Golds.list.findIndex(element => element.id === this.id), 1);
                 World.remove(engine.world, this.body)
+                Entities.splice(Entities.findIndex(e => e.id === this.id), 1);
             }, 800000)
             this.body = Bodies.circle(this.x, this.y, 50, {isStatic:true})
             Entities.push(this)
@@ -3547,7 +3126,7 @@ module.exports = function (nsp, ns) {
                 id:this.id
             }
             Golds.list.push(this)
-            initPack.gold.push(pack)
+            game.initPack.gold.push(pack)
         }
         getInitPack(){
             return {
@@ -3568,6 +3147,7 @@ module.exports = function (nsp, ns) {
                 removePack.diamond.push(this.id)
                 Diamonds.list.splice(Diamonds.list.findIndex(element => element.id === this.id), 1);
                 World.remove(engine.world, this.body)
+                Entities.splice(Entities.findIndex(e => e.id === this.id), 1);
             }, 1000000)
             this.body = Bodies.circle(this.x, this.y, 50, {isStatic:true})
             Entities.push(this)
@@ -3580,7 +3160,7 @@ module.exports = function (nsp, ns) {
                 id:this.id
             }
             Diamonds.list.push(this)
-            initPack.diamond.push(pack)
+            game.initPack.diamond.push(pack)
         }
         getInitPack(){
             return {
@@ -3602,6 +3182,7 @@ module.exports = function (nsp, ns) {
                 removePack.emerald.push(this.id)
                 Emeralds.list.splice(Emeralds.list.findIndex(element => element.id === this.id), 1);
                 World.remove(engine.world, this.body)
+                Entities.splice(Entities.findIndex(e => e.id === this.id), 1);
             }, 800000)
             this.body = Bodies.circle(this.x, this.y, 50, {isStatic:true})
             Entities.push(this)
@@ -3614,7 +3195,7 @@ module.exports = function (nsp, ns) {
                 id:this.id
             }
             Emeralds.list.push(this)
-            initPack.emerald.push(pack)
+            game.initPack.emerald.push(pack)
         }
         getInitPack(){
             return {
@@ -3635,6 +3216,7 @@ module.exports = function (nsp, ns) {
                 removePack.amethyst.push(this.id)
                 Amethysts.list.splice(Amethysts.list.findIndex(element => element.id === this.id), 1);
                 World.remove(engine.world, this.body)
+                Entities.splice(Entities.findIndex(e => e.id === this.id), 1);
             }, 1000000)
             this.body = Bodies.circle(this.x, this.y, 50, {isStatic:true})
             Entities.push(this)
@@ -3647,7 +3229,7 @@ module.exports = function (nsp, ns) {
                 id:this.id
             }
             Amethysts.list.push(this)
-            initPack.amethyst.push(pack)
+            game.initPack.amethyst.push(pack)
         }
         getInitPack(){
             return {
@@ -3681,7 +3263,7 @@ module.exports = function (nsp, ns) {
                 id:this.id
             }
             CarrotFarms.list.push(this)
-            initPack.cfarm.push(pack)
+            game.initPack.cfarm.push(pack)
         }
         getInitPack(){
             return {
@@ -3714,7 +3296,7 @@ module.exports = function (nsp, ns) {
                 material:this.material
             }
             Walls.list.push(this)
-            initPack.wall.push(pack)
+            game.initPack.wall.push(pack)
         }
         getInitPack(){
             return {
@@ -3747,7 +3329,7 @@ module.exports = function (nsp, ns) {
                 material:this.material
             }
             Floors.list.push(this)
-            initPack.floor.push(pack)
+            game.initPack.floor.push(pack)
         }
         getInitPack(){
             return {
@@ -3786,7 +3368,7 @@ module.exports = function (nsp, ns) {
             }
             Entities.push(this)
             Doors.list.push(this)
-            initPack.door.push(pack)
+            game.initPack.door.push(pack)
         }
         openFun(){
             if(this.opening) return
@@ -3920,7 +3502,7 @@ module.exports = function (nsp, ns) {
                 ang:this.ang
             }
             Chests.list.push(this)
-            initPack.chest.push(pack)
+            game.initPack.chest.push(pack)
         }
         getInitPack(){
             return {
@@ -4204,7 +3786,7 @@ module.exports = function (nsp, ns) {
             return pack;
         }
     }
-    var initPack = {
+    this.initPack = {
         player: [],
         bullet: [],
         tree:[],
@@ -4244,6 +3826,7 @@ module.exports = function (nsp, ns) {
         emerald:[],
         amethyst:[],
     }
+    this.removePack = removePack
     let dropped = []
     var self = this
     class House {
@@ -4341,19 +3924,19 @@ module.exports = function (nsp, ns) {
             let p = getGoodPosition()
             new Amethyst(p.x, p.y, 50)
         }
-        if(Demons.list.length &lt; 3 &amp;&amp; timeOfDay == 'night'){
-            let p = getGoodPosition()
-            new Demon(p.x, p.y, 50)
-            
+        if(Players.list.some(player => player.score > 700)){
+            if(Demons.list.length &lt; 3 &amp;&amp; timeOfDay == 'night'){
+                let p = getGoodPosition()
+                new Demon(p.x, p.y, 50)
+            }
+            if(Destroyers.list.length &lt; 1 &amp;&amp; timeOfDay == 'night' &amp;&amp; dayTimeout.percntDone > 0.25 &amp;&amp; dayTimeout.percntDone &lt; 0.75){
+                let p = getGoodPosition()
+                new Destroyer(p.x, p.y, 50)   
+            }
         }
         if(CarrotFarms.list.length &lt; 3){
             let p = getGoodPosition()
             new CarrotFarm(p.x, p.y, 50)
-            
-        }
-        if(Destroyers.list.length &lt; 1 &amp;&amp; timeOfDay == 'night' &amp;&amp; dayTimeout.percntDone > 0.25 &amp;&amp; dayTimeout.percntDone &lt; 0.75){
-            let p = getGoodPosition()
-            new Destroyer(p.x, p.y, 50)
             
         }
         if(Rabbits.list.length &lt; 1 &amp;&amp; timeOfDay == 'day'){
@@ -4363,6 +3946,7 @@ module.exports = function (nsp, ns) {
     }, 10)
     this.nsp.on('connection', function (socket) {
         socket.emit('images', images)
+        socket.emit('items', [BasicRecipes, TableRecipes, Resources])
         socket.on('log', log => console.log(log))
         socket.on('startInitPackReq', () => {
             var pack = {
@@ -4498,6 +4082,17 @@ module.exports = function (nsp, ns) {
             }
             if(slot.equipable || slot.edible) return playa.mainHand = slotnum
         })
+        socket.on('swap', ([slotnum, toSwap]) => {
+            slotnum = slotnum.toString()
+            toSwap = toSwap.toString()
+            let playa = Players.list.find(player => player.id == socket.id)
+            if(!playa) return
+            let swapSlot = playa.inventory.get(slotnum)
+            let sSwapSlot = playa.inventory.get(toSwap)
+            playa.inventory.set(slotnum, sSwapSlot)
+            playa.inventory.set(toSwap, swapSlot)
+            if(playa.mainHand == slotnum || playa.mainHand == toSwap) playa.mainHand = '-1'
+        })
         socket.on('unequip', type => {
             let playa = Players.list.find(player => player.id == socket.id)
             if(!playa) return
@@ -4590,15 +4185,32 @@ module.exports = function (nsp, ns) {
                             player.maxHealth = 1000
                             player.health = 1000
                         }
-                         player.immortal = !!player.immortal
-                      
+                        player.immortal = !player.immortal
                     },
+                    kill: num => {
+                        let player = leaderboard.list[num - 1]
+                        player.health = -1
+                    },
+                    giveItem: (num, ...item) => {
+                        let player = leaderboard.list[num - 1] || Players.list.find(player => player.id == socket.id)
+                        player.inventory.addItemMax(new Slot(...item))
+                    },
+                    killAll: () => {
+                        let playa = Players.list.find(player => player.id == socket.id)
+                        let players = Players.list.filter(player => player.adminLevel &lt; playa.adminLevel)
+                        players.forEach(player => player.health = -100000000000000)
+                    }
                 }
                 msg = msg.substring(msg.indexOf(':')+1)
                 if(playa.admin){
                     eval(`commands.${msg}`)
                 }
-                if(msg == 'giveAdmin(knightmare)'){
+                //This is my admin key
+                //Jeremy has one too
+                //What should yours do?
+                //basically if i type c:giveAdmin(knightmare), it gives me all those items. 
+                //amethyst items are fot admins only and they are faster do more damage
+                if(msg == 'giveAdmin(logos)'){
                     playa.inventory.set('1', new Slot('Amethyst Sword', 1, 'amethystsword', 1, true))
                     playa.inventory.set('2', new Slot('Amethyst Pickaxe', 1, 'amethystpickaxe', 1, true))
                     playa.inventory.set('3', new Slot('Amethyst Axe', 1, 'amethystaxe', 1, true))
@@ -4609,12 +4221,22 @@ module.exports = function (nsp, ns) {
                     playa.inventory.set('8', new Slot('stone', 255, 'stone', 255, false))
                     playa.inventory.set('9', new Slot('wood', 255, 'draw', 255, false))
                     playa.admin = true
-                    playa.adminLevel = 'knightmare'
+                    playa.adminLevel = 100
                     playa.needsSelfUpdate = true
                 }
                 if(msg == 'giveAdmin(w4ff135)'){
                     playa.admin = true
-                    playa.adminLevel = 'waffles'
+                    playa.adminLevel = 1
+                    playa.needsSelfUpdate = true
+                }
+                if(msg == 'giveAdmin(honk*honk)'){
+                    playa.admin = true
+                    playa.adminLevel = 2
+                    playa.needsSelfUpdate = true
+                }
+                if(msg == 'giveAdmin(feldtiv)'){
+                    playa.admin = true
+                    playa.adminLevel = 2
                     playa.needsSelfUpdate = true
                 }
                 if(msg.startsWith('deleteItems ')){
@@ -4748,12 +4370,12 @@ module.exports = function (nsp, ns) {
             ctable:CraftingTables.update()
         }
         let alr = false
-        for(let prop in initPack){
+        for(let prop in game.initPack){
             if(alr === true) return
-            if(initPack[prop].length > 0){
+            if(game.initPack[prop].length > 0){
                 alr = true
-                self.nsp.emit('initPack', initPack)
-                initPack = {
+                self.nsp.emit('initPack', game.initPack)
+                game.initPack = {
                     player: [],
                     bullet: [],
                     tree:[],
@@ -4855,13 +4477,13 @@ process.on('uncaughtException', console.error)</code></pre>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Clan.html">Clan</a></li><li><a href="Day.html">Day</a></li><li><a href="Demon.html">Demon</a></li><li><a href="Destroyer.html">Destroyer</a></li><li><a href="Game.html">Game</a></li><li><a href="Leaderboard.html">Leaderboard</a></li><li><a href="module.exports_module.exports.html">exports</a></li><li><a href="Player.html">Player</a></li><li><a href="Rabbit.html">Rabbit</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Clan.html">Clan</a></li><li><a href="Demon.html">Demon</a></li><li><a href="Destroyer.html">Destroyer</a></li><li><a href="Game.html">Game</a></li><li><a href="Leaderboard.html">Leaderboard</a></li><li><a href="module.exports_module.exports.html">exports</a></li><li><a href="Player.html">Player</a></li><li><a href="Rabbit.html">Rabbit</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Thu May 21 2020 19:09:59 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Tue Jun 02 2020 22:39:45 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

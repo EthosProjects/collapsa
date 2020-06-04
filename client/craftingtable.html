@@ -16,13 +16,42 @@
         height:40%;
         display:none;
     }
+    input[type=range]{
+        position: absolute;
+        left:50%;
+        top:50%;
+    }
+    button {
+        position: absolute;
+        left:50%;
+        top:60%;
+        font-family: 'Zorque';
+    }
+    @font-face {
+        font-family: "Zorque";
+        src:url("/client/img/Zorque.woff") format("woff")
+    }
   </style>
 </head>
 <body>
         <canvas id="ctx"></canvas>
-    <video autoplay id="video"></video>
+        <input type="range" min='1' max='1080' value='540' id='quality'/>
+        <button id='locked'>Lock</button>
 <script>
-    let pixel = '1080px'
+    if(localStorage.getItem('locked') == 'true'){
+        console.log(localStorage.getItem('locked'))
+        locked.textContent = 'Unlock'
+    } 
+    locked.addEventListener('click', e => {
+        if(localStorage.getItem('locked') == 'false'){
+            locked.textContent = 'Unlock'
+            localStorage.setItem('locked', 'true')
+        }else {
+            locked.textContent = 'Lock'
+            localStorage.setItem('locked', 'false')
+        }
+    })
+    let pixel = '480px'
     let pixelNum = parseInt(pixel)
     console.log(pixelNum)
     let ctx = document.getElementById('ctx').getContext('2d')
@@ -42,6 +71,8 @@
         Img[`${src}`] = new Image()
         Img[`${src}`].src = `/client/img/${src}.${extention}`
     }
+    createImage('amethystsword', 'png')
+    createImage('hand', 'png')
     createImage('stonesword', 'png')
     
     createImage('stoneaxe', 'png')
@@ -49,13 +80,16 @@
     createImage('stonepickaxe', 'png')
   
     createImage('stonehammer', 'png')
+    createImage('favicon', 'png')
+    createImage('favicon2', 'png')
     let firstColor = '#CECECE'
     let secondColor = '#bababa'
     let thirdColor = '#999999'
     let fourthColor = 'grey'
-    let drawFourWay = (x, y) => {
+    let drawFourWay = (x, y, size) => {
         ctx.save()
         ctx.translate(x, y)
+        ctx.scale(size/150, size/150)
         ctx.fillStyle = firstColor
         ctx.fillRect(0, 0, 150, 150)
         ctx.fillStyle = secondColor
@@ -454,15 +488,19 @@
     }
     let p = new miniPlayer({
         usr:'',
-        x:450,
-        y:450,
-        lhit:false,
+        x:480/2 - 50,
+        y:480/2 + 23,
+        lhit:true,
         rhit:false,
-        rad:75,
-        angle:315
+        rad:60,
+        angle:315,
+        //mainHand:'Amethyst Sword'
     })
-    p.punchper = 0
-    p.lhit = true
+    //p.hitting = true
+    //p.per = Math.random()
+    console.log(p.per)
+    p.per = 0.3
+    p.hittin = true;
     //p.drawPerf()
     let href = document.createElement('a')
     href.href = canvas.toDataURL('image/png')
@@ -489,13 +527,12 @@
     let recorder = new MediaRecorder(stream)
     let chunks = []
     recorder.addEventListener('dataavailable', e => {
-        a.href = URL.createObjectURL(new Blob([e.data]))
+     //   a.href = URL.createObjectURL(new Blob([e.data]))
         //a.click()
     })
     recorder.start()
-    let a = document.createElement('a')
     //a.href = URL.createObjectURL('ee')
-    a.download = 'favicon.mp4'
+    //a.download = 'favicon.mp4'
     setTimeout(() => recorder.stop(), 1000)
     let drawPolygon = (sides,  size, x, y, angle, color) => {
         ctx.beginPath();
@@ -523,45 +560,127 @@
         ctx.fill();
         ctx.restore()
     }
-    let pixels = [1080]
-    pixels.forEach(pixel => {
+    let pixels = [1, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150]
+    let drawTree = (x, y, size) => {
+        drawConcave(8, size, x, y, 45, "#50c878")
+        drawPolygon(13, size * 350/900, x, y, 0, "#b06831")
+    }
+    let drawStone = (x, y, size) =>{
+        drawPolygon(8, size, x, y, 0, "#73757e")
+        drawPolygon(9, size/2, x, y, 0, "#b3b4bb")
+    }
+    let drawIron = (x, y, size) =>{
+        drawPolygon(8, size, x, y, 0, "#c0c0c0")
+        drawPolygon(9, size/2, x, y, 0, "#767676")
+    }
+    let drawGold = (x, y, size) =>{
+        drawPolygon(8, size, x, y, 0, "#ffd700")
+        drawPolygon(9, size/2, x, y, 0, "#c0c0c0")
+    }
+    let drawDiamond = (x, y, size) =>{
+        drawPolygon(8, size, x, y, 0, "#32f2ff")
+        drawPolygon(9, size/2, x, y, 0, "#c0c0c0")
+    }
+    let drawEmerald = (x, y, size) =>{
+        drawPolygon(8, size, x, y, 0, "#50c978")
+        drawPolygon(9, size/2, x, y, 0, "#c0c0c0")
+    }
+    let drawAmethyst = (x, y, size) =>{
+        drawPolygon(8, size, x, y, 0, "#9966cc")
+        drawPolygon(9, size/2, x, y, 0, "#c0c0c0")
+    }
+    let leftToDraw = []
+    let sorted = [1, 3, 5, 10, 7, 9].sort((a, b) => a - b)
+    console.log(sorted)
+    const findClosest = (array, target) => {
+        let n = array.length
+        if (target <= array[0]) return array[0];  
+        if (target >= array[array.lastIndexOf]) return array[array.lastIndexOf];  
+        let i = 0, j = array.length, mid = 0
+        while(i < j){
+            mid = (i + j)/2
+            if(array[parseInt(mid)] == target) return array[parseInt(mid)]
+            if(target < array[parseInt(mid)]){
+                // If target is greater than previous 
+                // to mid, return closest of two 
+                if (mid > 0 && target > array[parseInt(mid) - 1]) return getClosest(array[parseInt(mid) - 1], array[parseInt(mid)], target); 
+                j = mid; 
+            }else {
+                if (mid < n - 1 && target < array[parseInt(mid) + 1]) return getClosest(array[parseInt(mid)], array[parseInt(mid) + 1], target); 
+                i = mid + 1; 
+            }
+        }
+        return array[parseInt(mid)]
+    }
+    function getClosest($val1, $val2, $target) { 
+        if ($target - $val1 >= $val2 - $target) 
+            return $val2; 
+        else
+            return $val1; 
+    }
+    console.log(findClosest(sorted, 4))
+    let pixelTotal = [1, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150, 240, 360, 480, 720, 1080]
+    let draw = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
-        pixel += 'px'
+        //let pixel = localStorage.getItem('locked') == 'true' ? (findClosest(pixelTotal, quality.value) + 'px') : (quality.value + 'px')
+        console.log(localStorage.getItem('locked') == 'true', pixel)
         pixelNum = parseInt(pixel)
-        console.log(pixelNum)
-        /** 
-        * @type {HTMLCanvasElement}
-        */
+        console.log('working', pixelNum)
         canvas.style.width = pixelNum + 'px'
         canvas.style.height = pixelNum + 'px'
         canvas.width = parseInt(pixel)
         canvas.height = parseInt(pixel)
-        45 /(Math.PI/180)
-        drawConcave(8, pixelNum/2, pixelNum/2, pixelNum/2, 45, "#50c878")
-        drawPolygon(13, pixelNum * 175/900, pixelNum/2, pixelNum/2, 0, "#b06831")
+        let a = document.createElement('a')
+        Img.favicon.width = pixelNum
+        console.log(Img.favicon.width)
+        //ctx.drawImage(Img['favicon2'], -20, 0, pixelNum, pixelNum)
+        //ctx.drawImage(Img['favicon'], 0, 0, pixelNum, pixelNum)
+        
+        p.rad = 60 * pixelNum/480 * Math.pow(pixelNum/480, -0.500655)
+        Object.assign(p, {
+            x:pixelNum/2 - (50 * pixelNum/480) * Math.pow(pixelNum/480, -0.500655),
+            y:pixelNum/2 + (23 * pixelNum/480) * Math.pow(pixelNum/480, -0.500655),
+        });
+        p.drawPerf();
+        ctx.restore()
         let ctxdl = document.createElement('a')
-        a.href = canvas.toDataURL('image/png')
-        a.download = 'tree-' + pixelNum +'.png'
+        ctx.textAlign = "center"
+        ctx.font = `${70 * pixelNum/480}px Zorque`;
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 2;
+        ctx.beginPath()
+        ctx.strokeText(`Testing`, pixelNum/2, pixelNum - 58 * pixelNum/480); 
+        ctx.fillStyle = '#800000';
+        ctx.fillText(`Testing`, pixelNum/2, pixelNum - 58 * pixelNum/480);
+        
+        a.href = canvas.toDataURL('/image/png')
+        a.download = 'favicon-testing' +'.png'
         a.click()
-    })
-    
-    /**
-    for(let i = 0; i < len; i++) {
-        // extract alpha channel from a pixel
-        let px = data32[i] & 0xff000000;                   // little-endian: ABGR
-        console.log(data32[i])
-        // any non-transparency? ie. alpha > 0
-        if (px) {
-        data32[i] = px | 0xffffff;    // set this pixel to white, keep alpha level
-        }
     }
-    **/
-    // done
-    //ctx.putImageData(imageData, 0, 0);
-    setTimeout(() => {
-        //recorder.stop()
-    }, 6000)
-    //createImage('ironsword', 'png')
-    //createImage('ironpickaxe', 'png')
+    quality.addEventListener('input',draw)
+    setTimeout(draw, 1000)
+    let download = false
+    if(download){
+        pixels.forEach(pixel => {
+            //ctx.clearRect(0, 0, canvas.width, canvas.height)
+            pixel += 'px'
+            pixelNum = parseInt(pixel)
+            /** 
+             * @param
+             * @type {HTMLCanvasElement}
+             */
+            canvas.style.width = pixelNum + 'px'
+            canvas.style.height = pixelNum + 'px'
+            canvas.width = parseInt(pixel)
+            canvas.height = parseInt(pixel)
+            //let a = document.createElement('a')
+            ctx.drawImage(Img.favicon, 0, 0, pixelNum, pixelNum)
+            //drawFourWay(pixelNum/2, pixelNum/2)
+            //let ctxdl = document.createElement('a')
+            //a.href = canvas.toDataURL('image/png')
+            //a.download = 'iron-' + pixelNum +'.png'
+            //a.click()
+        })
+    }
 </script>
-</body>{}
+</body>

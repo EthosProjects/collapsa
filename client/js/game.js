@@ -29,7 +29,7 @@ class Mapper extends Map {
         return results;
     }
 }
-let quality = 240
+let quality = 150
 let curServer = '/usaeast1'
 var managerSocket = io();
 socket = io('/usaeast1')

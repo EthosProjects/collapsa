@@ -18,7 +18,7 @@ var game = require("./Entity.js")
 new game(io.of('/usaeast1'), '/usaeast1');
 //new game(io.of('/usaeast2'), '/usaeast2');
 const discordRoute = require('./api/routes/discord')
-const mlabInteractor = require(process.env.local ? '../mlab-promise' : 'mlab-promise')
+const { mlabInteractor } = require(process.env.local ? '../mlab-promise' : 'mlab-promise')
 const mLab = new mlabInteractor('4unBPu8hpfod29vxgQI57c0NMUqMObzP', ['lexybase', 'chatbase'])
 let collapsa
 let collapsauserbase
@@ -29,8 +29,6 @@ mLab.on('ready', () => {
     collapsa = mLab.databases.get('collapsa')
     collapsauserbase = collapsa.collections.get('collapsauserbase')
 })
-let res = {"access_token": "WhrfuCsaMImBQY9Ws483RsZJ519XtM", "expires_in": 604800, "refresh_token": "pCdNT5xWeypLmvSRfVO5UwSTfrkdbU", "scope": "identify email", "token_type": "Bearer"}
-
 let zeroFill = (s, w) => new Array(w - s.length).fill('0').join('') + s
 const genSnowflake = (increment, processID, workerID) => {
     let timestamp = zeroFill((new Date().getTime() - 1591092539000).toString(2), 42)
@@ -39,7 +37,6 @@ const genSnowflake = (increment, processID, workerID) => {
     workerID = zeroFill(workerID, 5)
     return parseInt(timestamp + processID + workerID + increment, 2)
 }
-console.log(genSnowflake(reqCount.toString(2), '1', '0'))
 Math = require('./math.js')
 app.use(bodyParser.json())
 app.route('/api')
@@ -84,7 +81,6 @@ app.route('/api/signup')
         }
         let validateEmail = sue => {
             let email = /^\w.+@\w{2,253}\.\w{2,63}$/;
-            console.log(sue.match(email))
             if(sue.match(email)) {  
                 valid[2] = 1
             } else if(sue.length == 0){
@@ -106,7 +102,6 @@ app.route('/api/signup')
             let psw = await bcrypt.hash(password, 10)
             let random = Math.floor(Math.random() * 100).toString()
             token = 'Aph_' + (random.length == 2 ? random : '0' + random) + 'yght' + token.substr(7)
-            console.log(token, psw, await bcrypt.compare(password, psw))
             await collapsauserbase.addDocument({
                 id:id,
                 token:token,
@@ -117,7 +112,6 @@ app.route('/api/signup')
             var d = new Date();
             d.setTime(d.getTime() + (30 * 24 * 60 * 60 * 1000));
             var expires = "Expires="+ d.toUTCString();
-            console.log(`token=${userbase.data.token}; ${expires}`)
             res.set('Set-Cookie', `token=${token}; ${expires}; path=/`)
             res.send({message:'signupSuccess'})
         }
@@ -158,7 +152,6 @@ app.route('/api/discordLogin')
             })
             .on('response', res => {
                 let buffer = []
-                console.log(res.statusCode)
                 res.on('data', data => buffer.push(data))
                 .on('end', () => resolve(JSON.parse(buffer.join(''))))
             })
@@ -184,6 +177,7 @@ app.route('/api/discordLogin')
                 res.on('end', () => resolve(JSON.parse(buffer.join(''))))
             })
         })
+        console.log(user)
         if(user.error){ 
             res.status(404)
             return res.send(JSON.stringify({error: "invalid user"}))
@@ -218,7 +212,7 @@ app.route('/api/discordLogin')
 var Vector = require('./Vector.js')
 // Aliases
 io.on('connection', socket => {
-    console.log('aaa')
+    console.log('New connection')
 })
 server.listen(
     port,
@@ -237,7 +231,8 @@ app.get('/404.css', function(request, response) {
 });
 app.set('port', port);
 app.use('/client', express.static(__dirname + '/client'))
-app.use(favicon(path.join(__dirname, '/client/img/favicon.ico')));
+app.use('/', express.static(__dirname + '/client'))
+app.use(favicon(path.join(__dirname, '/client/favicon.ico')));
 app.use(function(req, res, next) {
     res.status(404).sendFile(__dirname + '/404.html')
 })

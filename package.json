@@ -1,6 +1,6 @@
 {
   "name": "collapsa.io",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "It's a game",
   "homepage": "https://github.com/Electrox-Qui-Mortem/omegalords#readme",
   "main": "server.js",
