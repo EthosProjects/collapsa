@@ -20,6 +20,7 @@ new game(io.of('/usaeast1'), '/usaeast1');
 const discordRoute = require('./api/routes/discord')
 const { mlabInteractor } = require('mlab-promise')
 const mLab = new mlabInteractor('4unBPu8hpfod29vxgQI57c0NMUqMObzP', ['lexybase', 'chatbase'])
+require('./collapsabot')(mLab)
 let collapsa
 let collapsauserbase
 let reqCount = 0

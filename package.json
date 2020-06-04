@@ -13,13 +13,16 @@
   "dependencies": {
     "bcrypt": "^4.0.1",
     "body-parser": "^1.19.0",
+    "discord.js": "^12.2.0",
     "dotenv": "^8.2.0",
     "express": "^4.16.4",
     "matter-js": "^0.14.2",
     "mlab-promise": "0.0.5",
     "pathfinding": "^0.4.18",
     "serve-favicon": "^2.5.0",
-    "socket.io": "^2.3.0"
+    "socket.io": "^2.3.0",
+    "ytdl-core": "^3.1.1",
+    "ytdl-core-discord": "^1.2.0"
   },
   "scripts": {
     "start": "node server.js",
