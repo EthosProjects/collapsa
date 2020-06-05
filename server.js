@@ -19,6 +19,7 @@ new game(io.of('/usaeast1'), '/usaeast1');
 //new game(io.of('/usaeast2'), '/usaeast2');
 const discordRoute = require('./api/routes/discord')
 const { mlabInteractor } = require('mlab-promise')
+
 const mLab = new mlabInteractor('4unBPu8hpfod29vxgQI57c0NMUqMObzP', ['lexybase', 'chatbase'])
 require('./collapsabot')(mLab)
 let collapsa
@@ -221,6 +222,9 @@ server.listen(
         console.log('Your app is listening on port ' + server.address().port);
     }
 )
+app.get('/.well-known/pki-validation', (req, res) => {
+    res.sendFile(path.join(__dirname, '/client/index.html'))
+})
 app.get('/', function(request, response) {
     response.sendFile(path.join(__dirname, '/client/index.html'));
 });
@@ -232,6 +236,7 @@ app.get('/404.css', function(request, response) {
 });
 app.set('port', port);
 app.use('/client', express.static(__dirname + '/client'))
+app.use('/.well-known/pki-validation', express.static(__dirname + '/'))
 app.use('/', express.static(__dirname + '/client'))
 app.use(favicon(path.join(__dirname, '/client/favicon.ico')));
 app.use(function(req, res, next) {
