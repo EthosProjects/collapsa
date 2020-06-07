@@ -7,6 +7,7 @@ const {
 } = require('discord.js');
 const Collection = require('discord.js').Collection;
 const { token, prefix } = require('./config.json');
+prefix = process.env.NODE_ENV == 'production' ? '!' : '?' 
 let { mlabInteractor } = require('mlab-promise');
 let youtubeInteractor = require('./youtube.js/Youtube');
 //let yotube = new youtubeInteractor('AIzaSyCeld1vKBcUuZESB7qz_gIJxrTJl5w5e_Y')
