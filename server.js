@@ -1,18 +1,33 @@
 // Dependencies
+let dotenv = require('dotenv')
+dotenv.config();
 var express = require('express');
 var http = require('http');
 var https = require('https');
 var path = require('path');
 var fs = require('fs');
 var app = express();
-var server = http.Server(app);
+const httpApp = express();
+//console.log(fs.readFileSync('./httpsServer.csr'))
+var key = fs.readFileSync('encryption/server.key') + '';
+var cert = fs.readFileSync( 'encryption/server.crt' ) + '';
+var ca = fs.readFileSync( 'encryption/server.ca-bundle' ) + '';
+let httpsOptions = {
+    key: key,
+    cert: cert,
+    ca: ca
+}
+let httpsServer = https.createServer(httpsOptions, app)
+let httpServer = http.createServer(httpApp)
+httpApp.all('/', (req, res) => {
+    res.redirect(['https://', req.get('Host'), req.url].join(''));
+})
+//var httpsServer = http.Server(app);
 const bodyParser = require('body-parser')
 const bcrypt = require('bcrypt')
-let dotenv = require('dotenv')
-dotenv.config();
 var port = process.env.PORT || 3000;
 var socketIO = require('socket.io');
-var io = socketIO(server);
+var io = socketIO(httpsServer);
 var favicon = require('serve-favicon')
 var game = require("./Entity.js")
 new game(io.of('/usaeast1'), '/usaeast1');
@@ -216,10 +231,16 @@ var Vector = require('./Vector.js')
 io.on('connection', socket => {
     console.log('New connection')
 })
-server.listen(
+httpsServer.listen(
     port,
     function() {
-        console.log('Your app is listening on port ' + server.address().port);
+        console.log('Your https server is listening on port ' + httpsServer.address().port);
+    }
+)
+httpServer.listen(
+    80,
+    function() {
+        console.log('Your http server is listening on port ' + httpServer.address().port);
     }
 )
 app.get('/.well-known/pki-validation', (req, res) => {
