@@ -179,11 +179,11 @@ module.exports = (mLab) => {
                 message.content
             );
         }
-        if (!content.match(/^(<@710904657811079258> |!)/)) return;
-        let args
-        if(content.match(/^<@710904657811079258> /)) args = content.slice('<@710904657811079258> '.length).split(/ +/);
-        else content.slice(prefix.length).split(/ +/);
-        console.log(args)
+        console.log(content.startsWith(client.user.toString()), client.user.toString())
+        if(!content.match(/^(<@!{0,1}\d+> |!)/)) return;
+        if(content.match(/^d+/) && message.mentions.members.first().id != client.user.id) return
+        let args;
+        args = content.replace(/^(<@!{0,1}\d+> |!)/, '').split(/ +/);
         const commandName = args.shift().toLowerCase();
         if (client.commands.has(commandName))
             client.commands
@@ -261,7 +261,7 @@ module.exports = (mLab) => {
             "Hello! It's CollapsaBot. Use !configure to begin configuration"
         );
     });
-    client.login(token);
+    client.login(process.env.NODE_ENV == 'production' ? token : 'NzE3OTU5MzYyMTMxMjYzNjA5.Xty2Pg.exCv_gp7VQbgPWK11TtTBGereJ8');
     process.on('uncaughtException', (error) => {
         console.error(error);
     });
