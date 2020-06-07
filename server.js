@@ -18,10 +18,19 @@ let httpsOptions = {
     ca: ca
 }
 let httpsServer = https.createServer(httpsOptions, app)
-let httpServer = http.createServer(httpApp)
 httpApp.all('/', (req, res) => {
-    res.redirect(['https://', req.get('Host'), req.url].join(''));
-})
+    res.sendStatus(301)
+    return res.redirect(['https://', req.get('Host'), req.url].join(''));
+}) 
+//env = process.env.NODE_ENV || 'development';
+var forceSsl = function (req, res, next) {
+    if (process.env.NODE_ENV =='production ' && req.headers['X-Forwarded-Proto'] !== 'https') {
+        console.log(req.headers['x-forwarded-proto'])
+        return res.redirect(['https://', req.get('Host'), req.url].join(''));
+    }
+    return next();
+};
+
 //var httpsServer = http.Server(app);
 const bodyParser = require('body-parser')
 const bcrypt = require('bcrypt')
@@ -55,6 +64,7 @@ const genSnowflake = (increment, processID, workerID) => {
     return parseInt(timestamp + processID + workerID + increment, 2)
 }
 Math = require('./math.js')
+app.use(forceSsl)
 app.use(bodyParser.json())
 app.route('/api')
     .get(async (req, res) => {
@@ -235,12 +245,6 @@ httpsServer.listen(
     port,
     function() {
         console.log('Your https server is listening on port ' + httpsServer.address().port);
-    }
-)
-httpServer.listen(
-    80,
-    function() {
-        console.log('Your http server is listening on port ' + httpServer.address().port);
     }
 )
 app.get('/.well-known/pki-validation', (req, res) => {
