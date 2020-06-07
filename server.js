@@ -21,6 +21,7 @@ let httpsServer
 let httpServer = http.createServer(app)
 
 // Run separate https server if on localhost
+/*
 if (process.env.NODE_ENV != 'production') {
     httpsServer = https.createServer(httpsOptions, app).listen(process.env.PORT, function () {
         console.log("Express server listening with https on port %d in %s mode", this.address().port, app.settings.env);
@@ -36,7 +37,7 @@ if (process.env.NODE_ENV == 'production') {
         } else {
             return next();
         }
-    });*/
+    });
 } else {
     app.use(function (req, res, next) {
         res.setHeader('Strict-Transport-Security', 'max-age=8640000; includeSubDomains');
@@ -47,7 +48,7 @@ if (process.env.NODE_ENV == 'production') {
             return next();
         }
     });
-};
+};*/
 //var httpsServer = http.Server(app);
 const bodyParser = require('body-parser')
 const bcrypt = require('bcrypt')
