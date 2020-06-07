@@ -53,7 +53,7 @@ const bcrypt = require('bcrypt')
 let dotenv = require('dotenv')
 dotenv.config();
 var socketIO = require('socket.io');
-const io
+let io;
 if(httpsServer) io = socketIO(httpsServer);
 else io = socketIO(httpServer);
 var favicon = require('serve-favicon')
