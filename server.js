@@ -29,10 +29,10 @@ if (process.env.NODE_ENV != 'production') {
 
 if (process.env.NODE_ENV == 'production') {
     app.use(function (req, res, next) {
-        res.setHeader('Strict-Transport-Security', 'max-age=8640000; includeSubDomains');
+        //res.setHeader('Strict-Transport-Security', 'max-age=8640000; includeSubDomains');
         if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === "http") {
             next()
-            //return res.redirect(301, 'https://' + req.host + req.url);
+            return res.redirect(301, 'https://' + req.host + req.url);
         } else {
             return next();
             }
