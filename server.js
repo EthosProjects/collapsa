@@ -53,7 +53,9 @@ const bcrypt = require('bcrypt')
 let dotenv = require('dotenv')
 dotenv.config();
 var socketIO = require('socket.io');
-var io = socketIO(httpsServer);
+const io
+if(httpsServer) io = socketIO(httpsServer);
+else io = socketIO(httpServer);
 var favicon = require('serve-favicon')
 var game = require("./Entity.js")
 new game(io.of('/usaeast1'), '/usaeast1');
