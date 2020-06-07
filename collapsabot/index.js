@@ -6,8 +6,8 @@ const {
     TextChannel,
 } = require('discord.js');
 const Collection = require('discord.js').Collection;
-const { token, prefix } = require('./config.json');
-prefix = process.env.NODE_ENV == 'production' ? '!' : '?' 
+let { token, prefix } = require('./config.json');
+prefix = process.env.NODE_ENV == 'production' ? '!' : '?'
 let { mlabInteractor } = require('mlab-promise');
 let youtubeInteractor = require('./youtube.js/Youtube');
 //let yotube = new youtubeInteractor('AIzaSyCeld1vKBcUuZESB7qz_gIJxrTJl5w5e_Y')
@@ -140,7 +140,6 @@ module.exports = (mLab) => {
                 count: Date.now(),
             });
             let userbase = discorduserbase.documents.get(member.id).data;
-            console.log(userbase);
             let doc = Object.assign({}, userbase);
             doc.guilds[guild.id].exp.amount += Math.floor(
                 Math.random() * 20 + 20
@@ -164,7 +163,6 @@ module.exports = (mLab) => {
                 if (!antiSpam.get(author.id + message.guild.id).count)
                     antiSpam.delete(author.id + message.guild.id);
             }, 2000);
-            console.log(usr.count);
         } else {
             antiSpam.set(author.id + message.guild.id, {
                 author: author.id,
@@ -175,16 +173,12 @@ module.exports = (mLab) => {
                 if (!antiSpam.get(author.id + message.guild.id).count)
                     antiSpam.delete(author.id + message.guild.id);
             }, 2000);
-            console.log(
-                antiSpam.get(author.id + message.guild.id),
-                message.content
-            );
         }
-        console.log(content.startsWith(client.user.toString()), client.user.toString())
-        if(!content.match(/^(<@!{0,1}\d+> |!)/)) return;
+        let prefixRegex = new RegExp(`^(<@!{0,1}\\d+> |${prefix == '!' ?'!' : '\\' + prefix})`)
+        if(!content.match(prefixRegex)) return;
         if(content.match(/^d+/) && message.mentions.members.first().id != client.user.id) return
         let args;
-        args = content.replace(/^(<@!{0,1}\d+> |!)/, '').split(/ +/);
+        args = content.replace(prefixRegex, '').split(/ +/);
         const commandName = args.shift().toLowerCase();
         if (client.commands.has(commandName))
             client.commands
