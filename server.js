@@ -260,7 +260,7 @@ io.on('connection', socket => {
 httpServer.listen(
     port,
     function() {
-        console.log('Your https server is listening on port ' + httpsServer.address().port);
+        console.log('Your http server is listening on port ' + httpServer.address().port);
     }
 )
 app.get('/.well-known/pki-validation', (req, res) => {
