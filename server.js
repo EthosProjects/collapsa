@@ -1,6 +1,4 @@
 // Dependencies
-let dotenv = require('dotenv')
-dotenv.config();
 var express = require('express');
 var http = require('http');
 var https = require('https');
@@ -17,24 +15,43 @@ let httpsOptions = {
     cert: cert,
     ca: ca
 }
-let httpsServer = https.createServer(httpsOptions, app)
-httpApp.all('/', (req, res) => {
-    res.sendStatus(301)
-    return res.redirect(['https://', req.get('Host'), req.url].join(''));
-}) 
-//env = process.env.NODE_ENV || 'development';
-var forceSsl = function (req, res, next) {
-    if (process.env.NODE_ENV =='production ' && req.headers['X-Forwarded-Proto'] !== 'https') {
-        console.log(req.headers['x-forwarded-proto'])
-        return res.redirect(['https://', req.get('Host'), req.url].join(''));
-    }
-    return next();
+var port = process.env.PORT || 3000; // Used by Heroku and http on localhost
+process.env['PORT'] = process.env.PORT || 4000; // Used by https on localhost
+let httpsServer
+let httpServer = http.createServer(app)
+
+// Run separate https server if on localhost
+if (process.env.NODE_ENV != 'production') {
+    httpsServer = https.createServer(httpsOptions, app).listen(process.env.PORT, function () {
+        console.log("Express server listening with https on port %d in %s mode", this.address().port, app.settings.env);
+    });
 };
 
+if (process.env.NODE_ENV == 'production') {
+    app.use(function (req, res, next) {
+        res.setHeader('Strict-Transport-Security', 'max-age=8640000; includeSubDomains');
+        if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === "http") {
+            return res.redirect(301, 'https://' + req.host + req.url);
+        } else {
+            return next();
+            }
+    });
+} else {
+    app.use(function (req, res, next) {
+        res.setHeader('Strict-Transport-Security', 'max-age=8640000; includeSubDomains');
+        if (!req.secure) {
+            return res.redirect(301, 'https://' + req.host  + ":" + process.env.PORT + req.url);
+        } else {
+            return next();
+        }
+    });
+
+};
 //var httpsServer = http.Server(app);
 const bodyParser = require('body-parser')
 const bcrypt = require('bcrypt')
-var port = process.env.PORT || 3000;
+let dotenv = require('dotenv')
+dotenv.config();
 var socketIO = require('socket.io');
 var io = socketIO(httpsServer);
 var favicon = require('serve-favicon')
@@ -64,7 +81,6 @@ const genSnowflake = (increment, processID, workerID) => {
     return parseInt(timestamp + processID + workerID + increment, 2)
 }
 Math = require('./math.js')
-app.use(forceSsl)
 app.use(bodyParser.json())
 app.route('/api')
     .get(async (req, res) => {
@@ -241,7 +257,7 @@ var Vector = require('./Vector.js')
 io.on('connection', socket => {
     console.log('New connection')
 })
-httpsServer.listen(
+httpServer.listen(
     port,
     function() {
         console.log('Your https server is listening on port ' + httpsServer.address().port);
