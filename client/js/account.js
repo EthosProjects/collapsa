@@ -24,7 +24,6 @@ function getCookie(cname) {
     }
     return "";
 }
-console.log(location.href)
 let loginwithDiscordURL = {
     client_id:"710904657811079258",
     redirect_uri:location.origin + '/api/discordLogin',
@@ -72,7 +71,6 @@ if(getCookie('token')){
         body:JSON.stringify({token})
     })
     let res = await req.json()
-    console.log(res)
     if(res.err){
         loginButton.style.display = 'block'
         signupButton.style.display = 'block'
@@ -84,6 +82,7 @@ if(getCookie('token')){
         sessionStorage.setItem('email', res.email)
         accountEmail.value = res.email
         document.getElementById("nameyourself").value = res.username
+        accountModalSubmit.disabled = false
     }
     })()
 }
@@ -100,7 +99,6 @@ signout.addEventListener('click', e => {
             var letter = signupModal.querySelector('.letter')
             var number = signupModal.querySelector('.numval')
             var length = signupModal.querySelector('.length')
-            console.log(letter)
             let letters = /[a-zA-Z]/g;
             if(sup.match(letters)) {  
                 letter.classList.remove("invalid");
@@ -144,14 +142,12 @@ signout.addEventListener('click', e => {
             }
         }
         let validateUsername = suu => {
-            if(suu.match(/^[a-zA-Z]{1}\w{5,11}$/)) valid[0] = 1
+            if(suu.match(/^[a-zA-Z]{1}[ \w]{5,11}$/)) valid[0] = 1
             else valid[0] = 0
-            console.log(valid[0])
         }
         if(index == 0) validateUsername(element.value)
         if(index == 1) validatePassword(element.value)
         if(index == 2) validateEmail(element.value)
-        console.log(valid)
         if(valid.every(v => v)) signupModalSubmit.disabled = false
         else signupModalSubmit.disabled = true
     }
@@ -188,6 +184,7 @@ signupButton.addEventListener('click', e => {
 })
 loginForm.addEventListener('submit', async e => {
     e.preventDefault()
+    loginModalSubmit.disabled = true
     let password = document.getElementById('loginPassword').value
     let username = document.getElementById('loginUsername').value
     let loginErr = document.getElementById('loginErr')
@@ -208,13 +205,14 @@ loginForm.addEventListener('submit', async e => {
         }else {
             loginErr.textContent = 'Incorrect username or password'
         }
+        loginModalSubmit.disabled = false
     }else {
-        setCookie('token', res.token, 30)
         loginErr.style.display = 'none'
         loginButton.style.display = 'none'
         signupButton.style.display = 'none'
         accountButton.style.display = 'block'
         loginModal.style.display = 'none'
+        loginModalSubmit.disabled = false
     }
 })
 signupForm.addEventListener('submit', async e => {
@@ -232,11 +230,11 @@ signupForm.addEventListener('submit', async e => {
     })
     let res = await req.json();
     let signupErrs = signupForm.querySelectorAll('.signupErr');
-    signupModalSubmit.disabled = false;
     [...signupErrs].forEach(e => e.style.display = 'none')
     if(res.err){
         if(res.message == 'usernameTaken') signupErrs[0].style.display = 'block'
         if(res.message == 'emailTaken') signupErrs[1].style.display = 'block'
+        signupModalSubmit.disabled = false;
     }else {
         sessionStorage.setItem('username', username)
         accountUsername.value = username
@@ -247,6 +245,89 @@ signupForm.addEventListener('submit', async e => {
         signupButton.style.display = 'none'
         accountButton.style.display = 'block'
         signupModal.style.display = 'none'
+        signupModalSubmit.disabled = false;
+    }
+});
+
+[...accountModal.getElementsByClassName('input')].forEach((element, index) => {
+    let valid = [1, 1, 0, 0]
+    let validate = () => {
+        let username = accountModal.getElementsByClassName('input')[0]
+        let email = accountModal.getElementsByClassName('input')[1]
+        let newPassword = accountModal.getElementsByClassName('input')[2]
+        let password = accountModal.getElementsByClassName('input')[3]
+        let validatePassword = sup => {
+            if(!sup.length) return valid[3] = 1
+            if(!sup.match(/^(?=.*[a-zA-Z0-9]).{8,16}$/)) valid[3] = 0
+            else valid[3] = 1
+        }
+        let validateEmail = sue => {
+            let email = /^\w.+@\w{2,253}\.\w{2,63}$/;
+            if(sue.match(email)) {  
+                
+                valid[1] = 1
+            } else if(sue.length == 0){
+                valid[1] = 0
+            } 
+        }
+        let validateUsername = suu => {
+            if(suu.match(/^[a-zA-Z]{1}[ \w]{5,11}$/)) valid[0] = 1
+            else valid[0] = 0
+        }
+        let validateNewPassword = sup => {
+            if(!sup.length) return valid[2] = 1
+            if(!sup.match(/^(?=.*[a-zA-Z0-9]).{8,16}$/)) valid[2] = 0
+            else valid[2] = 1
+        }
+        validateUsername(username.value)
+        validateEmail(email.value)
+        validatePassword(password.value)
+        validateNewPassword(newPassword.value)
+        if(valid.every(v => v)) accountModalSubmit.disabled = false
+        else accountModalSubmit.disabled = true
+    }
+    element.addEventListener('keyup', validate)
+    element.addEventListener('keydown', validate)
+    validate(element)
+});
+accountForm.addEventListener('submit', async e => {
+    e.preventDefault()
+    e.preventDefault()
+    loginModalSubmit.disabled = true
+    let password = accountPassword.value
+    let username = accountUsername.value
+    let email = accountEmail.value
+    let newPassword = accountNewPassword.value
+    let token = getCookie('token')
+    //let loginErr = document.getElementById('loginErr')
+    let req = await fetch(`${window.location.href}api/updateAccount`, {
+        method:'POST',
+        headers:{
+            'content-type':'application/json'
+        },
+        body:JSON.stringify({username:username, password:password, email, newPassword, token})
+    })
+    let res = await req.json()
+    console.log(res)
+    //loginErr.style.display = 'none'
+    if(res.err){
+        /*loginErr.style.display = 'block'
+        if(res.acceptedLogins){
+            console.log(res.acceptedLogins.length, res.acceptedLogins[0])
+            if(res.acceptedLogins.length == 1 && res.acceptedLogins[0] == 'Discord') loginErr.textContent = 'You can only log in through discord'
+        }else {
+            loginErr.textContent = 'Incorrect username or password'
+        }
+        loginModalSubmit.disabled = false*/
+    }else {
+        /*
+        setCookie('token', res.token, 30)
+        loginErr.style.display = 'none'
+        loginButton.style.display = 'none'
+        signupButton.style.display = 'none'
+        accountButton.style.display = 'block'
+        loginModal.style.display = 'none'
+        loginModalSubmit.disabled = */
     }
 })
 let percentageWidth = window.innerWidth/window.outerWidth

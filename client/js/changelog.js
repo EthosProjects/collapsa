@@ -12,6 +12,7 @@ var changelog = {
         'and please send a screenshot and accurate description. I\'ll try to fix it asap. PS: By the end of next update, I will have added a page for reporting bugs'
     ],
     Plans: [
+        'Fix login system',
         'Add a high score board',
         'Fix wall images',
         'Create voting system for next update',

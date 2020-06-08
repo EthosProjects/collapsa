@@ -71,12 +71,19 @@ var game = require("./Entity.js")
 new game(io.of('/usaeast1'), '/usaeast1');
 //new game(io.of('/usaeast2'), '/usaeast2');
 const discordRoute = require('./api/routes/discord')
-const { mlabInteractor } = require('mlab-promise')
+const { mlabInteractor, collection } = require('mlab-promise')
 
 const mLab = new mlabInteractor('4unBPu8hpfod29vxgQI57c0NMUqMObzP', ['lexybase', 'chatbase'])
 require('./collapsabot')(mLab)
 let collapsa
+/**
+ * @type {collection}
+ */
 let collapsauserbase
+/**
+ * @type {collection}
+ */
+let leaderboard
 let reqCount = 0
 let formFormat = data => Object.keys(data).map(k => `${k}=${encodeURIComponent(data[k])}`).join('&')
 mLab.on('ready', () => {
@@ -105,7 +112,7 @@ app.route('/api/login')
         let username = req.body.username
         let password = req.body.password
         if(req.body.token){
-            if(!collapsauserbase.findDocument(d => d.data.token == req.body.token)) res.send(JSON.stringify({message:"invalidToken", err:true}))
+            if(!collapsauserbase.findDocument(d => d.data.token == req.body.token)) return res.send(JSON.stringify({message:"invalidToken", err:true}))
             let userbase = collapsauserbase.findDocument(d => d.data.token == req.body.token)
             res.send(JSON.stringify({message:"validToken", username:userbase.data.username, email:userbase.data.email}))
             return
@@ -119,9 +126,53 @@ app.route('/api/login')
             return res.send(JSON.stringify({acceptedLogins, err:true}))
         }
         let successful = await bcrypt.compare(password, document.data.password)
-        if(successful) res.send(JSON.stringify({token:document.data.id}))
+        if(successful){
+            var d = new Date();
+            d.setTime(d.getTime() + (30 * 24 * 60 * 60 * 1000));
+            var expires = "Expires="+ d.toUTCString();
+            console.log(document.data.token)
+            res.set('Set-Cookie', `token=${document.data.token}; ${expires}; path=/`)
+            res.send(JSON.stringify({token:document.data.token, username:document.data.username, email:document.data.email}))
+        }
         else res.send(JSON.stringify({message:"Incorrect username or password"}))
     })
+app.route('/api/updateAccount')
+    .post(async (req, res) => {
+        reqCount++
+        let username = req.body.username
+        let email = req.body.email
+        let newPassword = req.body.newPassword
+        let password = req.body.password
+        let token = req.body.token
+        if(!collapsauserbase.findDocument(d => d.data.token == token)) return res.send(JSON.stringify({message:"invalidUsername", err:true}))
+        let document = collapsauserbase.findDocument(d => d.data.token == token)
+        let newDoc = Object.assign({}, document.data)
+        console.log(document)
+        console.log(req.body)
+        if(!password){
+            if(document.data.password) return res.send(JSON.stringify({message:"neededPassword", err:true}))
+            
+        }else {
+            let successful = await bcrypt.compare(password, document.data.password)
+            if(!successful) return res.send(JSON.stringify({message:"incorrectPassword", err:true})) 
+        }
+        if(newPassword){
+            if(!newPassword.match(/^(?=.*[a-zA-Z0-9]).{8,16}$/)) return res.send(JSON.stringify({message:"invalidNewPassword", err:true}))
+            newDoc.password = await bcrypt.hash(newPassword, 10)
+        }
+        if(username != document.data.username){
+            if(!username.match(/^[a-zA-Z]{1}[ \w]{5,11}$/)) return res.send(JSON.stringify({message:"invalidUsername", err:true}))
+            newDoc.username = username
+        }
+        if(email != document.data.email){
+            if(!email.match(/^\w.+@\w{2,253}\.\w{2,63}$/)) return res.send(JSON.stringify({message:"invalidEmail", err:true}))
+            newDoc.email = email
+        }
+        await collapsauserbase.updateDocument(newDoc)
+        console.log(newDoc, collapsauserbase.documents.get(newDoc.id))
+        res.send(JSON.stringify({message:"Account update successful"}))
+    })
+
 app.route('/api/signup')
     .post(async (req, res) => {
         reqCount++
@@ -187,7 +238,7 @@ app.route('/api/discordLogin')
         //res.sendFile(path.join(__dirname, '/client/index.html'));
         let client_id = '710904657811079258'
         let client_secret = 'ZabZmWdAlMZFPl2O7xGRqtqpZhIar9tE'
-        let redirect_uri = process.env.local ? 'http://localhost:3000/api/discordLogin' : 'http://www.collapsa.io/api/discordLogin'
+        let redirect_uri = !process.env.NODE_ENV ? 'https://localhost:4000/api/discordLogin' : 'http://www.collapsa.io/api/discordLogin'
         let code = req.query.code
         let obj = {
             'code': code,
@@ -215,6 +266,7 @@ app.route('/api/discordLogin')
         })
         if(tokens.error){ 
             res.status(404)
+            console.log(tokens.error)
             return res.send(JSON.stringify({error: "invalid token"}))
         }
         let access_token = tokens.access_token
