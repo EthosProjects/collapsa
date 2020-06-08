@@ -348,7 +348,7 @@ class Game extends EventEmitter {
 }
 //console.log(new Day())
 //console.log(new Game())
-module.exports = function (nsp, ns) {
+module.exports = function (nsp, ns, mLab) {
     this.engine = Engine.create(); 
     let engine = this.engine
     let sunlight = 1
@@ -641,7 +641,7 @@ module.exports = function (nsp, ns) {
          * @param {String} id 
          * @param {String} usr 
          */
-        constructor(id, usr, socket, game) {
+        constructor(id, usr, socket, game, token) {
             super()
             this.game = game
             this.id = id
@@ -673,6 +673,7 @@ module.exports = function (nsp, ns) {
                     ) inWay = true
                 })
             }
+            this.token = token
             this.body = Bodies.circle(tempx, tempy, this.rad, {frictionAir:0.02, restitution:0.15})
             Entities.push(this)
             World.addBody(this.game.engine.world, this.body)
@@ -3487,8 +3488,8 @@ module.exports = function (nsp, ns) {
     }
     var Players = {
         list: [],
-        onConnect: function (id, socket, nm) {
-            var player = new Player(id, nm, socket, game)
+        onConnect: function (id, socket, nm, token) {
+            var player = new Player(id, nm, socket, game, token)
             player.needsSelfUpdate = true
             leaderboard.addPlayer(player)
             let pack = player.getSelfUpdatePack()
@@ -3540,7 +3541,18 @@ module.exports = function (nsp, ns) {
                 
                 if (player.health <= 0) {
                     player.emit('death')
-                    if(Players.list.lengt > 1) removePack.player.push(player.id)
+                    if(player.token){
+                        let collapsauserbase = mLab.databases.get('collapsa').collections.get('collapsauserbase')
+                        if(collapsauserbase.findDocument(doc => doc.data.token == player.token)){
+                            let user = collapsauserbase.findDocument(doc => doc.data.token == player.token)
+                            let newDoc = Object.assign({}, user.data)
+                            if(newDoc.highscore < player.score){
+                                newDoc.highscore = player.score
+                                collapsauserbase.updateDocument(newDoc)
+                            }
+                        }
+                    }
+                    if(Players.list.length > 1) removePack.player.push(player.id)
                     Players.list.splice(Players.list.findIndex(function (element) {
                         return element.id === player.id
                     }), 1);
@@ -4235,7 +4247,7 @@ module.exports = function (nsp, ns) {
             }
             playa.msg.set(msgID, msgObj)
         })
-        socket.on('new player', function (usr) {
+        socket.on('new player', function ({usr, token}) {
             console.log('New Player')
             var uppedTrees = STrees.update()
             var pack = {
@@ -4288,7 +4300,7 @@ module.exports = function (nsp, ns) {
             Bullets.list.forEach(function(bullet){
                 pack.bullet.push(bulle)
             })*/
-            Players.onConnect(socket.id, socket, usr);
+            Players.onConnect(socket.id, socket, usr, token);
             this.nsp.to(socket.id).emit('initPack', pack)
             
         });
@@ -4440,3 +4452,4 @@ module.exports = function (nsp, ns) {
     global.games.push(this)
 }
 process.on('uncaughtException', console.error)
+process.on('unhandledRejection', console.error)

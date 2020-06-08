@@ -219,7 +219,7 @@ var init = function(name) {
     star.style.display = "none"
     //document.getElementById("chat").style.display = "block"
     canvas.style.display = "block";
-    socket.emit('new player', usr);
+    socket.emit('new player', {usr, token:getCookie('token')});
     if(!allLoaded) Img.loadImages()
     let canJoin = true;
     var movement = {

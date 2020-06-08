@@ -67,13 +67,12 @@ let io;
 if(httpsServer) io = socketIO(httpsServer);
 else io = socketIO(httpServer);
 var favicon = require('serve-favicon')
-var game = require("./Entity.js")
-new game(io.of('/usaeast1'), '/usaeast1');
+const { mlabInteractor, collection } = require('mlab-promise')
+const mLab = new mlabInteractor('4unBPu8hpfod29vxgQI57c0NMUqMObzP', ['lexybase', 'chatbase'])
+var game = require("./Entity.js", mLab)
+new game(io.of('/usaeast1'), '/usaeast1', mLab);
 //new game(io.of('/usaeast2'), '/usaeast2');
 const discordRoute = require('./api/routes/discord')
-const { mlabInteractor, collection } = require('mlab-promise')
-
-const mLab = new mlabInteractor('4unBPu8hpfod29vxgQI57c0NMUqMObzP', ['lexybase', 'chatbase'])
 require('./collapsabot')(mLab)
 let collapsa
 /**
@@ -172,7 +171,22 @@ app.route('/api/updateAccount')
         console.log(newDoc, collapsauserbase.documents.get(newDoc.id))
         res.send(JSON.stringify({message:"Account update successful"}))
     })
-
+app.route('/api/leaderboard')
+    .get(async (req, res) => {
+        let discorduserbase = collapsa.collections.get('discorduserbase')
+        let discordUsers = discorduserbase.filterDocuments(document => {
+            if(!document.data.guilds['709240989012721717']) return false
+            if(!collapsauserbase.findDocument(doc => doc.data.discordid == document.name)) return false
+            return true
+        })
+        let users = [...collapsauserbase.documents.values()].map(doc => ({
+            username:doc.data.username,
+            score:doc.data.highscore,
+            discordid:doc.data.discordid ? doc.data.discordid : undefined
+        }))
+        discordUsers.forEach(document => users.find(doc => document.data.discordid == doc.name).discordexp = document.data.guilds['709240989012721717'].exp.amount)
+        res.send(JSON.stringify(users))
+    })
 app.route('/api/signup')
     .post(async (req, res) => {
         reqCount++
