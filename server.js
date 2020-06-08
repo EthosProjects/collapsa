@@ -19,9 +19,17 @@ var port = process.env.PORT || 3000; // Used by Heroku and http on localhost
 process.env['PORT'] = process.env.PORT || 4000; // Used by https on localhost
 let httpsServer
 let httpServer = http.createServer(app)
-
+try {
+    const { mlabInteractor } = require('../mlab-promise')
+}catch {
+    const { mlabInteractor } = require('mlab-promise')
+}
+if(process.env.NODE_ENV == 'production'){
+    
+    
+}
 // Run separate https server if on localhost
-/*
+
 if (process.env.NODE_ENV != 'production') {
     httpsServer = https.createServer(httpsOptions, app).listen(process.env.PORT, function () {
         console.log("Express server listening with https on port %d in %s mode", this.address().port, app.settings.env);
@@ -37,18 +45,18 @@ if (process.env.NODE_ENV == 'production') {
         } else {
             return next();
         }
-    });
+    });*/
 } else {
     app.use(function (req, res, next) {
         res.setHeader('Strict-Transport-Security', 'max-age=8640000; includeSubDomains');
         if (!req.secure) {
             console.log('Redirecting')
-            return res.redirect(301, 'https://' + req.host  + ":" + process.env.PORT + req.url);
+            return res.redirect(301, 'https://' + req.hostname  + ":" + process.env.PORT + req.url);
         } else {
             return next();
         }
     });
-};*/
+};
 //var httpsServer = http.Server(app);
 const bodyParser = require('body-parser')
 const bcrypt = require('bcrypt')
@@ -263,7 +271,7 @@ io.on('connection', socket => {
 })
 httpServer.listen(
     port,
-    function() {
+    () => {
         console.log('Your http server is listening on port ' + httpServer.address().port);
     }
 )
