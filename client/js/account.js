@@ -84,6 +84,49 @@ if(getCookie('token')){
         document.getElementById("nameyourself").value = res.username
         accountModalSubmit.disabled = false
     }
+    req = await fetch(`${window.location.origin}/api/leaderboard`, {
+        method:'GET',
+        headers:{
+            'content-type':'application/json'
+        },
+    })
+    res = await req.json()
+    res.forEach(item => {
+        let entry = document.createElement('tr')
+        let username = document.createElement('td')
+            username.textContent = item.username == sessionStorage.getItem('username') ? `(You)${item.username}` : item.username
+        let highscore = document.createElement('td')
+        highscore.textContent = item.score
+        let discordexp = document.createElement('td')
+        discordexp.textContent = item.discordexp || 'Not in the discord'
+        entry.appendChild(username)
+        entry.appendChild(highscore)
+        entry.appendChild(discordexp)
+        leaderboardBody.appendChild(entry)
+    })
+    })()
+}else {
+    (async () => {
+        let req = await fetch(`${window.location.origin}/api/leaderboard`, {
+            method:'GET',
+            headers:{
+                'content-type':'application/json'
+            },
+        })
+        let res = await req.json()
+        res.forEach(item => {
+            let entry = document.createElement('tr')
+            let username = document.createElement('td')
+            username.textContent = item.username
+            let highscore = document.createElement('td')
+            highscore.textContent = item.score
+            let discordexp = document.createElement('td')
+            discordexp.textContent = item.discordexp || 'Not in the discord'
+            entry.appendChild(username)
+            entry.appendChild(highscore)
+            entry.appendChild(discordexp)
+            leaderboardBody.appendChild(entry)
+        })
     })()
 }
 signout.addEventListener('click', e => {

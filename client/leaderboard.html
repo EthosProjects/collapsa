@@ -73,8 +73,8 @@
                     </thead>
                     <tbody id="leaderboardBody">
                     </tbody>
-                  </table>
-                </div>
+                </table>
+            </div>
             <div id="changelog">
                 <h1>Changelog</h1>
             </div>
@@ -164,7 +164,7 @@
                 res.forEach(item => {
                     let entry = document.createElement('tr')
                     let username = document.createElement('td')
-                    username.textContent = item.username
+                        username.textContent = item.username == sessionStorage.getItem('username') ? `(You)${item.username}` : item.username
                     let highscore = document.createElement('td')
                     highscore.textContent = item.score
                     let discordexp = document.createElement('td')
@@ -174,7 +174,29 @@
                     entry.appendChild(discordexp)
                     leaderboardBody.appendChild(entry)
                 })
-                console.log(res)
+                })()
+            }else {
+                (async () => {
+                    let req = await fetch(`${window.location.origin}/api/leaderboard`, {
+                        method:'GET',
+                        headers:{
+                            'content-type':'application/json'
+                        },
+                    })
+                    let res = await req.json()
+                    res.forEach(item => {
+                        let entry = document.createElement('tr')
+                        let username = document.createElement('td')
+                        username.textContent = item.username
+                        let highscore = document.createElement('td')
+                        highscore.textContent = item.score
+                        let discordexp = document.createElement('td')
+                        discordexp.textContent = item.discordexp || 'Not in the discord'
+                        entry.appendChild(username)
+                        entry.appendChild(highscore)
+                        entry.appendChild(discordexp)
+                        leaderboardBody.appendChild(entry)
+                    })
                 })()
             }
         </script>
