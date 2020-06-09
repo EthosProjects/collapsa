@@ -8,8 +8,8 @@ var app = express();
 const httpApp = express();
 //console.log(fs.readFileSync('./httpsServer.csr'))
 var key = fs.readFileSync('encryption/server.key') + '';
-var cert = fs.readFileSync( 'encryption/server.crt' ) + '';
-var ca = fs.readFileSync( 'encryption/server.ca-bundle' ) + '';
+var cert = fs.readFileSync( 'encryption/www_collapsa_io.crt' ) + '';
+var ca = fs.readFileSync( 'encryption/www_collapsa_io.ca-bundle' ) + '';
 let httpsOptions = {
     key: key,
     cert: cert,

@@ -2413,6 +2413,8 @@ var init = function(name) {
             
             ctx.fillStyle = '#01571b'
             ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y, 2000, 1000)
+            ctx.fillStyle = '#e2d0a7'
+            ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y + 1000, 2000, 500)
             pack.player.forEach(function(pack) {
                 /**
                  * @type {Player} toUpdate
@@ -2916,7 +2918,7 @@ var init = function(name) {
                     ctx.beginPath()
                     ctx.fillRect((canvas.width - 300)/2 + 40 + offSetX, (canvas.height - 300)/2 + 40 + offSetY, 60, 60)
                     if(/^leather$/.test(item.type)) ctx.drawImage(Img[item.image], item.x + x - 24.5, item.y + y - 28.5, 49, 57)
-                    if(/^(stone|iron|gold|diamond|emerald|amethyst)$/.test(item.type)){
+                    if(/^(stone|iron|gold|diamond|emerald|amethyst|sand)$/.test(item.type)){
                         ctx.save()
                         ctx.translate((canvas.width - 300)/2 + offSetX + 70, (canvas.height - 300)/2 + offSetY + 70)
                         ctx.save()
@@ -3080,7 +3082,7 @@ var init = function(name) {
                     ctx.drawImage(Img[slot.image], 0 - 40, 0 - 40, 80 , 80 )
                     ctx.restore()
                 }
-                if(/^(stone|iron|gold|diamond|emerald|amethyst)$/.test(slot.image)){
+                if(/^(stone|iron|gold|sand|diamond|emerald|amethyst)$/.test(slot.image)){
                     ctx.save()
                     ctx.translate((canvas.width)/10 + (canvas.width)/10 * i , canvas.height - 100)
                     ctx.rotate(Math.PI/ 180 * 0)
@@ -3377,7 +3379,7 @@ var init = function(name) {
                     ctx.drawImage(Img[slot.image], 0 - 40, 0 - 40, 80 , 80 )
                     ctx.restore()
                 }
-                if(/^(stone|iron|gold|diamond|emerald|amethyst)$/.test(slot.image)){
+                if(/^(stone|iron|gold|sand|diamond|emerald|amethyst)$/.test(slot.image)){
                     ctx.save()
                     ctx.translate(clientX, clientY + 90 - 100 + 10)
                     ctx.rotate(Math.PI/ 180 * 0)

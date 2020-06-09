@@ -519,5 +519,12 @@ module.exports = {
                 type:'Resource',
             }
         ],
+        [
+            'sand',
+            {
+                description: "It's erm dusty?",
+                type:'Resource',
+            }
+        ],
     ]
 }

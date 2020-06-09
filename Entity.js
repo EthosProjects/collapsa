@@ -327,14 +327,20 @@ class Game extends EventEmitter {
         this.Clans = new Mapper()
         this.Entities = new Mapper()
         this.map = {
-            width:2000,
-            height:1000
+            forest: {    
+                width:2000,
+                height:1000
+            },
+            total:{
+                width:2000,
+                height:1500
+            }
         }
         this.walls = {
-            top:Bodies.rectangle(this.map.width/2, -500, this.map.width, 1000, {isStatic:true}),
-            bottom:Bodies.rectangle(this.map.width/2, this.map.height + 500, this.map.width, 1000, {isStatic:true}),
-            left:Bodies.rectangle(-500, this.map.height/2, 1000, this.map.height, {isStatic:true}),
-            right:Bodies.rectangle(this.map.width + 500, this.map.height/2, 1000, this.map.height, {isStatic:true})
+            top:Bodies.rectangle(this.map.total.width/2, -500, this.map.total.width, 1000, {isStatic:true}),
+            bottom:Bodies.rectangle(this.map.total.width/2, this.map.total.height + 500, this.map.total.width, 1000, {isStatic:true}),
+            left:Bodies.rectangle(-500, this.map.total.height/2, 1000, this.map.total.height, {isStatic:true}),
+            right:Bodies.rectangle(this.map.total.width + 500, this.map.total.height/2, 1000, this.map.total.height, {isStatic:true})
         }
         World.add(this.engine.world, [ 
             this.walls.top, 
@@ -369,8 +375,14 @@ module.exports = function (nsp, ns, mLab) {
         setDayTimeout()
     }, 40000)
     this.map = {
-        width:2000,
-        height:1000
+        forest: {    
+            width:2000,
+            height:1000
+        },
+        total:{
+            width:2000,
+            height:1500
+        }
     }
     let clans = new Map()
     let Entities = this.Entities = []
@@ -418,10 +430,10 @@ module.exports = function (nsp, ns, mLab) {
         }
     }
     let walls = {
-        top:Bodies.rectangle(this.map.width/2, -500, this.map.width, 1000, {isStatic:true}),
-        bottom:Bodies.rectangle(this.map.width/2, this.map.height + 500, this.map.width, 1000, {isStatic:true}),
-        left:Bodies.rectangle(-500, this.map.height/2, 1000, this.map.height, {isStatic:true}),
-        right:Bodies.rectangle(this.map.width + 500, this.map.height/2, 1000, this.map.height, {isStatic:true})
+        top:Bodies.rectangle(this.map.total.width/2, -500, this.map.total.width, 1000, {isStatic:true}),
+        bottom:Bodies.rectangle(this.map.total.width/2, this.map.total.height + 500, this.map.total.width, 1000, {isStatic:true}),
+        left:Bodies.rectangle(-500, this.map.total.height/2, 1000, this.map.total.height, {isStatic:true}),
+        right:Bodies.rectangle(this.map.total.width + 500, this.map.total.height/2, 1000, this.map.total.height, {isStatic:true})
     }
     World.add(engine.world, [ 
         walls.top, 
@@ -653,8 +665,8 @@ module.exports = function (nsp, ns, mLab) {
             this.clans = null
             this.msg = new Map()
             this.adminLevel = 0
-            let tempx = Math.getRandomInt(0, game.map.width/100 - 1) * 100 + 50
-            let tempy = Math.getRandomInt(0, game.map.height/100 - 1) * 100 + 50
+            let tempx = Math.getRandomInt(0, game.map.forest.width/100 - 1) * 100 + 50
+            let tempy = Math.getRandomInt(0, game.map.forest.height/100 - 1) * 100 + 50
             let inWay = false
             Entities.forEach(e => {
                 if(
@@ -663,8 +675,8 @@ module.exports = function (nsp, ns, mLab) {
                 ) inWay = true
             })
             while(inWay){
-                tempx = Math.getRandomInt(0, game.map.width/100 - 1) * 100 + 50
-                tempy = Math.getRandomInt(0, game.map.height/100 - 1) * 100 + 50
+                tempx = Math.getRandomInt(0, game.map.forest.width/100 - 1) * 100 + 50
+                tempy = Math.getRandomInt(0, game.map.forest.height/100 - 1) * 100 + 50
                 inWay = false
                 Entities.forEach(e => {
                     if(
@@ -782,7 +794,7 @@ module.exports = function (nsp, ns, mLab) {
                 iron:{
                     damage:4,
                     walldam:6,
-                    mines:[{item:'stone', count:5}]
+                    mines:[{item:'sand', count:5}]
                 }
             }
             this.sword = {
@@ -880,7 +892,7 @@ module.exports = function (nsp, ns, mLab) {
             this.next = 'l'
             this.lhit = false
             this.rhit = false
-            this.maxSpd = 2;
+            this._maxSpd = 2;
             this.health = 20;
             this.maxHealth = 20;
             this.stamina = 20
@@ -927,22 +939,22 @@ module.exports = function (nsp, ns, mLab) {
         updateSpd() {
           var m = this.move
           this.acc = Vector.create(0, 0)
-          if(m.r) this.acc.x += this.maxSpd/3500
-          if(m.l) this.acc.x -= this.maxSpd/3500
-          if(m.d) this.acc.y += this.maxSpd/3500
-          if(m.u) this.acc.y -= this.maxSpd/3500
+          if(m.r) this.acc.x += this._maxSpd/3500
+          if(m.l) this.acc.x -= this._maxSpd/3500
+          if(m.d) this.acc.y += this._maxSpd/3500
+          if(m.u) this.acc.y -= this._maxSpd/3500
           Body.applyForce(this.body, this.body.position, this.acc)
         }
         update() {
             if(this.move.run && this.stamina > .5 && 
               Vector.magnitude(this.acc) > 0 && 
               this.food > this.maxFood * 30 / 100){
-                this.maxSpd = 3
+                this._maxSpd = 3
                 this.stamina -= this.maxStamina/5/60
                 this.needsSelfUpdate = true
             }else if(this.stamina < this.maxStamina && 
               this.food > this.maxFood * 30 / 100){
-                this.maxSpd = 2
+                this._maxSpd = 2
                 if(Vector.magnitude(this.acc) <= 0) this.stamina += this.maxStamina/25/60
                 else this.stamina += this.maxStamina/100/60
                 this.needsSelfUpdate = true
@@ -974,7 +986,7 @@ module.exports = function (nsp, ns, mLab) {
                 //if()
             }
             this.updateSpd();
-            if(Vector.magnitude(this.body.velocity) > this.maxSpd) Vector.mult(Vector.normalise(this.body.velocity), {x:this.maxSpd, y:this.maxSpd}, this.body.velocity)            
+            if(Vector.magnitude(this.body.velocity) > this._maxSpd) Vector.mult(Vector.normalise(this.body.velocity), {x:this._maxSpd, y:this._maxSpd}, this.body.velocity)            
             this.targets = []
             this.treetargs = []
             this.stonetargs = []
@@ -1418,7 +1430,7 @@ module.exports = function (nsp, ns, mLab) {
                                 if(Vector.getDistance(paxep, e.body.position) < e.rad + paxerad) targs.push(e)
                             }
                             if(e instanceof STree || e instanceof Stone || e instanceof Iron || e instanceof Gold || e instanceof Diamond || e instanceof Emerald || e instanceof Amethyst){
-                                
+
                                 if(Vector.getDistance(paxep, e.body.position) < 50 + paxerad) rtargs.push(e)
                             }
                             if(e instanceof Wall || e instanceof Door || e instanceof Floor || e instanceof CraftingTable || e instanceof CarrotFarm){
@@ -1427,41 +1439,10 @@ module.exports = function (nsp, ns, mLab) {
                             }
                         })
                         new Timeout(() => {
+                            console.log(this.shovel[u].mines)
+                            this.inventory.addItemMax(new Slot('sand', this.shovel[u].mines[0].count, 'sand', 255))
+                            this.score += this.shovel[u].mines[0].count * 2
                             rtargs.forEach(r => {
-                                let rem
-                                let restype = ''
-                                let resnum = null
-                                if(r instanceof Stone){restype = 'stone'; resnum = 0}
-                                if(r instanceof Iron){restype = 'iron'; resnum = 1}
-                                if(r instanceof Gold){restype = 'gold'; resnum = 2}
-                                if(r instanceof Diamond){restype = 'diamond'; resnum = 3}
-                                if(r instanceof Emerald){restype = 'emerald'; resnum = 4}
-                                if(r instanceof Amethyst){restype = 'amethyst'; resnum = 5} 
-                                if(r instanceof Stone || r instanceof Iron || r instanceof Gold || r instanceof Diamond || r instanceof Amethyst || r instanceof Emerald){
-                                    if((un >= 3) || ((un > 0 && un < 3) && resnum <= 3) || (resnum == un) || (un == 0 || resnum == 1)){
-                                        rem = this.inventory.addItemMax(new Slot(restype, this.shovel[u].mines[resnum].count, restype, 255, false))
-                                        this.score += this.shovel[u].mines[resnum].count * resnum + 2
-                                    }
-                                    this.needsSelfUpdate = true
-                                }
-                                if(rem){
-                                    let ang = Math.getRandomNum(0, 360)
-                                    let offset = Vector.create(0, 50 + 20)
-                                    offset.x = Math.cos(ang * Math.PI / 180) * Vector.magnitude(offset);
-                                    offset.y = Math.sin(ang * Math.PI / 180) * Vector.magnitude(offset);
-                                    Vector.add(r.body.position, offset, offset)
-                                    let self = {
-                                        item:rem,
-                                        x:offset.x,
-                                        y:offset.y, 
-                                        timeout:new Timeout(() => {
-                                            dropped.splice(dropped.findIndex(function (element) {
-                                                return element === self
-                                            }), 1);
-                                        }, 20000)
-                                    }
-                                    dropped.push(self)
-                                }
                                 r.health -= this.shovel[u].walldam
                             })
                             targs.forEach(t => {
@@ -1521,7 +1502,7 @@ module.exports = function (nsp, ns, mLab) {
                                         )
                                 )
                             ) || 
-                            (mvect.x < 50 || mvect.y < 50 || mvect.x > game.map.width || mvect.y > game.map.height)
+                            (mvect.x < 50 || mvect.y < 50 || mvect.x > game.map.forest.width || mvect.y > game.map.forest.height)
                         )){
                             return this.canPlace = false
                         }
@@ -1545,7 +1526,7 @@ module.exports = function (nsp, ns, mLab) {
                               ) && !(
                                   this.structures.find(s => e == s && e instanceof Floor) || 
                                   (this.clan && this.clan.members.find(member => member.structures.find(s => e == s && s instanceof Floor)))
-                              ) || (mvect.x < 50 || mvect.y < 50 || mvect.x > game.map.width || mvect.y > game.map.height)
+                              ) || (mvect.x < 50 || mvect.y < 50 || mvect.x > game.map.forest.width || mvect.y > game.map.forest.height)
                         ))return this.canPlace = false
                         let slot = this.inventory.get(this.mainHand)
                         slot.count -= 1
@@ -1567,7 +1548,7 @@ module.exports = function (nsp, ns, mLab) {
                               ) && !(
                                   this.structures.find(s => e == s && e instanceof Floor) || 
                                   (this.clan && this.clan.members.find(member => member.structures.find(s => e == s && s instanceof Floor)))
-                              ) || (mvect.x < 50 || mvect.y < 50 || mvect.x > game.map.width || mvect.y > game.map.height)
+                              ) || (mvect.x < 50 || mvect.y < 50 || mvect.x > game.map.forest.width || mvect.y > game.map.forest.height)
                         ))return this.canPlace = false
                         let slot = this.inventory.get(this.mainHand)
                         slot.count -= 1
@@ -1590,7 +1571,7 @@ module.exports = function (nsp, ns, mLab) {
                                   (
                                       this.clan && 
                                       this.clan.members.find(member => member.structures.find(s => e == s && (e instanceof Wall || e instanceof Door || e instanceof CraftingTable))))
-                              ) || (mvect.x < 50 || mvect.y < 50 || mvect.x > game.map.width || mvect.y > game.map.height)
+                              ) || (mvect.x < 50 || mvect.y < 50 || mvect.x > game.map.forest.width || mvect.y > game.map.forest.height)
                         ))return this.canPlace = false
                         let slot = this.inventory.get(this.mainHand)
                         slot.count -= 1
@@ -1615,7 +1596,7 @@ module.exports = function (nsp, ns, mLab) {
                                   (
                                       this.clan && 
                                       this.clan.members.find(member => member.structures.find(s => e == s && (e instanceof Wall || e instanceof Door || e instanceof CraftingTable))))
-                              ) || (mvect.x < 50 || mvect.y < 50 || mvect.x > game.map.width || mvect.y > game.map.height)
+                              ) || (mvect.x < 50 || mvect.y < 50 || mvect.x > game.map.forest.width || mvect.y > game.map.forest.height)
                         ))return this.canPlace = false
                         let slot = this.inventory.get(this.mainHand)
                         slot.count -= 1
@@ -1763,7 +1744,7 @@ module.exports = function (nsp, ns, mLab) {
         changeArmor(armor){
             this.armor = armor
             this.armorParts = this.armor.id.toLowerCase().split(' ')
-            if(this.armorParts[1] == 'armor') this.maxSpd *= 0.7
+            if(this.armorParts[1] == 'armor') this._maxSpd *= 0.7
         }
         getUpdatePack() {
             var pack = {
@@ -1911,7 +1892,7 @@ module.exports = function (nsp, ns, mLab) {
             this.next = 'l'
             this.lhit = false
             this.rhit = false
-            this.maxSpd = 2.75;
+            this._maxSpd = 2.75;
             this.health = 5;
             this.maxHealth = 30;
             this.stamina = 20
@@ -1997,7 +1978,7 @@ module.exports = function (nsp, ns, mLab) {
                 }
                 if(!this.pos) return this.path = null
             }
-            let grid = new PF.Grid(game.map.width/100, game.map.width/100)
+            let grid = new PF.Grid(game.map.forest.width/100, game.map.forest.width/100)
             let finder = new PF.AStarFinder()
             STrees.list.forEach(tree => grid.setWalkableAt((tree.x - 50)/100, (tree.y - 50)/100, false))
             Stones.list.forEach(tree => grid.setWalkableAt((tree.x - 50)/100, (tree.y - 50)/100, false))
@@ -2010,7 +1991,7 @@ module.exports = function (nsp, ns, mLab) {
             let y = Math.roundToDeca(this.body.position.y - 50, 100)/100
             let fx = Math.roundToDeca(this.pos.body.position.x - 50, 100)/100
             let fy = Math.roundToDeca(this.pos.body.position.y - 50, 100)/100
-            if(x > game.map.width/100 - 1|| y > game.map.width/100 - 1 || fx > game.map.width/100 - 1|| fy > game.map.width/100 - 1 || 
+            if(x > game.map.forest.width/100 - 1|| y > game.map.forest.width/100 - 1 || fx > game.map.forest.width/100 - 1|| fy > game.map.forest.width/100 - 1 || 
             x < 0 || y < 0 || fx < 0 || fy < 0) return this.path = null
             this.path = finder.findPath(x, y, fx, fy, grid)
             setTimeout(() => {
@@ -2039,20 +2020,20 @@ module.exports = function (nsp, ns, mLab) {
             if(!n) return
             this.acc = Vector.create(0, 0)
 
-            if(this.body.position.x < n.x) this.acc.x += this.maxSpd/3500
-            if(this.body.position.x > n.x) this.acc.x -= this.maxSpd/3500
-            if(this.body.position.y < n.y) this.acc.y += this.maxSpd/3500
-            if(this.body.position.y > n.y) this.acc.y -= this.maxSpd/3500
+            if(this.body.position.x < n.x) this.acc.x += this._maxSpd/3500
+            if(this.body.position.x > n.x) this.acc.x -= this._maxSpd/3500
+            if(this.body.position.y < n.y) this.acc.y += this._maxSpd/3500
+            if(this.body.position.y > n.y) this.acc.y -= this._maxSpd/3500
             if(Vector.getDistance(this.body.position, n) < 70.7 + this.rad) this.curr++
             Body.applyForce(this.body, this.body.position, this.acc)
         }
         update() {
             if(this.move.run && this.stamina > .5 && Vector.magnitude(this.acc) > 0){
-                this.maxSpd = 3
+                this._maxSpd = 3
                 this.stamina -= this.maxStamina/5/60
                 this.needsSelfUpdate = true
             }else if(this.stamina < this.maxStamina){
-                this.maxSpd = 2
+                this._maxSpd = 2
                 if(Vector.magnitude(this.acc) <= 0) this.stamina += this.maxStamina/25/60
                 else this.stamina += this.maxStamina/100/60
                 this.needsSelfUpdate = true
@@ -2063,7 +2044,7 @@ module.exports = function (nsp, ns, mLab) {
             if(this.stamina > this.maxStamina) this.stamina = this.maxStamina
             if(this.health > this.maxHealth) this.health = this.maxHealth
             this.updateSpd();
-            if(Vector.magnitude(this.body.velocity) > this.maxSpd) Vector.mult(Vector.normalise(this.body.velocity), {x:this.maxSpd, y:this.maxSpd}, this.body.velocity)            
+            if(Vector.magnitude(this.body.velocity) > this._maxSpd) Vector.mult(Vector.normalise(this.body.velocity), {x:this._maxSpd, y:this._maxSpd}, this.body.velocity)            
             this.targets = []
             if (this.punch.reload.timer > 0) {
                 this.punch.reload.timer--
@@ -2233,7 +2214,7 @@ module.exports = function (nsp, ns, mLab) {
             this.next = 'l'
             this.lhit = false
             this.rhit = false
-            this.maxSpd = 4;
+            this._maxSpd = 4;
             this.health = 20;
             this.maxHealth = 20;
             this.stamina = 20
@@ -2319,7 +2300,7 @@ module.exports = function (nsp, ns, mLab) {
                 }
                 if(!this.pos) return this.path = null
             }
-            let grid = new PF.Grid(game.map.width/100, game.map.width/100)
+            let grid = new PF.Grid(game.map.forest.width/100, game.map.forest.width/100)
             let finder = new PF.AStarFinder()
             STrees.list.forEach(tree => grid.setWalkableAt((tree.x - 50)/100, (tree.y - 50)/100, false))
             Stones.list.forEach(tree => grid.setWalkableAt((tree.x - 50)/100, (tree.y - 50)/100, false))
@@ -2333,7 +2314,7 @@ module.exports = function (nsp, ns, mLab) {
             let y = Math.roundToDeca(this.body.position.y - 50, 100)/100
             let fx = Math.roundToDeca(this.pos.body.position.x - 50, 100)/100
             let fy = Math.roundToDeca(this.pos.body.position.y - 50, 100)/100
-            if(x > game.map.width/100 - 1|| y > game.map.width/100 - 1 || fx > game.map.width/100 - 1|| fy > game.map.width/100 - 1 || 
+            if(x > game.map.forest.width/100 - 1|| y > game.map.forest.width/100 - 1 || fx > game.map.forest.width/100 - 1|| fy > game.map.forest.width/100 - 1 || 
             x < 0 || y < 0 || fx < 0 || fy < 0) return this.path = null
             this.path = finder.findPath(x, y, fx, fy, grid)
             setTimeout(() => {
@@ -2366,20 +2347,20 @@ module.exports = function (nsp, ns, mLab) {
             if(!n) return
             this.acc = Vector.create(0, 0)
 
-            if(this.body.position.x < n.x) this.acc.x += this.maxSpd/3500
-            if(this.body.position.x > n.x) this.acc.x -= this.maxSpd/3500
-            if(this.body.position.y < n.y) this.acc.y += this.maxSpd/3500
-            if(this.body.position.y > n.y) this.acc.y -= this.maxSpd/3500
+            if(this.body.position.x < n.x) this.acc.x += this._maxSpd/3500
+            if(this.body.position.x > n.x) this.acc.x -= this._maxSpd/3500
+            if(this.body.position.y < n.y) this.acc.y += this._maxSpd/3500
+            if(this.body.position.y > n.y) this.acc.y -= this._maxSpd/3500
             if(Vector.getDistance(this.body.position, n) < 70.7 + this.rad) this.curr++
             Body.applyForce(this.body, this.body.position, this.acc)
         }
         update() {
             if(this.move.run && this.stamina > .5 && Vector.magnitude(this.acc) > 0){
-                this.maxSpd = 3
+                this._maxSpd = 3
                 this.stamina -= this.maxStamina/5/60
                 this.needsSelfUpdate = true
             }else if(this.stamina < this.maxStamina){
-                this.maxSpd = 2
+                this._maxSpd = 2
                 if(Vector.magnitude(this.acc) <= 0) this.stamina += this.maxStamina/25/60
                 else this.stamina += this.maxStamina/100/60
                 this.needsSelfUpdate = true
@@ -2390,7 +2371,7 @@ module.exports = function (nsp, ns, mLab) {
             if(this.health > this.maxHealth) this.health = this.maxHealth
             this.updateSpd();
             this.setHands()
-            if(Vector.magnitude(this.body.velocity) > this.maxSpd) Vector.mult(Vector.normalise(this.body.velocity), {x:this.maxSpd, y:this.maxSpd}, this.body.velocity)            
+            if(Vector.magnitude(this.body.velocity) > this._maxSpd) Vector.mult(Vector.normalise(this.body.velocity), {x:this._maxSpd, y:this._maxSpd}, this.body.velocity)            
             this.targets = []
             if (this.punch.reload.timer > 0) {
                 this.punch.reload.timer--
@@ -2555,7 +2536,7 @@ module.exports = function (nsp, ns, mLab) {
             this.next = 'l'
             this.lhit = false
             this.rhit = false
-            this.maxSpd = 2;
+            this._maxSpd = 2;
             this.health = 5;
             this.maxHealth = 5;
             this.stamina = 20
@@ -2625,7 +2606,7 @@ module.exports = function (nsp, ns, mLab) {
                 }
                 if(!this.pos) return this.path = null
             }
-            let grid = new PF.Grid(game.map.width/100, game.map.width/100)
+            let grid = new PF.Grid(game.map.forest.width/100, game.map.forest.width/100)
             let finder = new PF.AStarFinder()
             STrees.list.forEach(tree => grid.setWalkableAt((tree.x - 50)/100, (tree.y - 50)/100, false))
             Stones.list.forEach(tree => grid.setWalkableAt((tree.x - 50)/100, (tree.y - 50)/100, false))
@@ -2639,7 +2620,7 @@ module.exports = function (nsp, ns, mLab) {
             let y = Math.roundToDeca(this.body.position.y - 50, 100)/100
             let fx = Math.roundToDeca(this.pos.body.position.x - 50, 100)/100
             let fy = Math.roundToDeca(this.pos.body.position.y - 50, 100)/100
-            if(x > game.map.width/100 - 1|| y > game.map.width/100 - 1 || fx > game.map.width/100 - 1|| fy > game.map.width/100 - 1 || 
+            if(x > game.map.forest.width/100 - 1|| y > game.map.forest.width/100 - 1 || fx > game.map.forest.width/100 - 1|| fy > game.map.forest.width/100 - 1 || 
             x < 0 || y < 0 || fx < 0 || fy < 0) return this.path = null
             this.path = finder.findPath(x, y, fx, fy, grid)
             setTimeout(() => {
@@ -2667,20 +2648,20 @@ module.exports = function (nsp, ns, mLab) {
             if(!n) return
             this.acc = Vector.create(0, 0)
 
-            if(this.body.position.x < n.x) this.acc.x += this.maxSpd/3500
-            if(this.body.position.x > n.x) this.acc.x -= this.maxSpd/3500
-            if(this.body.position.y < n.y) this.acc.y += this.maxSpd/3500
-            if(this.body.position.y > n.y) this.acc.y -= this.maxSpd/3500
+            if(this.body.position.x < n.x) this.acc.x += this._maxSpd/3500
+            if(this.body.position.x > n.x) this.acc.x -= this._maxSpd/3500
+            if(this.body.position.y < n.y) this.acc.y += this._maxSpd/3500
+            if(this.body.position.y > n.y) this.acc.y -= this._maxSpd/3500
             if(Vector.getDistance(this.body.position, n) < 70.7 + this.rad) this.curr++
             Body.applyForce(this.body, this.body.position, this.acc)
         }
         update() {
             if(this.move.run && this.stamina > .5 && Vector.magnitude(this.acc) > 0){
-                this.maxSpd = 3
+                this._maxSpd = 3
                 this.stamina -= this.maxStamina/5/60
                 this.needsSelfUpdate = true
             }else if(this.stamina < this.maxStamina){
-                this.maxSpd = 2
+                this._maxSpd = 2
                 if(Vector.magnitude(this.acc) <= 0) this.stamina += this.maxStamina/25/60
                 else this.stamina += this.maxStamina/100/60
                 this.needsSelfUpdate = true
@@ -2691,7 +2672,7 @@ module.exports = function (nsp, ns, mLab) {
             if(this.health > this.maxHealth) this.health = this.maxHealth
             this.updateSpd();
             this.setHands()
-            if(Vector.magnitude(this.body.velocity) > this.maxSpd) Vector.mult(Vector.normalise(this.body.velocity), {x:this.maxSpd, y:this.maxSpd}, this.body.velocity)            
+            if(Vector.magnitude(this.body.velocity) > this._maxSpd) Vector.mult(Vector.normalise(this.body.velocity), {x:this._maxSpd, y:this._maxSpd}, this.body.velocity)            
             this.targets = []
             if (this.punch.reload.timer > 0) {
                 this.punch.reload.timer--
@@ -3729,10 +3710,10 @@ module.exports = function (nsp, ns, mLab) {
                     4
                     demon.hands.damage = dayTimeout.percntDone * 1 + 0.5
                     demon.maxHealth = dayTimeout.percntDone * 15 + 5
-                    demon.maxSpd =  (-2 * Math.abs(dayTimeout.percntDone - 0.5) + 1) * 1 + 1
+                    demon._maxSpd =  (-2 * Math.abs(dayTimeout.percntDone - 0.5) + 1) * 1 + 1
                 }else {
                     demon.hands.damage = 2 + (-2 * Math.abs(dayTimeout.percntDone - 0.5) + 1) * 2
-                    demon.maxSpd = 2 + (-2 * Math.abs(dayTimeout.percntDone - 0.5) + 1) * 2
+                    demon._maxSpd = 2 + (-2 * Math.abs(dayTimeout.percntDone - 0.5) + 1) * 2
                 }
                 if (demon.health <= 0) {
                     demon.emit('death')
@@ -3786,10 +3767,10 @@ module.exports = function (nsp, ns, mLab) {
                 if(timeOfDay == 'day'){
                     demon.hands.damage = dayTimeout.percntDone * 1 + 0.5
                     demon.maxHealth = dayTimeout.percntDone * 25 + 5
-                    demon.maxSpd =  (-2 * Math.abs(dayTimeout.percntDone - 0.5) + 1) * 0.5 + 1
+                    demon._maxSpd =  (-2 * Math.abs(dayTimeout.percntDone - 0.5) + 1) * 0.5 + 1
                 }else {
                     demon.hands.damage = 4 + (-2 * Math.abs(dayTimeout.percntDone - 0.5) + 1) * 2
-                    demon.maxSpd = 1.75 + (-2 * Math.abs(dayTimeout.percntDone - 0.5) + 1)
+                    demon._maxSpd = 1.75 + (-2 * Math.abs(dayTimeout.percntDone - 0.5) + 1)
                 }
                 if(demon.health <= 0 && timeOfDay == 'night'){
                     let drops = [new Slot('diamond', 5, 'diamond'), new Slot('diamond', 5, 'diamond'), new Slot('diamond', 5, 'diamond'), new Slot('diamond', 5, 'diamond')]
@@ -3978,8 +3959,8 @@ module.exports = function (nsp, ns, mLab) {
         }
     }
     let getGoodPosition = () => {
-        let tempx = Math.getRandomInt(0, game.map.width/100 - 1) * 100 + 50
-        let tempy = Math.getRandomInt(0, game.map.height/100 - 1) * 100 + 50
+        let tempx = Math.getRandomInt(0, game.map.forest.width/100 - 1) * 100 + 50
+        let tempy = Math.getRandomInt(0, game.map.forest.height/100 - 1) * 100 + 50
         let inWay = false
         Entities.forEach(e => {
             if(
@@ -3988,8 +3969,8 @@ module.exports = function (nsp, ns, mLab) {
             ) inWay = true
         })
         while(inWay){
-            tempx = Math.getRandomInt(0, game.map.width/100 - 1) * 100 + 50
-            tempy = Math.getRandomInt(0, game.map.height/100 - 1) * 100 + 50
+            tempx = Math.getRandomInt(0, game.map.forest.width/100 - 1) * 100 + 50
+            tempy = Math.getRandomInt(0, game.map.forest.height/100 - 1) * 100 + 50
             inWay = false
             Entities.forEach(e => {
                 if(
