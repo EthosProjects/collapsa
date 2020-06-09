@@ -683,7 +683,7 @@ var init = function(name) {
                     ctx.fillStyle = '#7F7F7F'
                     ctx.arc(32, 15, 7.5 - 2, 0, 2 * Math.PI)
                     ctx.fill()
-                    //ctx.drawImage(Img.hand, 32 - 7.5, 15 - 7.5, 15, 15)
+                    //drawHand(32 - 7.5, 15 - 7.5, 15, 15)
                 } else {
                     ctx.save();
                     ctx.translate(32 - 7.5, 15 - 7.5);
@@ -722,7 +722,8 @@ var init = function(name) {
                     ctx.restore();
                 }
             } else {
-                if(/Axe|Pickaxe|Sword|Hammer/.test(this.mainHand)){
+                if(/Axe|Pickaxe|Shovel|Sword|Hammer/.test(this.mainHand)){
+                    console.log(this.mainHand)
                     if(/Axe/.test(this.mainHand)){
                         let img = this.mainHand.toLowerCase().replace(/\s/, '')
                         ctx.save()
@@ -733,8 +734,8 @@ var init = function(name) {
                         ctx.rotate((Math.PI / 180) * 180)
                         ctx.drawImage(Img[img], 0 - 75/2, 0 - 75/2, 75, 75)
                         ctx.restore()
-                        ctx.drawImage(Img.hand, 0, 15 - 7.5 - 5, 15, 15)
-                        ctx.drawImage(Img.hand, 0, 15 - 2 - 7.5 - 30, 15, 15)
+                        drawHand(0, 15 - 7.5 - 5, 15, 15)
+                        drawHand(0, 15 - 2 - 7.5 - 30, 15, 15)
                         ctx.restore()
                     }else if(/Pickaxe/.test(this.mainHand)){
                         let img = this.mainHand.toLowerCase().replace(/\s/, '')
@@ -747,8 +748,8 @@ var init = function(name) {
                         ctx.rotate((Math.PI / 180) * 180)
                         ctx.drawImage(Img[img], 0 - 75/2, 0 - 75/2, 75, 75)
                         ctx.restore()
-                        ctx.drawImage(Img.hand, 0, 15 - 7.5 - 5, 15, 15)
-                        ctx.drawImage(Img.hand, 0, 15 - 2 - 7.5 - 30, 15, 15)
+                        drawHand(0, 15 - 7.5 - 5, 15, 15)
+                        drawHand(0, 15 - 2 - 7.5 - 30, 15, 15)
                         ctx.restore()
                     }else if(/Sword/.test(this.mainHand)){
                         let img = this.mainHand.toLowerCase().replace(/\s/, '')
@@ -756,7 +757,7 @@ var init = function(name) {
                         ctx.translate(32 - 7.5 + 5, 0)
                         ctx.strokeStyle = 'black'
                         ctx.lineWidth = '20px'
-                        ctx.drawImage(Img.hand, -15, 15 - 7.5 - 5 + 25, 15, 15)
+                        drawHand(-15, 15 - 7.5 - 5 + 25, 15, 15)
                         if(this.hitting) ctx.rotate((Math.PI / 180) * (360 - (-Math.abs(-120 * this.per + 60) + 60)))
                         ctx.save()
                         ctx.translate(-2.5 + 75/2 - 32 - 7.5 + 10, -30 + 75/2)
@@ -764,7 +765,7 @@ var init = function(name) {
                         ctx.drawImage(Img[img], 0 - 75/2, 0 - 75/2, 75, 75)
                         ctx.restore()
                     
-                        ctx.drawImage(Img.hand, 0, 15 - 2 - 7.5 - 30, 15, 15)
+                        drawHand(0, 15 - 2 - 7.5 - 30, 15, 15)
                         ctx.restore()
                     }else if(/Hammer/.test(this.mainHand)){
                         let img = this.mainHand.toLowerCase().replace(/\s/, '')
@@ -776,17 +777,17 @@ var init = function(name) {
                         ctx.rotate((Math.PI / 180) * 180)
                         ctx.drawImage(Img[img], 0 - 75/2, 0 - 75/2, 75, 75)
                         ctx.restore()
-                        ctx.drawImage(Img.hand, 0, 15 - 7.5 - 5, 15, 15)
-                        ctx.drawImage(Img.hand, 0, 15 - 2 - 7.5 - 30, 15, 15)
+                        drawHand(0, 15 - 7.5 - 5, 15, 15)
+                        drawHand(0, 15 - 2 - 7.5 - 30, 15, 15)
                         ctx.restore()
                     }
                 }
                 if(/Wall|Door|Floor|Crafting Table|Chest/.test(this.mainHand)){
                     let img = this.mainHand.toLowerCase().replace(/\s/, '')
-                    ctx.drawImage(Img.hand, 32 - 7.5, -15 - 7.5, 15, 15)
+                    drawHand(32 - 7.5, -15 - 7.5, 15, 15)
                     ctx.save()
                     ctx.translate(32 - 7.5 + 5, 0)
-                    ctx.drawImage(Img.hand, -15, 15 - 7.5 - 5 + 25, 15, 15)
+                    drawHand(-15, 15 - 7.5 - 5 + 25, 15, 15)
                     ctx.restore()
                 }
                 if(this.mainHand == 'carrot'){
@@ -910,7 +911,18 @@ var init = function(name) {
             ctx.save();
             
             //ctx.drawImage(Img.player, currx - this.rad, curry - this.rad, this.rad * 2, this.rad * 2)
-            
+            let drawHand = (x, y) => {
+                x += 7.5
+                y += 7.5
+                ctx.beginPath()
+                ctx.fillStyle = 'black'
+                ctx.arc(x, y, 7.5, 0, 2 * Math.PI)
+                ctx.fill()
+                ctx.beginPath()
+                ctx.fillStyle = '#7F7F7F'
+                ctx.arc(x, y, 7.5 - 2, 0, 2 * Math.PI)
+                ctx.fill()
+            }
             ctx.save()
             ctx.beginPath()
             ctx.fillStyle = 'red';
@@ -1001,7 +1013,7 @@ var init = function(name) {
                     ctx.fillStyle = '#7F7F7F'
                     ctx.arc(32, 15, 7.5 - 2, 0, 2 * Math.PI)
                     ctx.fill()
-                    //ctx.drawImage(Img.hand, 32 - 7.5, 15 - 7.5, 15, 15)
+                    //drawHand(32 - 7.5, 15 - 7.5, 15, 15)
                 } else {
                     ctx.save();
                     ctx.translate(32 - 7.5, 15 - 7.5);
@@ -1040,7 +1052,8 @@ var init = function(name) {
                     ctx.restore();
                 }
             } else {
-                if(/Axe|Pickaxe|Sword|Hammer/.test(this.mainHand)){
+                if(/Axe|Pickaxe|Shovel|Sword|Hammer/.test(this.mainHand)){
+                    
                     if(/Axe/.test(this.mainHand)){
                         let img = this.mainHand.toLowerCase().replace(/\s/, '')
                         ctx.save()
@@ -1051,8 +1064,8 @@ var init = function(name) {
                         ctx.rotate((Math.PI / 180) * 180)
                         ctx.drawImage(Img[img], 0 - 75/2, 0 - 75/2, 75, 75)
                         ctx.restore()
-                        ctx.drawImage(Img.hand, 0, 15 - 7.5 - 5, 15, 15)
-                        ctx.drawImage(Img.hand, 0, 15 - 2 - 7.5 - 30, 15, 15)
+                        drawHand(0, 15 - 7.5 - 5, 15, 15)
+                        drawHand(0, 15 - 2 - 7.5 - 30, 15, 15)
                         ctx.restore()
                     }else if(/Pickaxe/.test(this.mainHand)){
                         let img = this.mainHand.toLowerCase().replace(/\s/, '')
@@ -1065,8 +1078,8 @@ var init = function(name) {
                         ctx.rotate((Math.PI / 180) * 180)
                         ctx.drawImage(Img[img], 0 - 75/2, 0 - 75/2, 75, 75)
                         ctx.restore()
-                        ctx.drawImage(Img.hand, 0, 15 - 7.5 - 5, 15, 15)
-                        ctx.drawImage(Img.hand, 0, 15 - 2 - 7.5 - 30, 15, 15)
+                        drawHand(0, 15 - 7.5 - 5, 15, 15)
+                        drawHand(0, 15 - 2 - 7.5 - 30, 15, 15)
                         ctx.restore()
                     }else if(/Sword/.test(this.mainHand)){
                         let img = this.mainHand.toLowerCase().replace(/\s/, '')
@@ -1074,7 +1087,7 @@ var init = function(name) {
                         ctx.translate(32 - 7.5 + 5, 0)
                         ctx.strokeStyle = 'black'
                         ctx.lineWidth = '20px'
-                        ctx.drawImage(Img.hand, -15, 15 - 7.5 - 5 + 25, 15, 15)
+                        drawHand(-15, 15 - 7.5 - 5 + 25, 15, 15)
                         if(this.hitting) ctx.rotate((Math.PI / 180) * (360 - (-Math.abs(-120 * this.per + 60) + 60)))
                         ctx.save()
                         ctx.translate(-2.5 + 75/2 - 32 - 7.5 + 10, -30 + 75/2)
@@ -1082,7 +1095,7 @@ var init = function(name) {
                         ctx.drawImage(Img[img], 0 - 75/2, 0 - 75/2, 75, 75)
                         ctx.restore()
                     
-                        ctx.drawImage(Img.hand, 0, 15 - 2 - 7.5 - 30, 15, 15)
+                        drawHand(0, 15 - 2 - 7.5 - 30, 15, 15)
                         ctx.restore()
                     }else if(/Hammer/.test(this.mainHand)){
                         let img = this.mainHand.toLowerCase().replace(/\s/, '')
@@ -1094,17 +1107,41 @@ var init = function(name) {
                         ctx.rotate((Math.PI / 180) * 180)
                         ctx.drawImage(Img[img], 0 - 75/2, 0 - 75/2, 75, 75)
                         ctx.restore()
-                        ctx.drawImage(Img.hand, 0, 15 - 7.5 - 5, 15, 15)
-                        ctx.drawImage(Img.hand, 0, 15 - 2 - 7.5 - 30, 15, 15)
+                        drawHand(0, 15 - 7.5 - 5, 15, 15)
+                        drawHand(0, 15 - 2 - 7.5 - 30, 15, 15)
+                        ctx.restore()
+                    }else if(/Shovel/.test(this.mainHand)){
+                        let img = this.mainHand.toLowerCase().replace(/\s/, '')
+                        ctx.save()
+                        ctx.translate(32 - 7.5 + 5, 0)
+                        
+                        if(this.hitting && this.per < 0.333){ 
+                            ctx.rotate((Math.PI / 180) * (360 - 180 * this.per))
+                            ctx.translate(this.per * 30, this.per * -60)
+                        }else if(this.hitting && this.per > 0.333 && this.per < 0.666){
+                            ctx.rotate((Math.PI / 180) * (360 - 60))
+                            
+                            ctx.translate(10, -Math.abs(-240 * this.per + 120) + 20)
+                        }else if(this.hitting){
+                            ctx.rotate((Math.PI / 180) * (360 - (-180 * this.per + 180)))
+                            ctx.translate(this.per * -30 + 30, this.per * 60 - 60)
+                        }
+                        ctx.save()
+                        ctx.translate(-2.5 + 75/2 - 32 - 7.5 + 10, -30 + 75/2)
+                        ctx.rotate((Math.PI / 180) * 180)
+                        ctx.drawImage(Img[img], 0 - 75/2, 0 - 75/2, 75, 75)
+                        ctx.restore()
+                        drawHand(0, 15 - 7.5 - 5 - 2, 15, 15)
+                        drawHand(0, 15 - 2 - 7.5 - 30 - 2, 15, 15)
                         ctx.restore()
                     }
                 }
                 if(/Wall|Door|Floor|Crafting Table|Chest/.test(this.mainHand)){
                     let img = this.mainHand.toLowerCase().replace(/\s/, '')
-                    ctx.drawImage(Img.hand, 32 - 7.5, -15 - 7.5, 15, 15)
+                    drawHand(32 - 7.5, -15 - 7.5, 15, 15)
                     ctx.save()
                     ctx.translate(32 - 7.5 + 5, 0)
-                    ctx.drawImage(Img.hand, -15, 15 - 7.5 - 5 + 25, 15, 15)
+                    drawHand(-15, 15 - 7.5 - 5 + 25, 15, 15)
                     ctx.restore()
                 }
                 if(this.mainHand == 'carrot'){
@@ -1503,7 +1540,7 @@ var init = function(name) {
                 ctx.fillStyle = this.hcolor
                 ctx.arc(32, 15, 7.5 - 2, 0, 2 * Math.PI)
                 ctx.fill()
-                //ctx.drawImage(Img.hand, 32 - 7.5, 15 - 7.5, 15, 15)
+                //drawHand(32 - 7.5, 15 - 7.5, 15, 15)
             } else {
                 ctx.save();
                 ctx.translate(32 - 7.5, 15 - 7.5);
@@ -1620,22 +1657,34 @@ var init = function(name) {
             ctx.translate(currx, curry)
             ctx.rotate((Math.PI / 180) * this.angle)
             ctx.scale(this.rad/25, this.rad/25)
+            let drawHand = (x, y) => {
+                x += 7.5
+                y += 7.5
+                ctx.beginPath()
+                ctx.fillStyle = 'black'
+                ctx.arc(x, y, 7.5, 0, 2 * Math.PI)
+                ctx.fill()
+                ctx.beginPath()
+                ctx.fillStyle = '#7F7F7F'
+                ctx.arc(x, y, 7.5 - 2, 0, 2 * Math.PI)
+                ctx.fill()
+            }
             if (!(this.rhit)) {
-                ctx.drawImage(Img.hand, 32 - 7.5, 15 - 7.5, 15, 15)
+                drawHand(32 - 7.5, 15 - 7.5, 15, 15)
             } else {
                 ctx.save();
                 ctx.translate(32 - 7.5, 15 - 7.5);
                 ctx.rotate((Math.PI / 180) * (360 - (-Math.abs(-160 * this.punchper + 80) + 80)))
-                ctx.drawImage(Img.hand, 0, 0, 15, 15)
+                drawHand(0, 0, 15, 15)
                 ctx.restore()
             }
             if (!(this.lhit)) {
-                ctx.drawImage(Img.hand, 32 - 7.5, -15 - 7.5, 15, 15)
+                drawHand(32 - 7.5, -15 - 7.5, 15, 15)
             } else {
                 ctx.save();
                 ctx.translate(32 - 7.5, -(15 - 7.5));
                 ctx.rotate((Math.PI / 180) * (0 + (-Math.abs(-160 * this.punchper + 80) + 80)))
-                ctx.drawImage(Img.hand, 0, 0 - 15, 15, 15)
+                drawHand(0, 0 - 15, 15, 15)
                 ctx.restore();
             }
             ctx.restore()
@@ -2093,6 +2142,26 @@ var init = function(name) {
     let Destroyers = []
     let Rabbits = []
     var ctx = canvas.getContext('2d');
+    let drawAxis = () => {
+        let xGradient = ctx.createLinearGradient(-100, 0, 100, 0)
+        xGradient.addColorStop(0, 'green');
+        xGradient.addColorStop(.5, 'yellow');
+        xGradient.addColorStop(1, 'red');
+        let yGradient = ctx.createLinearGradient(0, -100, 0, 100)
+        yGradient.addColorStop(0, 'blue');
+        yGradient.addColorStop(.5, 'purple');
+        yGradient.addColorStop(1, 'red');
+        ctx.beginPath()
+        ctx.moveTo(-100, 0)
+        ctx.lineTo(100, 0)
+        ctx.strokeStyle = xGradient
+        ctx.stroke()
+        ctx.beginPath()
+        ctx.moveTo(0, -100)
+        ctx.lineTo(0, 100)
+        ctx.strokeStyle = yGradient
+        ctx.stroke()
+    }
     var playa;
     /**
      * @param {object} pack
@@ -2468,7 +2537,7 @@ var init = function(name) {
                     ctx.drawImage(Img[item.slot.image], item.x + x - 20, item.y + y - 20, 40, 40)
                 }
                 if(/^Leather$/.test(item.slot.type)) ctx.drawImage(Img[item.slot.image], item.x + x - 24.5, item.y + y - 28.5, 49, 57)
-                if(/Axe|Pickaxe|Sword|Hammer/.test(item.slot.type)){
+                if(/Axe|Pickaxe|Shovel|Sword|Hammer/.test(item.slot.type)){
                     ctx.save()
                     ctx.translate(item.x + x, item.y + y)
                     ctx.rotate(Math.PI/ 180 * 45)
@@ -2715,7 +2784,7 @@ var init = function(name) {
                     ctx.globalAlpha = 0.5
                     ctx.beginPath()
                     ctx.fillRect(470 + offSetX, 120 + offSetY, 60, 60)
-                    if(/Axe|Pickaxe|Sword|Hammer/.test(craft.craft)){
+                    if(/Axe|Pickaxe|Shovel|Sword|Hammer/.test(craft.craft)){
                         let img = craft.craft.toLowerCase().replace(/\s/, '')
                         ctx.globalAlpha = 1
                         ctx.save()
@@ -2766,7 +2835,7 @@ var init = function(name) {
                     ctx.globalAlpha = 0.5
                     ctx.beginPath()
                     ctx.fillRect(120 + offSetX, 120 + offSetY, 60, 60)
-                    if(/Axe|Pickaxe|Sword|Hammer/.test(craft.craft)){
+                    if(/Axe|Pickaxe|Shovel|Sword|Hammer/.test(craft.craft)){
                         let img = craft.craft.toLowerCase().replace(/\s/, '')
                         ctx.globalAlpha = 1
                         ctx.save()
@@ -2789,7 +2858,7 @@ var init = function(name) {
                 ctx.globalAlpha = 1*/
             } else {
                 playa.craftables.forEach((craft, i) => {                
-                    if(/Axe|Pickaxe|Sword|Hammer/.test(craft)){
+                    if(/Axe|Pickaxe|Shovel|Sword|Hammer/.test(craft)){
                         let img = craft.toLowerCase().replace(/\s/, '')
                         ctx.globalAlpha = 0.875
                         ctx.lineWidth = 2
@@ -2911,7 +2980,7 @@ var init = function(name) {
                         ctx.stroke()
                         ctx.restore()
                     }
-                    if(/Axe|Pickaxe|Sword|Hammer/.test(item.type)){
+                    if(/Axe|Pickaxe|Shovel|Sword|Hammer/.test(item.type)){
                         ctx.globalAlpha = 1
                         ctx.save()
                         ctx.translate((canvas.width - 300)/2 + 40 + offSetX + 27.5, (canvas.height - 300)/2 + 40 + offSetY + 27.5 + 5)
@@ -3003,7 +3072,7 @@ var init = function(name) {
                 ctx.globalAlpha = 1
                 ctx.stroke();  
                 if(slot == ' ') return 
-                if(/Axe|Pickaxe|Sword|Hammer/.test(slot.type)){
+                if(/Axe|Pickaxe|Shovel|Sword|Hammer/.test(slot.type)){
                     //let img = slot.image.toLowerCase().replace(/\s/, '')
                     ctx.save()
                     ctx.translate((canvas.width)/10 + (canvas.width)/10 * i , canvas.height - 100 + 7)
@@ -3300,7 +3369,7 @@ var init = function(name) {
             if(dragging[0].type == 'wood'){ 
                 drawWood(clientX,clientY)
             }else {
-                if(/Axe|Pickaxe|Sword|Hammer/.test(slot.type)){
+                if(/Axe|Pickaxe|Shovel|Sword|Hammer/.test(slot.type)){
                     //let img = slot.image.toLowerCase().replace(/\s/, '')
                     ctx.save()
                     ctx.translate(clientX, clientY + 90 - 100 + 7 + 10)

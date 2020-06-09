@@ -69,6 +69,23 @@ module.exports = {
             }
         ],
         [
+            'Stone Shovel', 
+            {
+                description: "Dirt :P",
+                type:'Tool',
+                recipe:[
+                    {id:'stone', count:20},
+                    {id:'wood', count:15},
+                ],
+                output:{
+                    count:1,
+                    image:'stoneshovel',
+                    stackSize:1,
+                    equipable:true
+                }
+            }
+        ],
+        [
             'Wood Wall', 
             {
                 description: "Now you can make a hut(Not safe from destroyers)",
@@ -253,6 +270,23 @@ module.exports = {
                 output:{
                     count:1,
                     image:'ironhammer',
+                    stackSize:1,
+                    equipable:true
+                }
+            }
+        ],
+        [
+            'Iron Shovel', 
+            {
+                description: "You could make a dirt hut with this :)",
+                type:'Tool',
+                recipe:[
+                    {id:'iron', count:20},
+                    {id:'stone', count:15},
+                ],
+                output:{
+                    count:1,
+                    image:'ironshovel',
                     stackSize:1,
                     equipable:true
                 }

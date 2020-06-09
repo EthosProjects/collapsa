@@ -1,0 +1,26 @@
+let drawHand = (x, y) => {
+    x += 7.5
+    y += 7.5
+    ctx.beginPath()
+    ctx.fillStyle = 'black'
+    ctx.arc(x, y, 7.5, 0, 2 * Math.PI)
+    ctx.fill()
+    ctx.beginPath()
+    ctx.fillStyle = '#7F7F7F'
+    ctx.arc(x, y, 7.5 - 2, 0, 2 * Math.PI)
+    ctx.fill()
+}else if(/Shovel/.test(this.mainHand)){
+                        let img = this.mainHand.toLowerCase().replace(/\s/, '')
+                        ctx.save()
+                        ctx.translate(32 - 7.5 + 5, 0)
+                        
+                        if(this.hitting) ctx.rotate((Math.PI / 180) * (360 - (-Math.abs(-120 * this.per + 60) + 60)))
+                        ctx.save()
+                        ctx.translate(-2.5 + 75/2 - 32 - 7.5 + 10, -30 + 75/2)
+                        ctx.rotate((Math.PI / 180) * 180)
+                        ctx.drawImage(Img[img], 0 - 75/2, 0 - 75/2, 75, 75)
+                        ctx.restore()
+                        drawHand(0, 15 - 7.5 - 5 - 2, 15, 15)
+                        drawHand(0, 15 - 2 - 7.5 - 30 - 2, 15, 15)
+                        ctx.restore()
+                    }

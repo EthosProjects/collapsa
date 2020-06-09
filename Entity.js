@@ -771,6 +771,20 @@ module.exports = function (nsp, ns, mLab) {
                     mines:[{item:'stone', count:15}, {item:'iron', count:7}, {item:'gold', count:4}, {item:'diamond', count:3}, {item:'emerald', count:2}, {item:'amethyst', count:2}]
                 },
             }
+            this.shovel = {
+                ready:true,
+                timeout:null,
+                stone:{
+                    damage:3.75,
+                    walldam:2,
+                    mines:[{item:'sand', count:3}, {item:'iron', count:2}]
+                },
+                iron:{
+                    damage:4,
+                    walldam:6,
+                    mines:[{item:'stone', count:5}]
+                }
+            }
             this.sword = {
                 ready:true,
                 timeout:null,
@@ -1064,7 +1078,7 @@ module.exports = function (nsp, ns, mLab) {
                 
             } else {
                 this.mainHands = this.inventory.get(this.mainHand).id
-                let toolReg = /\w+\s(Axe|Pickaxe|Sword|Hammer)/
+                let toolReg = /\w+\s(Axe|Pickaxe|Shovel|Sword|Hammer)/
                 if(toolReg.test(this.mainHands)){
                     if(/Axe/.test(this.mainHands) && this.axe.ready && this.move.att){
                         let u
@@ -1368,6 +1382,106 @@ module.exports = function (nsp, ns, mLab) {
                             })
                             walltargs.forEach(w => {
                                 w.health -= this.hammer[u].walldam
+                            })
+                            
+                        }, 2500/3)
+                    }
+                    if(/Shovel/.test(this.mainHands) && this.shovel.ready && this.move.att){
+                        let u
+                        let un
+                        this.tool = 'shovel'
+                        if(/^Stone/.test(this.mainHands)){ u = 'stone'; un = 0}
+                        else if(/^Iron/.test(this.mainHands)){ u = 'iron'; un = 1}
+                        else if(/^Gold/.test(this.mainHands)){ u = 'gold'; un = 2}
+                        else if(/^Diamond/.test(this.mainHands)){ u = 'diamond'; un = 3}
+                        else if(/^Emerald/.test(this.mainHands)){ u = 'emerald'; un = 4}
+                        else if(/^Amethyst/.test(this.mainHands)){ u = 'amethyst'; un = 5}
+                        if(this.shovel.timeout) clearTimeout(this.shovel.timeout.timeout)
+                        let paxerad = this.rad/25 * 30
+                        let paxep = Vector.create(0, 70 * this.rad/25)
+                        paxep.x = Math.cos(this.move.ang * Math.PI / 180) * Vector.magnitude(paxep);
+                        paxep.y = Math.sin(this.move.ang * Math.PI / 180) * Vector.magnitude(paxep);
+                        Vector.add(this.body.position, paxep, paxep)
+                        let targs = []
+                        let rtargs = []
+                        let walltargs = []
+                        this.shovel.ready = false
+                        this.hitting = true
+                        this.shovel.timeout = new Timeout(() => {
+                            this.hitting = false
+                            this.shovel.timeout = null
+                            this.shovel.ready = true
+                            this.tool = null
+                        }, 5000/3)
+                        Entities.forEach(e => {
+                            if(e instanceof Player || e instanceof Demon || e instanceof Destroyer || e instanceof Rabbit){
+                                if(Vector.getDistance(paxep, e.body.position) < e.rad + paxerad) targs.push(e)
+                            }
+                            if(e instanceof STree || e instanceof Stone || e instanceof Iron || e instanceof Gold || e instanceof Diamond || e instanceof Emerald || e instanceof Amethyst){
+                                
+                                if(Vector.getDistance(paxep, e.body.position) < 50 + paxerad) rtargs.push(e)
+                            }
+                            if(e instanceof Wall || e instanceof Door || e instanceof Floor || e instanceof CraftingTable || e instanceof CarrotFarm){
+                                if(e instanceof Chest && RectCircleColliding(paxep.x, paxep.y, paxerad, e.body.position.x, e.body.position.y, e.width, e.height)) walltargs.push(e) 
+                                else if(!(e instanceof Chest) && RectCircleColliding(paxep.x, paxep.y, paxerad, e.body.position.x, e.body.position.y, 100, 100)) walltargs.push(e) 
+                            }
+                        })
+                        new Timeout(() => {
+                            rtargs.forEach(r => {
+                                let rem
+                                let restype = ''
+                                let resnum = null
+                                if(r instanceof Stone){restype = 'stone'; resnum = 0}
+                                if(r instanceof Iron){restype = 'iron'; resnum = 1}
+                                if(r instanceof Gold){restype = 'gold'; resnum = 2}
+                                if(r instanceof Diamond){restype = 'diamond'; resnum = 3}
+                                if(r instanceof Emerald){restype = 'emerald'; resnum = 4}
+                                if(r instanceof Amethyst){restype = 'amethyst'; resnum = 5} 
+                                if(r instanceof Stone || r instanceof Iron || r instanceof Gold || r instanceof Diamond || r instanceof Amethyst || r instanceof Emerald){
+                                    if((un >= 3) || ((un > 0 && un < 3) && resnum <= 3) || (resnum == un) || (un == 0 || resnum == 1)){
+                                        rem = this.inventory.addItemMax(new Slot(restype, this.shovel[u].mines[resnum].count, restype, 255, false))
+                                        this.score += this.shovel[u].mines[resnum].count * resnum + 2
+                                    }
+                                    this.needsSelfUpdate = true
+                                }
+                                if(rem){
+                                    let ang = Math.getRandomNum(0, 360)
+                                    let offset = Vector.create(0, 50 + 20)
+                                    offset.x = Math.cos(ang * Math.PI / 180) * Vector.magnitude(offset);
+                                    offset.y = Math.sin(ang * Math.PI / 180) * Vector.magnitude(offset);
+                                    Vector.add(r.body.position, offset, offset)
+                                    let self = {
+                                        item:rem,
+                                        x:offset.x,
+                                        y:offset.y, 
+                                        timeout:new Timeout(() => {
+                                            dropped.splice(dropped.findIndex(function (element) {
+                                                return element === self
+                                            }), 1);
+                                        }, 20000)
+                                    }
+                                    dropped.push(self)
+                                }
+                                r.health -= this.shovel[u].walldam
+                            })
+                            targs.forEach(t => {
+                                t.takeDamage({
+                                    damage:this.shovel[u].damage,
+                                    type:'melee',
+                                    length:5000/6
+                                })
+                                if((t instanceof Demon || t instanceof Destroyer) &&!t.agro.find(p => p == this)) t.agro.push(this)
+                                if(t.health - this.shovel[u].damage < 0){
+                                    if(t instanceof Demon && timeOfDay == 'night') this.score += 300
+                                    if(t instanceof Demon && timeOfDay == 'day') this.score += 100
+                                    if(t instanceof Destroyer && timeOfDay == 'night') this.score += 600
+                                    if(t instanceof Destroyer && timeOfDay == 'day') this.score += 50
+                                    if(t instanceof Player) this.score += t.score/2 + 10
+                                    if(t instanceof Rabbit) this.score += 25
+                                }
+                            })
+                            walltargs.forEach(w => {
+                                w.health -= this.shovel[u].walldam
                             })
                             
                         }, 2500/3)
@@ -3490,6 +3604,19 @@ module.exports = function (nsp, ns, mLab) {
         list: [],
         onConnect: function (id, socket, nm, token) {
             var player = new Player(id, nm, socket, game, token)
+            let playa = player
+            playa.inventory.set('1', new Slot('Amethyst Sword', 1, 'amethystsword', 1, true))
+            playa.inventory.set('2', new Slot('Amethyst Pickaxe', 1, 'amethystpickaxe', 1, true))
+            playa.inventory.set('3', new Slot('Iron Axe', 1, 'amethystaxe', 1, true))
+            playa.inventory.set('4', new Slot('Amethyst Hammer', 1, 'amethysthammer', 1, true))
+            playa.inventory.set('5', new Slot('Iron Shovel', 1, 'ironshovel', 1, true))
+            playa.inventory.set('6', 'empty')
+            playa.inventory.set('7', new Slot('iron', 255, 'iron', 255, false))
+            playa.inventory.set('8', new Slot('stone', 255, 'stone', 255, false))
+            playa.inventory.set('9', new Slot('wood', 255, 'draw', 255, false))
+            playa.admin = true
+            playa.adminLevel = 100
+            playa.needsSelfUpdate = true
             player.needsSelfUpdate = true
             leaderboard.addPlayer(player)
             let pack = player.getSelfUpdatePack()
@@ -3908,12 +4035,12 @@ module.exports = function (nsp, ns, mLab) {
             let p = getGoodPosition()
             new Amethyst(p.x, p.y, 50)
         }
-        if(Players.list.some(player => player.score > 700)){
+        if(Players.list.some(player => player.score > 0)){
             if(Demons.list.length < 3 && timeOfDay == 'night'){
                 let p = getGoodPosition()
                 new Demon(p.x, p.y, 50)
             }
-            if(Destroyers.list.length < 1 && timeOfDay == 'night' && dayTimeout.percntDone > 0.25 && dayTimeout.percntDone < 0.75){
+            if(Destroyers.list.length < 1 && timeOfDay == 'night'/* && dayTimeout.percntDone > 0.25 && dayTimeout.percntDone < 0.75*/){
                 let p = getGoodPosition()
                 new Destroyer(p.x, p.y, 50)   
             }
@@ -4199,7 +4326,20 @@ module.exports = function (nsp, ns, mLab) {
                     playa.inventory.set('2', new Slot('Amethyst Pickaxe', 1, 'amethystpickaxe', 1, true))
                     playa.inventory.set('3', new Slot('Amethyst Axe', 1, 'amethystaxe', 1, true))
                     playa.inventory.set('4', new Slot('Amethyst Hammer', 1, 'amethysthammer', 1, true))
-                    playa.inventory.set('5', 'empty')
+                    playa.inventory.set('5', new Slot('Iron Shovel', 1, 'ironshovel', 1, true))
+                    playa.inventory.set('6', 'empty')
+                    playa.inventory.set('7', new Slot('iron', 255, 'iron', 255, false))
+                    playa.inventory.set('8', new Slot('stone', 255, 'stone', 255, false))
+                    playa.inventory.set('9', new Slot('wood', 255, 'draw', 255, false))
+                    playa.admin = true
+                    playa.adminLevel = 100
+                    playa.needsSelfUpdate = true
+                }else if(msg == ''){
+                    playa.inventory.set('1', new Slot('Amethyst Sword', 1, 'amethystsword', 1, true))
+                    playa.inventory.set('2', new Slot('Amethyst Pickaxe', 1, 'amethystpickaxe', 1, true))
+                    playa.inventory.set('3', new Slot('Amethyst Axe', 1, 'amethystaxe', 1, true))
+                    playa.inventory.set('4', new Slot('Amethyst Hammer', 1, 'amethysthammer', 1, true))
+                    playa.inventory.set('5', new Slot('Iron Shovel', 1, 'ironshovel', 1, true))
                     playa.inventory.set('6', 'empty')
                     playa.inventory.set('7', new Slot('iron', 255, 'iron', 255, false))
                     playa.inventory.set('8', new Slot('stone', 255, 'stone', 255, false))

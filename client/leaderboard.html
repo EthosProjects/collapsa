@@ -164,7 +164,7 @@
                 res.forEach(item => {
                     let entry = document.createElement('tr')
                     let username = document.createElement('td')
-                        username.textContent = item.username == sessionStorage.getItem('username') ? `(You)${item.username}` : item.username
+                    username.textContent = item.username == sessionStorage.getItem('username') ? `(You)${item.username}` : item.username
                     let highscore = document.createElement('td')
                     highscore.textContent = item.score
                     let discordexp = document.createElement('td')
