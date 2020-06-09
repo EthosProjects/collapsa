@@ -782,7 +782,7 @@ var init = function(name) {
                         ctx.restore()
                     }
                 }
-                if(/Wall|Door|Floor|Crafting Table|Chest/.test(this.mainHand)){
+                if(/Wall|Campfire|Door|Floor|Crafting Table|Chest/.test(this.mainHand)){
                     let img = this.mainHand.toLowerCase().replace(/\s/, '')
                     drawHand(32 - 7.5, -15 - 7.5, 15, 15)
                     ctx.save()
@@ -1136,7 +1136,7 @@ var init = function(name) {
                         ctx.restore()
                     }
                 }
-                if(/Wall|Door|Floor|Crafting Table|Chest/.test(this.mainHand)){
+                if(/Wall|Campfire|Door|Floor|Crafting Table|Chest/.test(this.mainHand)){
                     let img = this.mainHand.toLowerCase().replace(/\s/, '')
                     drawHand(32 - 7.5, -15 - 7.5, 15, 15)
                     ctx.save()
@@ -1199,12 +1199,12 @@ var init = function(name) {
             ctx.fill()
             ctx.restore();
             ctx.restore();
-            if(this.posPlace && /Wall|Door|Floor|Crafting Table|Chest/.test(this.mainHand)){
+            if(this.posPlace && /Wall|Campfire|Door|Floor|Crafting Table|Chest/.test(this.mainHand)){
                 let img = this.mainHand.toLowerCase().replace(/\s/, '')
                 ctx.restore()
                 ctx.save()
                 ctx.globalAlpha =0.5
-                if(/Wall|Floor|Crafting Table/.test(this.mainHand)) ctx.drawImage(Img[img], this.posPlace.x - 50 + x, this.posPlace.y - 50 + y, 100, 100)
+                if(/Wall|Campfire|Floor|Crafting Table/.test(this.mainHand)) ctx.drawImage(Img[img], this.posPlace.x - 50 + x, this.posPlace.y - 50 + y, 100, 100)
                 else if(/Door/.test(this.mainHand)){
                     if(pang == 'up'){
                         ctx.save()
@@ -1296,7 +1296,7 @@ var init = function(name) {
                         ctx.restore()
                     }
                     ctx.drawImage(Img[img], this.posPlace.x - 50 + x, this.posPlace.y - 50 + y, 100, 100)
-                }if(/Chest/.test(this.mainHand)){ 
+                }else if(/Chest/.test(this.mainHand)){ 
                     ctx.save()
                     ctx.translate(this.posPlace.x + x, this.posPlace.y + y)
                     if(pang == 'left' || pang == 'right'){
@@ -1824,6 +1824,31 @@ var init = function(name) {
             ctx.drawImage(Img['carrotfarm'], this.x - 50 + x, this.y - 50 + y, 100, 100)
         }
     }
+    let Campfires = new Mapper()
+    class Campfire {
+        constructor(pack){
+            this.x = pack.x
+            this.y = pack.y
+            this.id = pack.id
+            this.lit = pack.lit
+            Campfires.set(this.id, this)
+        }
+        show(x, y){
+            ctx.drawImage(Img['campfire'], this.x - 50 + x, this.y - 50 + y, 100, 100)
+            if(this.lit){
+                ctx.save()
+                ctx.beginPath()
+                ctx.fillStyle = 'orange'
+                ctx.globalAlpha = 0.5
+                ctx.arc(this.x + x, this.y + y, 150, 0, 2 * Math.PI)
+                ctx.fill()
+                ctx.restore()
+            }
+        }
+        processUpdatePack(pack){
+            this.lit = pack.lit
+        }
+    }
     var Walls = new Mapper()
     class Wall {
         constructor(pack){
@@ -2212,6 +2237,10 @@ var init = function(name) {
             new Wall(initPack)
             
         })
+        pack.campfire.forEach((initPack)=>{
+            new Campfire(initPack)
+            
+        })
         pack.door.forEach((initPack)=>{
             new Door(initPack)
         })
@@ -2461,6 +2490,10 @@ var init = function(name) {
                 let toUpdate = Doors.get(pack.id)
                 toUpdate.processUpdatePack(pack)
             })
+            pack.campfire.forEach(pack => {
+                let toUpdate = Campfires.get(pack.id)
+                toUpdate.processUpdatePack(pack)
+            })
             let oreEntities = [
                 ...CTrees.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
                 ...Stones.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
@@ -2476,6 +2509,7 @@ var init = function(name) {
                 ...Floors.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
                 ...Walls.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
                 ...Doors.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
+                ...Campfires.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
                 ...CraftingTables.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
                 ...Chests.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
                 ...CarrotFarms.findAll(e => Math.abs(e.y - playa.y) < 500 && Math.abs(e.x - playa.x) < 800),
@@ -2553,7 +2587,7 @@ var init = function(name) {
                     ctx.drawImage(Img[item.slot.image], -20, -20, 40, 40)
                     ctx.restore()
                 }
-                if(/Wall|Door|Floor|Crafting Table|Chest|Armor/.test(item.slot.type)){
+                if(/Wall|Campfire|Door|Floor|Crafting Table|Chest|Armor/.test(item.slot.type)){
                     ctx.save()
                     ctx.translate(item.x + x, item.y + y)
                     ctx.rotate(Math.PI/ 180 * 10)
@@ -2795,7 +2829,7 @@ var init = function(name) {
                         ctx.drawImage(Img[img], 0 - 27.5, 0 - 27.5, 55, 55)
                         ctx.restore()
                     }
-                    if(/Wall|Door|Floor|Crafting Table|Chest|Armor/.test(craft.craft)){
+                    if(/Wall|Campfire|Door|Floor|Crafting Table|Chest|Armor/.test(craft.craft)){
                         let img = craft.craft.toLowerCase().replace(/\s/, '')
                         ctx.globalAlpha = 1
                         ctx.save()
@@ -2846,7 +2880,7 @@ var init = function(name) {
                         ctx.drawImage(Img[img], 0 - 27.5, 0 - 27.5, 55, 55)
                         ctx.restore()
                     }
-                    if(/Wall|Door|Floor|Crafting Table|Chest|Armor/.test(craft.craft)){
+                    if(/Wall|Campfire|Door|Floor|Crafting Table|Chest|Armor/.test(craft.craft)){
                         let img = craft.craft.toLowerCase().replace(/\s/, '')
                         ctx.globalAlpha = 1
                         ctx.save()
@@ -2877,7 +2911,7 @@ var init = function(name) {
                         ctx.drawImage(Img[img], 0 - 27.5, 0 - 27.5, 55, 55)
                         ctx.restore()
                     }
-                    if(/Wall|Door|Floor|Crafting Table|Chest|Armor/.test(craft)){
+                    if(/Wall|Campfire|Door|Floor|Crafting Table|Chest|Armor/.test(craft)){
                         let img = craft.toLowerCase().replace(/\s/, '')
                         ctx.globalAlpha = 0.875
                         ctx.lineWidth = 2
@@ -2990,7 +3024,7 @@ var init = function(name) {
                         ctx.drawImage(Img[item.image], 0 - 27.5, 0 - 27.5, 55, 55)
                         ctx.restore()
                     }
-                    if(/Wall|Door|Floor|Crafting Table|Chest|Armor/.test(item.type)){
+                    if(/Wall|Campfire|Door|Floor|Crafting Table|Chest|Armor/.test(item.type)){
                         ctx.globalAlpha = 1
                         ctx.save()
                         ctx.translate((canvas.width - 300)/2 + 40 + offSetX + 30, (canvas.height - 300)/2 + 40 + offSetY + 30)
@@ -3112,7 +3146,7 @@ var init = function(name) {
                     ctx.fillText(slot.count, (canvas.width)/10 + (canvas.width)/10 * i  + 18, canvas.height - 58)
                     ctx.stroke()
                 }
-                if(/Wall|Door|Floor|Crafting Table|Chest|Armor/.test(slot.type)){
+                if(/Wall|Campfire|Door|Floor|Crafting Table|Chest|Armor/.test(slot.type)){
                     ctx.save()
                     ctx.translate((canvas.width)/10 + (canvas.width)/10 * i , canvas.height - 100 + 7)
                     ctx.rotate(Math.PI/ 180 * 10)
@@ -3196,7 +3230,8 @@ var init = function(name) {
                         s.unshift(s.shift().toUpperCase())
                         return s.join('')
                     }
-                    let w = ctx.measureText(desc).width
+                    let w = ctx.measureText(desc).width > ctx.measureText(name).width ? ctx.measureText(desc).width :ctx.measureText(name).width 
+
                     //ctx.fillRect((canvas.width)/10 + (canvas.width)/10 * hover[1]  - 45, canvas.height - 100 - 45 - 95, w + 10, 50)
                     roundRect(
                         ctx,
@@ -3228,7 +3263,7 @@ var init = function(name) {
                         s.unshift(s.shift().toUpperCase())
                         return s.join('')
                     }
-                    let w = ctx.measureText(desc).width
+                    let w = ctx.measureText(desc).width > ctx.measureText(name).width ? ctx.measureText(desc).width :ctx.measureText(name).width 
                     //ctx.fillRect((canvas.width)/10 + (canvas.width)/10 * hover[1]  - 45, canvas.height - 100 - 45 - 95, w + 10, 50)
                     roundRect(
                         ctx,
@@ -3260,7 +3295,7 @@ var init = function(name) {
                         s.unshift(s.shift().toUpperCase())
                         return s.join('')
                     }
-                    let w = ctx.measureText(desc).width
+                    let w = ctx.measureText(desc).width > ctx.measureText(name).width ? ctx.measureText(desc).width :ctx.measureText(name).width 
                     //ctx.fillRect((canvas.width)/10 + (canvas.width)/10 * hover[1]  - 45, canvas.height - 100 - 45 - 95, w + 10, 50)
                     roundRect(
                         ctx,
@@ -3409,7 +3444,7 @@ var init = function(name) {
                     ctx.fillText(slot.count, 0 + 18, 0 - 58)
                     ctx.stroke()
                 }
-                if(/Wall|Door|Floor|Crafting Table|Chest|Armor/.test(slot.type)){
+                if(/Wall|Campfire|Door|Floor|Crafting Table|Chest|Armor/.test(slot.type)){
                     ctx.save()
                     ctx.translate(clientX, clientY + 90 - 100 + 7 + 12.5)
                     ctx.rotate(Math.PI/ 180 * 10)

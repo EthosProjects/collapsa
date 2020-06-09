@@ -482,6 +482,23 @@ module.exports = {
                 }
             }
         ],
+        [
+            'Campfire', 
+            {
+                description: "Ooooh warm :)",
+                type:'Structure',
+                recipe:[
+                    {id:'wood', count:2},
+                    {id:'stone', count:10},
+                ],
+                output:{
+                    count:1,
+                    image:'campfire',
+                    stackSize:255,
+                    equipable:true
+                }
+            }
+        ],
     ],
     Resources:[
         [

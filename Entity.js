@@ -789,7 +789,7 @@ module.exports = function (nsp, ns, mLab) {
                 stone:{
                     damage:3.75,
                     walldam:2,
-                    mines:[{item:'sand', count:3}, {item:'iron', count:2}]
+                    mines:[{item:'sand', count:3}]
                 },
                 iron:{
                     damage:4,
@@ -1301,6 +1301,7 @@ module.exports = function (nsp, ns, mLab) {
                         saxep.y = Math.sin(this.move.ang * Math.PI / 180) * 60 * this.rad/25;
                         Vector.add(this.body.position, saxep, saxep)
                         let targs = []
+                        let camptargs = []
                         this.sword.ready = false
                         this.hitting = true
                         this.sword.timeout = new Timeout(() => {
@@ -1313,6 +1314,13 @@ module.exports = function (nsp, ns, mLab) {
                             if(e instanceof Player || e instanceof Demon || e instanceof Destroyer || e instanceof Rabbit){
                                 if(Vector.getDistance(saxep, e.body.position) < e.rad + saxerad) targs.push(e)
                             }
+                            if(e instanceof Campfire){
+                                console.log('woah')
+                                if(Vector.getDistance(saxep, e.body.position) < 14.83 + saxerad){
+                                    console.log('lighting')
+                                    camptargs.push(e)
+                                }
+                            }
                         })
                         new Timeout(() => {
                             targs.forEach(t => {
@@ -1322,6 +1330,7 @@ module.exports = function (nsp, ns, mLab) {
                                     length:un >= 3 ? 3000/3 : 5000/3
                                 })
                                 if((t instanceof Demon || t instanceof Destroyer) &&!t.agro.find(p => p == this)) t.agro.push(this)
+                                
                                 if(t.health - this.sword[u].damage < 0 ){
                                     if(t instanceof Demon && timeOfDay == 'night') this.score += 300
                                     if(t instanceof Demon && timeOfDay == 'day') this.score += 100
@@ -1329,6 +1338,13 @@ module.exports = function (nsp, ns, mLab) {
                                     if(t instanceof Destroyer && timeOfDay == 'day') this.score += 50
                                     if(t instanceof Player) this.score += t.score/2 + 10
                                     if(t instanceof Rabbit) this.score += 25
+                                }
+                            })
+                            camptargs.forEach(c => {
+                                if(!c.lit){
+                                    c.lit = true
+                                    c.needsUpdate = true
+                                    console.log('ass')
                                 }
                             })
                             
@@ -1440,8 +1456,10 @@ module.exports = function (nsp, ns, mLab) {
                         })
                         new Timeout(() => {
                             console.log(this.shovel[u].mines)
-                            this.inventory.addItemMax(new Slot('sand', this.shovel[u].mines[0].count, 'sand', 255))
-                            this.score += this.shovel[u].mines[0].count * 2
+                            if(this.body.position.y > 1000 + this.rad){
+                                this.inventory.addItemMax(new Slot('sand', this.shovel[u].mines[0].count, 'sand', 255))
+                                this.score += this.shovel[u].mines[0].count * 2
+                            }
                             rtargs.forEach(r => {
                                 r.health -= this.shovel[u].walldam
                             })
@@ -1468,7 +1486,7 @@ module.exports = function (nsp, ns, mLab) {
                         }, 2500/3)
                     }
                 }
-                if(/Wall|Floor|Door|Crafting Table|Chest/.test(this.mainHands)){
+                if(/Wall|Campfire|Floor|Door|Crafting Table|Chest/.test(this.mainHands)){
                     let mvect
                     if(this.move.mdis > 141.42 + this.rad){
                         mvect = Vector.create()
@@ -1603,6 +1621,26 @@ module.exports = function (nsp, ns, mLab) {
                         if(slot.count == 0){ this.inventory.set(this.mainHand, 'empty'); this.mainHand = '-1'}
                         this.needsSelfUpdate = true
                         this.structures.push(new Chest(mvect.x, mvect.y, this.pang))
+                        this.alusd = true
+                    }
+                    if(/Campfire/.test(this.mainHands) && this.move.att && !this.alusd){
+                        if(Entities.find(e => 
+                              (
+                                  (e.body.position.x == mvect.x && e.body.position.y == mvect.y) || 
+                                  (
+                                        (e instanceof Player || e instanceof Demon || e instanceof Destroyer || e instanceof Rabbit) &&
+                                        RectCircleColliding(e.body.position.x, e.body.position.y, e.rad, mvect.x, mvect.y, 100, 100)
+                                  )
+                              ) && !(
+                                  this.structures.find(s => e == s && e instanceof Floor) || 
+                                  (this.clan && this.clan.members.find(member => member.structures.find(s => e == s && s instanceof Floor)))
+                              ) || (mvect.x < 50 || mvect.y < 50 || mvect.x > game.map.forest.width || mvect.y > game.map.forest.height)
+                        ))return this.canPlace = false
+                        let slot = this.inventory.get(this.mainHand)
+                        slot.count -= 1
+                        if(slot.count == 0){ this.inventory.set(this.mainHand, 'empty'); this.mainHand = '-1'}
+                        this.needsSelfUpdate = true
+                        this.structures.push(new Campfire(mvect.x, mvect.y))
                         this.alusd = true
                     }
                 }
@@ -2267,7 +2305,7 @@ module.exports = function (nsp, ns, mLab) {
                         })
                     }    
                     this.pos = possible.get(nearest)
-                }else if(Players.list.find(player => Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 700)){
+                }else if(Players.list.find(player => Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 7000 && !Campfires.list.some(campfire => campfire.lit && Vector.getDistance(player.body.position, campfire.body.position) < 150 + player.rad))){
                     let possible = new Mapper()
                     Players.list.forEach((player, i)=> {
                         if(Vector.getDistance(player.body.position, this.body.position) < 700 + this.rad && player.score > 700) possible.set(i, player)
@@ -2967,6 +3005,30 @@ module.exports = function (nsp, ns, mLab) {
             return pack
         }
     }
+    var Campfires = {
+        list:[],
+        update:function(){
+            var pack = []
+            Campfires.list.forEach(campfire => {
+                if(campfire.health <= 0) {
+                    removePack.campfire.push(campfire.id)
+                    if(Players.list.find( p => p.structures.find( s => s == campfire))){
+                        let p = Players.list.find( p => p.structures.find( s => s == campfire))
+                        p.structures.splice(p.structures.findIndex(s => s == campfire), 1)
+                    }
+                    Campfires.list.splice(Campfires.list.findIndex(function (element) {
+                        return element.id === campfire.id
+                    }), 1);
+                    Entities.splice(Entities.findIndex(e => e.id === campfire.id), 1);
+                    World.remove(engine.world, campfire.body)
+                }
+                if(campfire.needsUpdate){
+                    pack.push(campfire.getInitPack())
+                }
+            })
+            return pack
+        }
+    }
     var Floors = this.Floors = {
         list:[],
         update:function(){
@@ -3376,6 +3438,37 @@ module.exports = function (nsp, ns, mLab) {
         }
         
     }
+    class Campfire {
+        constructor(x, y){
+            this.x = x
+            this.y = y
+            this.id = Math.random()
+            this.health = 50
+            this.body = Bodies.circle(this.x, this.y, 175/12, {isStatic:true})
+            Entities.push(this)
+            World.addBody(engine.world, this.body)
+            this.needsUpdate = false
+            this.lit = false
+            //grow(this)
+            var pack = {
+                x:this.x,
+                y:this.y,
+                id:this.id,
+                lit:false
+            }
+            Campfires.list.push(this)
+            game.initPack.campfire.push(pack)
+        }
+        getInitPack(){
+            return {
+                x:this.x,
+                y:this.y,
+                id:this.id,
+                lit:this.lit
+            }
+        }
+        
+    }
     class Floor {
         constructor(x, y, material){
             this.x = x
@@ -3586,7 +3679,7 @@ module.exports = function (nsp, ns, mLab) {
         onConnect: function (id, socket, nm, token) {
             var player = new Player(id, nm, socket, game, token)
             let playa = player
-            playa.inventory.set('1', new Slot('Amethyst Sword', 1, 'amethystsword', 1, true))
+            /*playa.inventory.set('1', new Slot('Amethyst Sword', 1, 'amethystsword', 1, true))
             playa.inventory.set('2', new Slot('Amethyst Pickaxe', 1, 'amethystpickaxe', 1, true))
             playa.inventory.set('3', new Slot('Iron Axe', 1, 'amethystaxe', 1, true))
             playa.inventory.set('4', new Slot('Amethyst Hammer', 1, 'amethysthammer', 1, true))
@@ -3594,7 +3687,7 @@ module.exports = function (nsp, ns, mLab) {
             playa.inventory.set('6', 'empty')
             playa.inventory.set('7', new Slot('iron', 255, 'iron', 255, false))
             playa.inventory.set('8', new Slot('stone', 255, 'stone', 255, false))
-            playa.inventory.set('9', new Slot('wood', 255, 'draw', 255, false))
+            playa.inventory.set('9', new Slot('wood', 255, 'draw', 255, false))*/
             playa.admin = true
             playa.adminLevel = 100
             playa.needsSelfUpdate = true
@@ -3889,6 +3982,7 @@ module.exports = function (nsp, ns, mLab) {
         wall:[],
         door:[],
         floor:[],
+        campfire:[],
         demon:[],
         destroyer:[],
         ctable:[],
@@ -3909,6 +4003,7 @@ module.exports = function (nsp, ns, mLab) {
         wall:[],
         door:[],
         floor:[],
+        campfire:[],
         demon:[],
         destroyer:[],
         ctable:[],
@@ -4016,12 +4111,12 @@ module.exports = function (nsp, ns, mLab) {
             let p = getGoodPosition()
             new Amethyst(p.x, p.y, 50)
         }
-        if(Players.list.some(player => player.score > 0)){
+        if(Players.list.some(player => player.score > 700)){
             if(Demons.list.length < 3 && timeOfDay == 'night'){
                 let p = getGoodPosition()
                 new Demon(p.x, p.y, 50)
             }
-            if(Destroyers.list.length < 1 && timeOfDay == 'night'/* && dayTimeout.percntDone > 0.25 && dayTimeout.percntDone < 0.75*/){
+            if(Destroyers.list.length < 1 && timeOfDay == 'night' && dayTimeout.percntDone > 0.25 && dayTimeout.percntDone < 0.75){
                 let p = getGoodPosition()
                 new Destroyer(p.x, p.y, 50)   
             }
@@ -4053,6 +4148,7 @@ module.exports = function (nsp, ns, mLab) {
                 wall:[],
                 door:[],
                 floor:[],
+                campfire:[],
                 demon:[],
                 destroyer:[],
                 ctable:[],
@@ -4076,6 +4172,7 @@ module.exports = function (nsp, ns, mLab) {
             Walls.list.forEach( wall => pack.wall.push(wall.getInitPack()))
             Doors.list.forEach( door => pack.door.push(door.getInitPack()))
             Floors.list.forEach( floor => pack.floor.push(floor.getInitPack()))
+            Campfires.list.forEach( campfire => pack.campfire.push(campfire.getInitPack()))
             CraftingTables.list.forEach( ctable => pack.ctable.push(ctable.getInitPack()))
             Chests.list.forEach( chest => pack.chest.push(chest.getInitPack()))
             CarrotFarms.list.forEach( cfarm => pack.cfarm.push(cfarm.getInitPack()))
@@ -4383,6 +4480,7 @@ module.exports = function (nsp, ns, mLab) {
                 wall:[],
                 door:[],
                 floor:[],
+                campfire:[],
                 demon:[],
                 destroyer:[],
                 ctable:[],
@@ -4406,6 +4504,7 @@ module.exports = function (nsp, ns, mLab) {
             Walls.list.forEach( wall => pack.wall.push(wall.getInitPack()))
             Doors.list.forEach( door => pack.door.push(door.getInitPack()))
             Floors.list.forEach( floor => pack.floor.push(floor.getInitPack()))
+            Campfires.list.forEach( campfire => pack.campfire.push(campfire.getInitPack()))
             CraftingTables.list.forEach( ctable => pack.ctable.push(ctable.getInitPack()))
             Chests.list.forEach( chest => pack.chest.push(chest.getInitPack()))
             CarrotFarms.list.forEach( cfarm => pack.cfarm.push(cfarm.getInitPack()))
@@ -4457,6 +4556,7 @@ module.exports = function (nsp, ns, mLab) {
             wall:Walls.update(),
             door:Doors.update(),
             floor:Floors.update(),
+            campfire:Campfires.update(),
             chest:Chests.update(),
             cfarm:CarrotFarms.update(),
             rabbit:Rabbits.update(),
@@ -4491,6 +4591,7 @@ module.exports = function (nsp, ns, mLab) {
                     wall:[],
                     door:[],
                     floor:[],
+                    campfire:[],
                     demon:[],
                     destroyer:[],
                     ctable:[],
@@ -4549,6 +4650,7 @@ module.exports = function (nsp, ns, mLab) {
                     floor:[],
                     demon:[],
                     destroyer:[],
+                    campfire:[],
                     ctable:[],
                     cfarm:[],
                     rabbit:[],

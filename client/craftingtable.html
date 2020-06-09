@@ -584,6 +584,46 @@
         drawConcave(8, size, x, y, 45, "#50c878")
         drawPolygon(13, size * 350/900, x, y, 0, "#b06831")
     }
+    const drawWood = (x, y, scale = 1) => {
+        ctx.save()
+        ctx.translate(x, y)
+        ctx.scale(scale * pixelNum/90, scale  * pixelNum/90)
+        ctx.beginPath()
+        ctx.lineJoin = ctx.lineCap = 'round';
+        ctx.lineWidth = 10
+        ctx.strokeStyle = 'maroon'
+        ctx.moveTo(0 - 45 + 75, 0 - 45 + 27.857)
+        ctx.lineTo(0 - 45 + 15, 0 - 45 + 62.143)
+        ctx.stroke()
+        ctx.lineJoin = ctx.lineCap = 'round';
+        ctx.lineWidth = 7
+        ctx.strokeStyle = 'saddlebrown'
+        ctx.moveTo(0 - 45 + 75, 0 - 45 + 27.857)
+        ctx.lineTo(0 - 45 + 15, 0 - 45 + 62.143)
+        ctx.stroke()
+        
+        ctx.beginPath()
+        ctx.lineJoin = ctx.lineCap = 'round';
+        ctx.lineWidth = 10
+        ctx.strokeStyle = 'maroon'
+        ctx.moveTo(0 - 45 + 15, 0 - 45 + 27.857)
+        ctx.lineTo(0 - 45 + 75, 0 - 45 + 62.143)
+        ctx.stroke()
+        
+        ctx.lineJoin = ctx.lineCap = 'round';
+        ctx.lineWidth = 7
+        ctx.strokeStyle = 'saddlebrown'
+        ctx.moveTo(0 - 45 + 15, 0 - 45 + 27.857)
+        ctx.lineTo(0 - 45 + 75, 0 - 45 + 62.143)
+        ctx.stroke()
+        
+        ctx.beginPath()
+        ctx.lineWidth = 1.5
+        ctx.strokeStyle = 'black'
+        ctx.fillStyle = 'white'
+        ctx.restore()
+    }
+        
     let drawStone = (x, y, size) =>{
         drawPolygon(8, size, x, y, 0, "#73757e")
         drawPolygon(9, size/2, x, y, 0, "#b3b4bb")
@@ -688,16 +728,33 @@
         canvas.style.height = pixelNum + 'px'
         canvas.width = parseInt(pixel)
         canvas.height = parseInt(pixel)
-        ctx.beginPath()
-        ctx.moveTo(pixelNum/2 - 180, pixelNum/2 - 180 + 250)
-        ctx.quadraticCurveTo(pixelNum/2, pixelNum/2 - 60 + 250, pixelNum/2 + 180, pixelNum/2 - 180 + 250)
-        ctx.lineTo(pixelNum/2, pixelNum/2 - 420 + 250)
-        ctx.lineTo(pixelNum/2 - 180, pixelNum/2 - 180 + 250)
-        ctx.fillStyle = '#d7c393'
-        ctx.fill()
+        let drawSand = () => {
+            ctx.beginPath()
+            ctx.moveTo(pixelNum/2 - 180, pixelNum/2 - 180 + 250)
+            ctx.quadraticCurveTo(pixelNum/2, pixelNum/2 - 60 + 250, pixelNum/2 + 180, pixelNum/2 - 180 + 250)
+            ctx.lineTo(pixelNum/2, pixelNum/2 - 420 + 250)
+            ctx.lineTo(pixelNum/2 - 180, pixelNum/2 - 180 + 250)
+            ctx.fillStyle = '#d7c393'
+            ctx.fill()
+        }
         let a = document.createElement('a')
+        console.log(pixelNum/90)
+        drawWood(pixelNum/2, pixelNum/2, 1)
+        drawStone(pixelNum/2, pixelNum/2 + 70, 40)
+        drawStone(pixelNum/2, pixelNum/2 - 70, 40)
+        drawStone(pixelNum/2 + 70, pixelNum/2, 40)
+        drawStone(pixelNum/2 - 70, pixelNum/2, 40)
+        for(let i = 0; i < 10;i++){
+            let ang = 360/10 * i + (Math.random() * 20 - 30)
+            console.log(ang)
+            //Math.random() * 360
+            let x = pixelNum/2 + Math.cos(ang * Math.PI / 180) * 70;
+            let y = pixelNum/2 + Math.sin(ang * Math.PI / 180) * 70;
+            drawStone(x, y, 40)
+
+        }
         a.href = canvas.toDataURL('/image/png')
-        a.download = 'sand' +'.png'
+        a.download = 'campfire' +'.png'
         //a.click()
     }
     quality.addEventListener('input',draw)
