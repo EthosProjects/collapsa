@@ -1,9 +1,12 @@
-const {MessageEmbed, Message, Collection} = require('discord.js')
+const {MessageEmbed, Message, Collection, Client} = require('discord.js')
+const { mlabInteractor } = require('mlab-promise')
 module.exports = {
     name:'mute',
     /**
      * @param {Message} message
      * @param {Array.<string>} args
+     * @param {Client} client
+     * @param {mlabInteractor} mLab
      */
     execute: async (message, args = [], client, mLab) => {
         if(!args[0]){
@@ -11,16 +14,16 @@ module.exports = {
         }
         let endTime = new Date().getTime()
         let times = new Collection([
-            ['s', ['sec', 'second', 'seconds', ' Second']], 
             ['m', ['m', 'minute', 'minutes', ' Minute']], 
             ['h', ['h', 'hr', 'hour', ' hours', 'hours', ' Hour']], 
-            ['d', ['day', 'd', ' days', 'days', ' Day']] 
+            ['d', ['day', 'd', ' days', 'days', ' Day']],
+            ['s', ['s', 'sec', 'second', 'seconds', ' Second']]
         ])
         let validTime = 'h'
         let timeInt = parseFloat(args[1]) ? parseFloat(args[1]) : 1
         let t = timeInt + 0
         //console.log(args, times)
-        
+        console.log(args)
         if(timeInt != 1000 * 60 * 60 && args[1]){
             timeInt + 0
             validTime = [...times.keys()].filter(t => times.get(t).some(a => args[1].endsWith(a)))[0] || 'h'
@@ -85,17 +88,22 @@ module.exports = {
             await discorduserbase.updateDocument(doc)
         }
         
-        if (member.id === message.author.id) return message.channel.send('You can\'t mute yourself'); 
-        args.shift()
-        if(parseFloat(args[1])) args.shift()
+        if (member.id === message.author.id) return message.channel.send('You can\'t mute yourself');
+        args.shift() 
+        console.log(args)
+        if(parseInt(args[0])) args.shift() 
         let reason = args.join(' ')
         // Check if the user mention or the entered userID is the message author himsmelf
         //if (!reason) return message.reply('You forgot to enter a reason for this ban!'); 
         // Check if a reason has been given by the message author
         let authorRolesArr = [...author.roles.cache.values()].map(role => role.rawPosition).sort((a, b) => b - a)
         let memberRolesArr = [...member.roles.cache.values()].map(role => role.rawPosition).sort((a, b) => b - a)
-        let role = guild.roles.cache.get('715973607590723635')
-        //if(role.rawPosition < memberRolesArr[0]) return message.reply('This mute will do nothing')
+        let guildSetup = collapsa.collections.get('discordguildbase')
+        if(!guildSetup.documents.has(guild.id)) return message.reply('This server does not have a setup :(')
+        if(!guildSetup.documents.get(guild.id).data.mute.role) return message.reply('This server does not have a mute role set')
+        let role = guild.roles.cache.get(guildSetup.documents.get(guild.id).data.mute.role)
+        if(!role) return message.reply('It seems that someone has deleted the muted role for this server. Please reconfigure it')
+        if(role.rawPosition < memberRolesArr[0]) return message.reply('This mute will do nothing')
         if(author.id == client.owner || author.id == guild.ownerID){
             let doc = Object.assign({}, discorduserbase.documents.get(member.id).data)
             doc.guilds[guild.id].muteTimeEnd = endTime
@@ -107,7 +115,7 @@ module.exports = {
                 doc.guilds[guild.id].muteTimeEnd = false
                 discorduserbase.updateDocument(doc)
             }, t)
-            await member.roles.add(role, "Fun")
+            await member.roles.add(role, reason)
             let embed = new MessageEmbed()
                 .setColor('#000001')
                 .setTitle(`Muted ${member.user.username}`)
@@ -126,7 +134,7 @@ module.exports = {
         let doc = Object.assign({}, discorduserbase.documents.get(member.id).data)
         doc.guilds[guild.id].muteTimeEnd = endTime
         await discorduserbase.updateDocument(doc)
-        await member.roles.add(role)
+        await member.roles.add(role, reason)
         setTimeout(() => {
             if(!guild.members.cache.get(member.id)) return
             member.roles.remove(role)
