@@ -2323,6 +2323,9 @@ var init = function(name) {
         pack.ctable.forEach((id) => {
             CraftingTables.delete(id)
         })
+        pack.campfire.forEach((id) => {
+            Campfires.delete(id)
+        })
         pack.chest.forEach((id) => {
             Chests.delete(id)
         })
