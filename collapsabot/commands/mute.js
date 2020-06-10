@@ -104,6 +104,7 @@ module.exports = {
         let role = guild.roles.cache.get(guildSetup.documents.get(guild.id).data.mute.role)
         if(!role) return message.reply('It seems that someone has deleted the muted role for this server. Please reconfigure it')
         if(role.rawPosition < memberRolesArr[0]) return message.reply('This mute will do nothing')
+        if (!guild.me.hasPermission(['MANAGE_ROLES'])) return message.reply('You can\'t mute this user because the bot doesn\'t have sufficient pemissions')
         if(author.id == client.owner || author.id == guild.ownerID){
             let doc = Object.assign({}, discorduserbase.documents.get(member.id).data)
             doc.guilds[guild.id].muteTimeEnd = endTime
