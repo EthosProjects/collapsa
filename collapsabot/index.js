@@ -28,39 +28,47 @@ module.exports = (mLab) => {
                 client.guilds.cache.size
             } guild${client.guilds.cache.size > 1 ? 's' : ''}`
         );
+        client.guilds.cache.forEach((guild) => {
+            console.log(guild.name);
+    
+            guild.channels.cache.forEach((channel) => {
+                console.log(` - ${channel.name} ${channel.type} ${channel.id}`);
+            });
+            // general text 679422692931272744
+        });
+        client.user.setPresence({ activity: { name: 'with discord.js' }, status: 'idle' })
+            .then(console.log)
+            .catch(console.error);
+        client.user.setActivity('Collapsa.io', { type: 'PLAYING' })
         //console.log(client)
     });
     let antiSpam = new Collection();
     let expRate = new Collection();
     client.on('message', async (message) => {
         if (message.author.bot || message.webhookID) return;
+        
     });
+    console.log('12345678901234567890123456789012'.length)
     client.on('message', async (message) => {
         let channel = message.channel;
         let content = message.content;
         let author = message.author;
-
-        if (
+        //<:amethystaxe:720101840821420044>
+      /*  if (
             message.guild.id == client.mainGuild &&
             !author.bot &&
             !message.webhookID
         ) {
-            /**
-             * @type {TextChannel}
-             */
             let channel = message.guild.channels.cache.get(
                 '716569270158622760'
             );
-            /**
-             * @type {Webhook}
-             */
             let webhook = await channel.createWebhook(message.author.username, {
                 avatar: message.author.avatarURL(),
             });
             await webhook.send(message.content);
             await webhook.delete();
         }
-
+*/
         if (
             message.content.startsWith('!join ') &&
             message.author.id == client.owner
