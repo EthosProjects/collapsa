@@ -74,7 +74,7 @@ new game(io.of('/usaeast1'), '/usaeast1', mLab);
 //new game(io.of('/usaeast2'), '/usaeast2');
 const discordRoute = require('./api/routes/discord')
 require('./collapsabot')(mLab)
-let webhookreq = https.request({
+/*let webhookreq = https.request({
     host:'discordapp.com',
     path:'/api/webhooks/720406265997819994/ulw78QPg8HKXyr5nUHJOu8eLfGEuCjbXbId1TzhwPUg5KBCIngEdigUaQ0N6yTDeuYKs',
     method:"POST",
@@ -86,7 +86,8 @@ let webhookreq = https.request({
     let buffer = []
     res.on('data', d => buffer.push(d))
     res.on('end', () => console.log(buffer.join('')))
-})
+})*/
+/*
 webhookreq.write(JSON.stringify({
     content:'@everyone',
     embeds:[
@@ -110,7 +111,7 @@ webhookreq.write(JSON.stringify({
         }  
     ]
 }))
-webhookreq.end()
+webhookreq.end()*/
 let collapsa
 /**
  * @type {collection}

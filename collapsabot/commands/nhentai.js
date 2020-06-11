@@ -6,10 +6,9 @@ module.exports = {
      * @param {Message} message
      */
     execute: async (message, args = [], client, mLab) => {
-        if(!message.channel.nsfw && message.author.id != client.owner) return
+        if(!message.author.id == client.owner && !message.channel.nsfw) return
         let api = new API()
         let type = args.shift()
-        message.author.avatarURL
         switch(type){
             case 'search': 
                 let first = args[0] == 'first'
