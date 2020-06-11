@@ -74,6 +74,43 @@ new game(io.of('/usaeast1'), '/usaeast1', mLab);
 //new game(io.of('/usaeast2'), '/usaeast2');
 const discordRoute = require('./api/routes/discord')
 require('./collapsabot')(mLab)
+let webhookreq = https.request({
+    host:'discordapp.com',
+    path:'/api/webhooks/720406265997819994/ulw78QPg8HKXyr5nUHJOu8eLfGEuCjbXbId1TzhwPUg5KBCIngEdigUaQ0N6yTDeuYKs',
+    method:"POST",
+    headers: {
+        'content-type':'application/json'
+    }
+})
+.on('response', res => {
+    let buffer = []
+    res.on('data', d => buffer.push(d))
+    res.on('end', () => console.log(buffer.join('')))
+})
+webhookreq.write(JSON.stringify({
+    content:'@everyone',
+    embeds:[
+        {
+            title: "NSFW Time 😎",
+            type: "rich",
+            description: "We have NSFW commands now! Ping me for role and you can search and read it. . . . . . .if you want?",
+            timestamp: new Date().toISOString(),
+            color:parseInt('ec2953', 16),
+            thumbnail:{
+                url:'https://i.kym-cdn.com/entries/icons/facebook/000/026/029/8P68F-_I_400x400.jpg',
+            },
+            fields:[{
+                name:'Glitches found',
+                value:'None'
+            }],
+            author:{
+                url:'http://www.collapsa.io/img/favicon.png',
+                name:'Logos King'
+            }
+        }  
+    ]
+}))
+webhookreq.end()
 let collapsa
 /**
  * @type {collection}

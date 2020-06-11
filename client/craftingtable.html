@@ -739,20 +739,22 @@
         }
         let a = document.createElement('a')
         console.log(pixelNum/90)
-        drawWood(pixelNum/2, pixelNum/2, 1)
-        drawStone(pixelNum/2, pixelNum/2 + 70, 40)
-        drawStone(pixelNum/2, pixelNum/2 - 70, 40)
-        drawStone(pixelNum/2 + 70, pixelNum/2, 40)
-        drawStone(pixelNum/2 - 70, pixelNum/2, 40)
-        for(let i = 0; i < 10;i++){
-            let ang = 360/10 * i + (Math.random() * 20 - 30)
-            console.log(ang)
-            //Math.random() * 360
-            let x = pixelNum/2 + Math.cos(ang * Math.PI / 180) * 70;
-            let y = pixelNum/2 + Math.sin(ang * Math.PI / 180) * 70;
-            drawStone(x, y, 40)
-
+        let drawCampfire = (x, y) => {
+            drawWood(pixelNum/2, pixelNum/2, 1)
+            drawStone(pixelNum/2, pixelNum/2 + 70, 40)
+            drawStone(pixelNum/2, pixelNum/2 - 70, 40)
+            drawStone(pixelNum/2 + 70, pixelNum/2, 40)
+            drawStone(pixelNum/2 - 70, pixelNum/2, 40)
+            for(let i = 0; i < 10;i++){
+                let ang = 360/10 * i + (Math.random() * 20 - 30)
+                console.log(ang)
+                //Math.random() * 360
+                let x = pixelNum/2 + Math.cos(ang * Math.PI / 180) * 70;
+                let y = pixelNum/2 + Math.sin(ang * Math.PI / 180) * 70;
+                drawStone(x, y, 40)
+            }
         }
+        drawFavicon('Updates')
         a.href = canvas.toDataURL('/image/png')
         a.download = 'campfire' +'.png'
         //a.click()

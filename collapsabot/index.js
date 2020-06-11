@@ -23,6 +23,10 @@ module.exports = (mLab) => {
         //console.log(owner)
     });
     client.once('ready', () => {
+        let statusChannel = client.guilds.cache.find(guild => guild.id == client.mainGuild).channels.cache.find(channel => channel.id == '720399190089531393')
+        statusChannel.bulkDelete(100, true)
+        statusChannel.send('I\'m online!')
+        console.log(statusChannel.messages.cache)
         console.log(
             `${client.user.username} is now online in ${
                 client.guilds.cache.size
@@ -36,9 +40,6 @@ module.exports = (mLab) => {
             });
             // general text 679422692931272744
         });
-        client.user.setPresence({ activity: { name: 'with discord.js' }, status: 'idle' })
-            .then(console.log)
-            .catch(console.error);
         client.user.setActivity('Collapsa.io', { type: 'PLAYING' })
         //console.log(client)
     });
@@ -48,27 +49,11 @@ module.exports = (mLab) => {
         if (message.author.bot || message.webhookID) return;
         
     });
-    console.log('12345678901234567890123456789012'.length)
     client.on('message', async (message) => {
         let channel = message.channel;
         let content = message.content;
         let author = message.author;
-        //<:amethystaxe:720101840821420044>
-      /*  if (
-            message.guild.id == client.mainGuild &&
-            !author.bot &&
-            !message.webhookID
-        ) {
-            let channel = message.guild.channels.cache.get(
-                '716569270158622760'
-            );
-            let webhook = await channel.createWebhook(message.author.username, {
-                avatar: message.author.avatarURL(),
-            });
-            await webhook.send(message.content);
-            await webhook.delete();
-        }
-*/
+        if(!message.guild) return
         if (
             message.content.startsWith('!join ') &&
             message.author.id == client.owner
