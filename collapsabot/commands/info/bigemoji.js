@@ -1,5 +1,7 @@
 const {MessageEmbed, Message} = require('discord.js')
-module.exports = {
+const Command = require('../../Command.js')
+const Argument = require('../../Argument.js')
+module.exports = new Command({
     name:'bigemoji',
     /**
      * @param {Message} message
@@ -12,6 +14,8 @@ module.exports = {
         if(!emoji) return message.reply('Why the fake emoji?')
         let embed = new MessageEmbed()
             .setImage(emoji.url)
+            .setAuthor("CollapsaBot", 'http://www.collapsa.io/client/img/favicon.png')
+            .setTimestamp()
         await message.channel.send(embed);
     }
-}
+})

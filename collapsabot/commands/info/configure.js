@@ -1,6 +1,9 @@
 const {MessageEmbed, Message, Collection} = require('discord.js')
-module.exports = {
+const Command = require('../../Command.js')
+const Argument = require('../../Argument.js')
+module.exports = new Command({
     name:'configure',
+    description:'Configure the optional commands',
     /**
      * @param {Message} message
      * @param {Array.<string>} args
@@ -31,9 +34,6 @@ module.exports = {
                     message.guild.channels.cache.has(m.content)
                 ) || m.content == 'no'
             )
-        }
-        if(args[0] == 'muteRole'){
-            
         }
         switch(args[0]){
             case 'mutedRole' :
@@ -149,4 +149,4 @@ module.exports = {
                 break;
         }
     }
-}
+})

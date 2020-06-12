@@ -1,11 +1,7 @@
 const { Client, Collection } = require('discord.js')
 const { mlabInteractor } = require('mlab-promise')
+const Command = require('./Command.js')
 const fs = require('fs')
-/**
- * @typedef Command
- * @property {string} name
- * @property {Function} execute 
- */
 class CollapsaBot extends Client {
     /**
      * 
@@ -13,6 +9,7 @@ class CollapsaBot extends Client {
      */
     constructor(mLab){
         super()
+        this.prefix = '!'
         /**
          * @type {string}
          */
@@ -25,17 +22,31 @@ class CollapsaBot extends Client {
          * @type {mlabInteractor}
          */
         this.mLab = mLab
-        this.supportinvite = ''
-        this.version = ''
+        this.supportinvite = 'https://discord.gg/MSbqVCy'
+        this.version = '0.0.1'
         /**
-         * @type {Collection<string,Command}
+         * @type {Collection<string,Command>}
          */
         this.commands = new Collection()
-        const commandFiles = fs.readdirSync('./collapsabot/commands').filter(file => file.endsWith('.js'));
-        for (const file of commandFiles) {
-            const command = require(`./commands/${file}`);
-            this.commands.set(command.name, command);
+        /**
+         * @type {Collection<string,Array.<Command>>}
+         */
+        this.commandFolders = new Collection()
+        const commandFolders = fs.readdirSync('./collapsabot/commands');
+        for (const folder of commandFolders) {
+            const commandFiles = fs.readdirSync(`./collapsabot/commands/${folder}`).filter(file => file.endsWith('.js'));
+            let folderArr = []
+            for (const file of commandFiles) {
+                /**
+                 * @type {Command}
+                 */
+                const command = require(`./commands/${folder}/${file}`);
+                this.commands.set(command.name, command);
+                folderArr.push(command)
+            }
+            this.commandFolders.set(folder, folderArr)
         }
+        console.log(this.commands, this.commandFolders)
     }
 }
 module.exports = CollapsaBot

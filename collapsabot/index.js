@@ -111,7 +111,7 @@ module.exports = (mLab) => {
                 },
                 warnings: [],
             };
-            await discorduserbase.updateDocument(member.id, doc);
+            await discorduserbase.updateDocument(doc);
         }
         if (expRate.has(author.id + message.guild.id)) {
             let expRated = expRate.get(author.id + message.guild.id);

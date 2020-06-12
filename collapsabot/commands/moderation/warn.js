@@ -1,6 +1,17 @@
 const {MessageEmbed, Message, Collection} = require('discord.js')
-module.exports = {
+const Command = require('../../Command.js')
+const Argument = require('../../Argument.js')
+module.exports = new Command({
     name:'warn',
+    arguments:[
+        new Argument({
+            _name:'user',
+            optional:false,
+            type:'User',
+            description:'User ID, mention, or username of the user whom you want to warn'
+        }),
+    ],
+    description:'Warns a user',
     /**
      * @param {Message} message
      * @param {Array.<string>} args
@@ -85,4 +96,4 @@ module.exports = {
             .setAuthor(message.author.username, message.author.avatarURL())
         message.channel.send
     }
-}
+})

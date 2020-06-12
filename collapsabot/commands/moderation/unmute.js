@@ -1,6 +1,17 @@
 const {MessageEmbed, Message, Collection, Client} = require('discord.js')
-module.exports = {
+const Command = require('../../Command.js')
+const Argument = require('../../Argument.js')
+module.exports = new Command({
     name:'unmute',
+    arguments:[
+        new Argument({
+            _name:'user',
+            optional:false,
+            type:'User',
+            description:'User ID, mention, or username of the user whom you want to unmute'
+        }),
+    ],
+    description:'Unmutes a user',
     /**
      * @param {Message} message
      * @param {Array.<string>} args
@@ -89,4 +100,4 @@ module.exports = {
             .setAuthor(message.author.username, message.author.avatarURL())
         message.channel.send(embed)
     }
-}
+})

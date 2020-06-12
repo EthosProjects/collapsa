@@ -1,6 +1,8 @@
 const {MessageEmbed, Message} = require('discord.js')
-module.exports = {
+const Command = require('../../Command.js')
+module.exports = new Command({
     name:'serverinfo',
+    description:'Get information on a server',
     /**
      * @param {Message} message
      */
@@ -19,7 +21,7 @@ module.exports = {
         let embed = new MessageEmbed()
             .setColor("#00ff00")
             .setThumbnail(sicon)
-            .setAuthor(message.guild.name)
+            .setAuthor(message.guild.name, message.guild.iconURL({ dynamic:true }))
             .addField("Name", message.guild.name, inline)
             .addField("ID", message.guild.id, inline)
             .addField("Owner", message.guild.owner, inline)
@@ -33,4 +35,4 @@ module.exports = {
     
         message.channel.send(embed);
     }
-}
+})

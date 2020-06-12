@@ -74,7 +74,7 @@ new game(io.of('/usaeast1'), '/usaeast1', mLab);
 //new game(io.of('/usaeast2'), '/usaeast2');
 const discordRoute = require('./api/routes/discord')
 require('./collapsabot')(mLab)
-/*let webhookreq = https.request({
+let webhookreq = https.request({
     host:'discordapp.com',
     path:'/api/webhooks/720406265997819994/ulw78QPg8HKXyr5nUHJOu8eLfGEuCjbXbId1TzhwPUg5KBCIngEdigUaQ0N6yTDeuYKs',
     method:"POST",
@@ -86,19 +86,18 @@ require('./collapsabot')(mLab)
     let buffer = []
     res.on('data', d => buffer.push(d))
     res.on('end', () => console.log(buffer.join('')))
-})*/
-/*
+})
 webhookreq.write(JSON.stringify({
     content:'@everyone',
     embeds:[
         {
-            title: "NSFW Time 😎",
+            title: "CollapsaBot Help commands",
             type: "rich",
-            description: "We have NSFW commands now! Ping me for role and you can search and read it. . . . . . .if you want?",
+            description: "There is now a help command with complete descriptions of every command",
             timestamp: new Date().toISOString(),
-            color:parseInt('ec2953', 16),
+            color:parseInt('2ecc71', 16),
             thumbnail:{
-                url:'https://i.kym-cdn.com/entries/icons/facebook/000/026/029/8P68F-_I_400x400.jpg',
+                url:'http://www.collapsa.io/img/favicon.png',
             },
             fields:[{
                 name:'Glitches found',
@@ -111,7 +110,7 @@ webhookreq.write(JSON.stringify({
         }  
     ]
 }))
-webhookreq.end()*/
+webhookreq.end()
 let collapsa
 /**
  * @type {collection}

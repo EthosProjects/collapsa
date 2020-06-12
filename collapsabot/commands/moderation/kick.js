@@ -1,6 +1,17 @@
 const {MessageEmbed, Message} = require('discord.js')
-module.exports = {
+const Command = require('../../Command.js')
+const Argument = require('../../Argument.js')
+module.exports = new Command({
     name:'kick',
+    arguments:[
+        new Argument({
+            _name:'user',
+            optional:false,
+            type:'User',
+            description:'User ID, mention, or username of the user whom you want to kick'
+        })
+    ],
+    description:'Kicks a user',
     /**
      * @param {Message} message
      */
@@ -32,7 +43,8 @@ module.exports = {
                 .setTitle(`Kicked ${message.mentions.users.first().username}`)
                 .addField('Reason', reason ? reason : 'No reason specified')
                 .setDescription('Owner force')
-                .setAuthor(message.author.username, message.author.avatarURL())
+                .setAuthor("CollapsaBot", 'http://www.collapsa.io/client/img/favicon.png')
+                .setTimestamp()
             message.channel.send(embed)
             return
         }
@@ -48,4 +60,4 @@ module.exports = {
             .setAuthor(message.author.username, message.author.avatarURL())
         message.channel.send(embed)
     }
-}
+})

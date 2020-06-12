@@ -1,11 +1,35 @@
-const {MessageEmbed, Message, Collection, Client} = require('discord.js')
+const {MessageEmbed, Message, Collection} = require('discord.js')
 const { mlabInteractor } = require('mlab-promise')
-module.exports = {
+const CollapsaBot = require('../../CollapsaBot')
+const Command = require('../../Command.js')
+const Argument = require('../../Argument.js')
+module.exports = new Command({
     name:'mute',
+    arguments:[
+        new Argument({
+            _name:'user',
+            optional:false,
+            type:'User',
+            description:'User ID, mention, or username of the user whom you want to mute'
+        }),
+        new Argument({
+            _name:'time',
+            optional:true,
+            type:'Time',
+            description:'Length of the mute'
+        }),
+        new Argument({
+            _name:'reason',
+            optional:true,
+            type:'Rasion',
+            description:'Reason for the mute'
+        })
+    ],
+    description:'Mutes a user',
     /**
      * @param {Message} message
      * @param {Array.<string>} args
-     * @param {Client} client
+     * @param {CollapsaBot} client
      * @param {mlabInteractor} mLab
      */
     execute: async (message, args = [], client, mLab) => {
@@ -71,10 +95,6 @@ module.exports = {
                 warnings:[]
             }
             await discorduserbase.addDocument(doc)
-            let embed = new MessageEmbed()
-                .setTitle('Added member to database')
-                .addField('Username', member.user.username)
-            message.reply(embed)
         }else if(!discorduserbase.documents.get(member.id).data.guilds[guild.id]){
             let doc = Object.assign({}, discorduserbase.documents.get(member.id).data)
             doc.guilds[guild.id] = {
@@ -153,4 +173,4 @@ module.exports = {
             .setAuthor(message.author.username, message.author.avatarURL())
         message.channel.send(embed)
     }
-}
+})

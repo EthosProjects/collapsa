@@ -7,7 +7,9 @@ const EventEmitter = require('events');
 const PF = require('pathfinding');
 const socketIO = require('socket.io');
 const Day = require('./library/day.js');
-const Mapper = require('./library/mapper.js');
+const Mapper = require('discord.js').Collection;
+const Slot = require('./lib/Slot.js')
+const Clan = require('./lib/Clan.js')
 Vector.getDistance = function (vectorA, vectorB) {
 	return Math.sqrt(
 		Math.pow(vectorA.x - vectorB.x, 2) + Math.pow(vectorA.y - vectorB.y, 2)
@@ -40,99 +42,7 @@ function RectCircleColliding(cx, cy, cr, rx, ry, rw, rh) {
 	return dx * dx + dy * dy <= cr * cr;
 }
 global.games = [];
-/**
- * An object containintg the clan methods
- */
-class Clan {
-	/**
-	 * Creates a new clan instance
-	 * @param {Game} game
-	 * @param {String} name
-	 * @param {Player} owner
-	 */
-	constructor(game, name, owner) {
-		/**
-		 * @type {Game}
-		 */
-		this.game = game;
-		/**
-		 * The owner of the clan
-		 * @type {Player}
-		 */
-		this.owner = owner;
-		/**
-		 * The name of the clan
-		 * @type {String}
-		 */
-		this.name = name;
-		/**
-		 * The leaderboard of the clan
-		 */
-		this.leaderboard = new Leaderboard([owner]);
-		/**
-		 * The list of members of the clan
-		 */
-		this.members = [owner];
-		/**
-		 * The requests to join the clan
-		 */
-		this.joinReqs = [];
-		game.clans.set(this.name, this);
-	}
-	/**
-	 * Adds a member to the clan
-	 * @param {Player} member
-	 */
-	addMember(member) {
-		if(!member) return;
-		this.leaderboard.addPlayer(member);
-		this.members.push(member);
-		this.members.forEach((mem) => (mem.needsUpdate = true));
-		member.clan = this;
-	}
-	/**
-	 * Removes a member from the clan
-	 * @param {Player} member
-	 */
-	removeMember(member) {
-		if(!member) return;
-		if(this.owner == member) {
-			this.game.clans.delete(this.name);
-			this.members.forEach((mem) => {
-				mem.clan = null;
-				mem.needsSelfUpdate = true;
-			});
-		}
-		this.leaderboard.removePlayer(member.id);
-		this.members.splice(
-			this.members.findIndex((player) => player.id == member.id),
-			1
-		);
-		member.clan = null;
-		member.needsSelfUpdate = null;
-	}
-	/**
-	 * Accepts a request to join the clan
-	 */
-	acceptReq() {
-		let req = this.joinReqs[0];
-		if(!req || this.members.length >= 9) return;
-		this.addMember(req.member);
-		this.joinReqs = this.joinReqs.filter(
-			(request) => request.member.id != req.member.id
-		);
-	}
-	/**
-	 * Denies a request to join the clan
-	 */
-	denyReq() {
-		let req = this.joinReqs[0];
-		if(!req) return;
-		this.joinReqs = this.joinReqs.filter(
-			(request) => request.member.id != req.member.id
-		);
-	}
-}
+
 /**
  * The leaderboard class
  */
@@ -195,27 +105,6 @@ class Leaderboard {
 			});
 		});
 		return pack;
-	}
-}
-class Slot {
-	constructor(
-		type,
-		count,
-		image,
-		stackSize = 255,
-		equipable = false,
-		edible = false,
-		armorable = false,
-		hatables = false
-	) {
-		this.id = type;
-		this.count = count;
-		this.image = image;
-		this.stackSize = stackSize;
-		this.equipable = equipable;
-		this.edible = edible;
-		this.armorable = armorable;
-		this.hatables = hatables;
 	}
 }
 class Crafter extends Mapper {
@@ -469,57 +358,7 @@ module.exports = function (nsp, ns, mLab) {
 		},
 	};
 	let clans = new Map();
-	let Entities = (this.Entities = []);
-
-	class Clan {
-		constructor(name, owner) {
-			this.owner = owner;
-			this.name = name;
-			this.leaderboard = new Leaderboard([owner]);
-			this.members = [owner];
-			this.joinReqs = [];
-			clans.set(this.name, this);
-		}
-		addMember(member) {
-			if(!member) return;
-			this.leaderboard.addPlayer(member);
-			this.members.push(member);
-			this.members.forEach((mem) => (mem.needsUpdate = true));
-			member.clan = this;
-		}
-		removeMember(member) {
-			if(!member) return;
-			if(this.owner == member) {
-				clans.delete(this.name);
-				this.members.forEach((mem) => {
-					mem.clan = null;
-					mem.needsSelfUpdate = true;
-				});
-			}
-			this.leaderboard.removePlayer(member.id);
-			this.members.splice(
-				this.members.findIndex((player) => player.id == member.id),
-				1
-			);
-			member.clan = null;
-			member.needsSelfUpdate = null;
-		}
-		acceptReq() {
-			let req = this.joinReqs[0];
-			if(!req || this.members.length >= 9) return;
-			this.addMember(req.member);
-			this.joinReqs = this.joinReqs.filter(
-				(request) => request.member.id != req.member.id
-			);
-		}
-		denyReq() {
-			let req = this.joinReqs[0];
-			if(!req) return;
-			this.joinReqs = this.joinReqs.filter(
-				(request) => request.member.id != req.member.id
-			);
-		}
-	}
+	this.Entities = [];
 	let walls = {
 		top: Bodies.rectangle(
 			this.map.total.width / 2,
@@ -566,7 +405,6 @@ module.exports = function (nsp, ns, mLab) {
 			Vector.add(this.position, this.velocity, this.position);
 		}
 	}
-
 	class Storage extends Mapper {
 		constructor(base, length) {
 			if(!base) {
@@ -594,7 +432,7 @@ module.exports = function (nsp, ns, mLab) {
 		}
 		addItem(toAdd) {
 			let found = false;
-			let posSlots = this.findAll((item) => item.id == toAdd.id);
+			let posSlots = this.filter((item) => item.id == toAdd.id);
 			posSlots.forEach((item) => {
 				if(found) return;
 				if(item.id == toAdd.id) {
@@ -633,7 +471,7 @@ module.exports = function (nsp, ns, mLab) {
 		}
 		addItemMax(toAdd) {
 			let found = false;
-			let posSlots = this.findAll((item) => item.id == toAdd.id);
+			let posSlots = this.filter((item) => item.id == toAdd.id);
 			let ret = true;
 			if(!ret) return;
 			while (
@@ -709,7 +547,7 @@ module.exports = function (nsp, ns, mLab) {
 		}
 		addItem(toAdd) {
 			let found = false;
-			let posSlots = this.findAll((item) => item.id == toAdd.id);
+			let posSlots = this.filter((item) => item.id == toAdd.id);
 			posSlots.forEach((item) => {
 				if(found) return;
 				if(item.id == toAdd.id) {
@@ -748,7 +586,7 @@ module.exports = function (nsp, ns, mLab) {
 		}
 		addItemMax(toAdd) {
 			let found = false;
-			let posSlots = this.findAll((item) => item.id == toAdd.id);
+			let posSlots = this.filter((item) => item.id == toAdd.id);
 			let ret = true;
 			if(!ret) return;
 			while (
@@ -790,6 +628,9 @@ module.exports = function (nsp, ns, mLab) {
 		/**
 		 * @param {String} id
 		 * @param {String} usr
+		 * @param {SocketIO.Socket} socket
+		 * @param {Game} game
+		 * @param {String} token
 		 */
 		constructor(id, usr, socket, game, token) {
 			super();
@@ -804,10 +645,9 @@ module.exports = function (nsp, ns, mLab) {
 			this.msg = new Map();
 			this.adminLevel = 0;
 			let tempx = Math.getRandomInt(0, game.map.forest.width / 100 - 1) * 100 + 50;
-			let tempy =
-				Math.getRandomInt(0, game.map.forest.height / 100 - 1) * 100 + 50;
+			let tempy = Math.getRandomInt(0, game.map.forest.height / 100 - 1) * 100 + 50;
 			let inWay = false;
-			Entities.forEach((e) => {
+			this.game.Entities.forEach((e) => {
 				if(
 					(e.body.position.x == tempx && e.body.position.y == tempy) ||
 					(e instanceof Player &&
@@ -819,7 +659,7 @@ module.exports = function (nsp, ns, mLab) {
 				tempx = Math.getRandomInt(0, game.map.forest.width / 100 - 1) * 100 + 50;
 				tempy = Math.getRandomInt(0, game.map.forest.height / 100 - 1) * 100 + 50;
 				inWay = false;
-				Entities.forEach((e) => {
+				this.game.Entities.forEach((e) => {
 					if(
 						(e.body.position.x == tempx && e.body.position.y == tempy) ||
 						(e instanceof Player &&
@@ -833,7 +673,7 @@ module.exports = function (nsp, ns, mLab) {
 				frictionAir: 0.02,
 				restitution: 0.15,
 			});
-			Entities.push(this);
+			this.game.Entities.push(this);
 			World.addBody(this.game.engine.world, this.body);
 			//new Guns.types['pistol'](getRandomNum(25, 2090), getRandomNum(25,1463))
 			this.inventory = new Inventory();
@@ -1396,7 +1236,7 @@ module.exports = function (nsp, ns, mLab) {
 							this.axe.ready = true;
 							this.tool = null;
 						}, 5000 / 3);
-						Entities.forEach((e) => {
+						this.game.Entities.forEach((e) => {
 							if(
 								e instanceof Player ||
 								e instanceof Demon ||
@@ -1559,7 +1399,7 @@ module.exports = function (nsp, ns, mLab) {
 							this.pickaxe.ready = true;
 							this.tool = null;
 						}, 5000 / 3);
-						Entities.forEach((e) => {
+						this.game.Entities.forEach((e) => {
 							if(
 								e instanceof Player ||
 								e instanceof Demon ||
@@ -1766,7 +1606,7 @@ module.exports = function (nsp, ns, mLab) {
 							},
 							un >= 3 ? 3000 / 3 : 5000 / 3
 						);
-						Entities.forEach((e) => {
+						this.game.Entities.forEach((e) => {
 							if(
 								e instanceof Player ||
 								e instanceof Demon ||
@@ -1846,7 +1686,7 @@ module.exports = function (nsp, ns, mLab) {
 							this.hammer.ready = true;
 							this.tool = null;
 						}, 6000 / 3);
-						Entities.forEach((e) => {
+						this.game.Entities.forEach((e) => {
 							if(
 								e instanceof Player ||
 								e instanceof Demon ||
@@ -1979,7 +1819,7 @@ module.exports = function (nsp, ns, mLab) {
 							this.shovel.ready = true;
 							this.tool = null;
 						}, 5000 / 3);
-						Entities.forEach((e) => {
+						this.game.Entities.forEach((e) => {
 							if(
 								e instanceof Player ||
 								e instanceof Demon ||
@@ -2092,7 +1932,7 @@ module.exports = function (nsp, ns, mLab) {
 					this.needsSelfUpdate = true;
 					if(/Wall/.test(this.mainHands) && this.move.att && !this.alusd) {
 						if(
-							Entities.some(
+							this.game.Entities.some(
 								(e) =>
 									(((e.body.position.x == mvect.x && e.body.position.y == mvect.y) ||
 										((e instanceof Player ||
@@ -2131,16 +1971,16 @@ module.exports = function (nsp, ns, mLab) {
 						}
 						this.needsSelfUpdate = true;
 						if(/Wood/.test(this.mainHands))
-							this.structures.push(new Wall(mvect.x, mvect.y, 'wood'));
+							this.structures.push(new Wall(mvect.x, mvect.y, 'wood', this.game));
 						if(/Stone/.test(this.mainHands))
-							this.structures.push(new Wall(mvect.x, mvect.y, 'stone'));
+							this.structures.push(new Wall(mvect.x, mvect.y, 'stone', this.game));
 						if(/Iron/.test(this.mainHands))
-							this.structures.push(new Wall(mvect.x, mvect.y, 'iron'));
+							this.structures.push(new Wall(mvect.x, mvect.y, 'iron', this.game));
 						this.alusd = true;
 					}
 					if(/Door/.test(this.mainHands) && this.move.att && !this.alusd) {
 						if(
-							Entities.some(
+							this.game.Entities.some(
 								(e) =>
 									(((e.body.position.x == mvect.x && e.body.position.y == mvect.y) ||
 										((e instanceof Player ||
@@ -2178,11 +2018,11 @@ module.exports = function (nsp, ns, mLab) {
 						}
 						this.needsSelfUpdate = true;
 						if(/Wood/.test(this.mainHands))
-							this.structures.push(new Door(mvect.x, mvect.y, 'wood', this.pang));
+							this.structures.push(new Door(mvect.x, mvect.y, 'wood', this.pang, this.game));
 						if(/Stone/.test(this.mainHands))
-							this.structures.push(new Door(mvect.x, mvect.y, 'stone', this.pang));
+							this.structures.push(new Door(mvect.x, mvect.y, 'stone', this.pang, this.game));
 						if(/Iron/.test(this.mainHands))
-							this.structures.push(new Door(mvect.x, mvect.y, 'iron', this.pang));
+							this.structures.push(new Door(mvect.x, mvect.y, 'iron', this.pang, this.game));
 						this.alusd = true;
 					}
 					if(
@@ -2191,7 +2031,7 @@ module.exports = function (nsp, ns, mLab) {
 						!this.alusd
 					) {
 						if(
-							Entities.find(
+							this.game.Entities.find(
 								(e) =>
 									(((e.body.position.x == mvect.x && e.body.position.y == mvect.y) ||
 										((e instanceof Player ||
@@ -2228,12 +2068,12 @@ module.exports = function (nsp, ns, mLab) {
 							this.mainHand = '-1';
 						}
 						this.needsSelfUpdate = true;
-						this.structures.push(new CraftingTable(game, mvect.x, mvect.y));
+						this.structures.push(new CraftingTable(game, mvect.x, mvect.y, this.game));
 						this.alusd = true;
 					}
 					if(/Floor/.test(this.mainHands) && this.move.att && !this.alusd) {
 						if(
-							Entities.find(
+							this.game.Entities.find(
 								(e) =>
 									(e.id != this.id &&
 										((e.body.position.x == mvect.x && e.body.position.y == mvect.y) ||
@@ -2284,16 +2124,16 @@ module.exports = function (nsp, ns, mLab) {
 						}
 						this.needsSelfUpdate = true;
 						if(/Wood/.test(this.mainHands))
-							this.structures.push(new Floor(mvect.x, mvect.y, 'wood'));
+							this.structures.push(new Floor(mvect.x, mvect.y, 'wood', this.game));
 						if(/Stone/.test(this.mainHands))
-							this.structures.push(new Floor(mvect.x, mvect.y, 'stone'));
+							this.structures.push(new Floor(mvect.x, mvect.y, 'stone', this.game));
 						if(/Iron/.test(this.mainHands))
-							this.structures.push(new Floor(mvect.x, mvect.y, 'iron'));
+							this.structures.push(new Floor(mvect.x, mvect.y, 'iron', this.game));
 						this.alusd = true;
 					}
 					if(/Chest/.test(this.mainHands) && this.move.att && !this.alusd) {
 						if(
-							Entities.find(
+							this.game.Entities.find(
 								(e) =>
 									(e.id != this.id &&
 										((e.body.position.x == mvect.x && e.body.position.y == mvect.y) ||
@@ -2343,12 +2183,12 @@ module.exports = function (nsp, ns, mLab) {
 							this.mainHand = '-1';
 						}
 						this.needsSelfUpdate = true;
-						this.structures.push(new Chest(mvect.x, mvect.y, this.pang));
+						this.structures.push(new Chest(mvect.x, mvect.y, this.pang, this.game));
 						this.alusd = true;
 					}
 					if(/Campfire/.test(this.mainHands) && this.move.att && !this.alusd) {
 						if(
-							Entities.find(
+							this.game.Entities.find(
 								(e) =>
 									(((e.body.position.x == mvect.x && e.body.position.y == mvect.y) ||
 										((e instanceof Player ||
@@ -2385,7 +2225,7 @@ module.exports = function (nsp, ns, mLab) {
 							this.mainHand = '-1';
 						}
 						this.needsSelfUpdate = true;
-						this.structures.push(new Campfire(mvect.x, mvect.y));
+						this.structures.push(new Campfire(mvect.x, mvect.y, this.game));
 						this.alusd = true;
 					}
 				}
@@ -2438,7 +2278,7 @@ module.exports = function (nsp, ns, mLab) {
 					this.lhit = false;
 					this.rhit = false;
 				}, 1500 / 3);
-				Entities.forEach((e) => {
+				this.game.Entities.forEach((e) => {
 					if(
 						e instanceof Player ||
 						e instanceof Demon ||
@@ -2703,15 +2543,16 @@ module.exports = function (nsp, ns, mLab) {
 		 * @param {String} id
 		 * @param {String} usr
 		 */
-		constructor(x, y) {
+		constructor(x, y, game) {
 			super();
 			this.rad = 50;
 			this.id = Math.random();
+			this.game = game
 			this.body = Bodies.circle(x, y, this.rad, {
 				frictionAir: 0.02,
 				restitution: 0.15,
 			});
-			Entities.push(this);
+			this.game.Entities.push(this);
 			World.addBody(engine.world, this.body);
 			this.bullets = [];
 			this.agro = [];
@@ -3061,7 +2902,7 @@ module.exports = function (nsp, ns, mLab) {
 					this.lhit = false;
 					this.rhit = false;
 				}, 1500 / 3);
-				Entities.forEach((e) => {
+				this.game.Entities.forEach((e) => {
 					if(e == this) return;
 					if(e instanceof Player || e instanceof Rabbit) {
 						if(Vector.getDistance(this.hposfr, e.body.position) < e.rad + this.hrad)
@@ -3201,15 +3042,16 @@ module.exports = function (nsp, ns, mLab) {
 		 * @param {String} id
 		 * @param {String} usr
 		 */
-		constructor(x, y) {
+		constructor(x, y, game) {
 			super();
 			this.rad = 30;
+			this.game = game
 			this.id = Math.random();
 			this.body = Bodies.circle(x, y, this.rad, {
 				frictionAir: 0.02,
 				restitution: 0.15,
 			});
-			Entities.push(this);
+			this.game.Entities.push(this);
 			World.addBody(engine.world, this.body);
 			this.bullets = [];
 			this.agro = [];
@@ -3553,7 +3395,7 @@ module.exports = function (nsp, ns, mLab) {
 					this.lhit = false;
 					this.rhit = false;
 				}, 1500 / 3);
-				Entities.forEach((e) => {
+				this.game.Entities.forEach((e) => {
 					if(
 						e instanceof Player ||
 						e instanceof Demon ||
@@ -3698,15 +3540,16 @@ module.exports = function (nsp, ns, mLab) {
 		 * @param {String} id
 		 * @param {String} usr
 		 */
-		constructor(x, y) {
+		constructor(x, y, game) {
 			super();
 			this.rad = 25;
 			this.id = Math.random();
+			this.game = game
 			this.body = Bodies.circle(x, y, this.rad, {
 				frictionAir: 0.02,
 				restitution: 0.15,
 			});
-			Entities.push(this);
+			this.game.Entities.push(this);
 			World.addBody(engine.world, this.body);
 			this.bullets = [];
 			this.agro = [];
@@ -4133,8 +3976,8 @@ module.exports = function (nsp, ns, mLab) {
 						}),
 						1
 					);
-					Entities.splice(
-						Entities.findIndex((e) => e.id === tree.id),
+					game.Entities.splice(
+						game.Entities.findIndex((e) => e.id === tree.id),
 						1
 					);
 					World.remove(engine.world, tree.body);
@@ -4158,8 +4001,8 @@ module.exports = function (nsp, ns, mLab) {
 						}),
 						1
 					);
-					Entities.splice(
-						Entities.findIndex((e) => e.id === stone.id),
+					game.Entities.splice(
+						game.Entities.findIndex((e) => e.id === stone.id),
 						1
 					);
 					World.remove(engine.world, stone.body);
@@ -4183,8 +4026,8 @@ module.exports = function (nsp, ns, mLab) {
 						}),
 						1
 					);
-					Entities.splice(
-						Entities.findIndex((e) => e.id === iron.id),
+					game.Entities.splice(
+						game.Entities.findIndex((e) => e.id === iron.id),
 						1
 					);
 					World.remove(engine.world, iron.body);
@@ -4209,8 +4052,8 @@ module.exports = function (nsp, ns, mLab) {
 						}),
 						1
 					);
-					Entities.splice(
-						Entities.findIndex((e) => e.id === gold.id),
+					game.Entities.splice(
+						game.Entities.findIndex((e) => e.id === gold.id),
 						1
 					);
 					World.remove(engine.world, gold.body);
@@ -4234,8 +4077,8 @@ module.exports = function (nsp, ns, mLab) {
 						}),
 						1
 					);
-					Entities.splice(
-						Entities.findIndex((e) => e.id === diamond.id),
+					game.Entities.splice(
+						game.Entities.findIndex((e) => e.id === diamond.id),
 						1
 					);
 					World.remove(engine.world, diamond.body);
@@ -4259,8 +4102,8 @@ module.exports = function (nsp, ns, mLab) {
 						}),
 						1
 					);
-					Entities.splice(
-						Entities.findIndex((e) => e.id === amethyst.id),
+					game.Entities.splice(
+						game.Entities.findIndex((e) => e.id === amethyst.id),
 						1
 					);
 					World.remove(engine.world, amethyst.body);
@@ -4284,8 +4127,8 @@ module.exports = function (nsp, ns, mLab) {
 						}),
 						1
 					);
-					Entities.splice(
-						Entities.findIndex((e) => e.id === emerald.id),
+					game.Entities.splice(
+						game.Entities.findIndex((e) => e.id === emerald.id),
 						1
 					);
 					World.remove(engine.world, emerald.body);
@@ -4309,8 +4152,8 @@ module.exports = function (nsp, ns, mLab) {
 						}),
 						1
 					);
-					Entities.splice(
-						Entities.findIndex((e) => e.id === cfarm.id),
+					game.Entities.splice(
+						game.Entities.findIndex((e) => e.id === cfarm.id),
 						1
 					);
 					World.remove(engine.world, cfarm.body);
@@ -4339,8 +4182,8 @@ module.exports = function (nsp, ns, mLab) {
 						}),
 						1
 					);
-					Entities.splice(
-						Entities.findIndex((e) => e.id === wall.id),
+					game.Entities.splice(
+						game.Entities.findIndex((e) => e.id === wall.id),
 						1
 					);
 					World.remove(engine.world, wall.body);
@@ -4369,8 +4212,8 @@ module.exports = function (nsp, ns, mLab) {
 						}),
 						1
 					);
-					Entities.splice(
-						Entities.findIndex((e) => e.id === campfire.id),
+					game.Entities.splice(
+						game.Entities.findIndex((e) => e.id === campfire.id),
 						1
 					);
 					World.remove(engine.world, campfire.body);
@@ -4402,8 +4245,8 @@ module.exports = function (nsp, ns, mLab) {
 						}),
 						1
 					);
-					Entities.splice(
-						Entities.findIndex((e) => e.id === floor.id),
+					game.Entities.splice(
+						game.Entities.findIndex((e) => e.id === floor.id),
 						1
 					);
 				}
@@ -4438,8 +4281,8 @@ module.exports = function (nsp, ns, mLab) {
 						}),
 						1
 					);
-					Entities.splice(
-						Entities.findIndex((e) => e.id === door.id),
+					game.Entities.splice(
+						game.Entities.findIndex((e) => e.id === door.id),
 						1
 					);
 					World.remove(engine.world, door.body);
@@ -4469,8 +4312,8 @@ module.exports = function (nsp, ns, mLab) {
 						}),
 						1
 					);
-					Entities.splice(
-						Entities.findIndex((e) => e.id === ctable.id),
+					game.Entities.splice(
+						game.Entities.findIndex((e) => e.id === ctable.id),
 						1
 					);
 					World.remove(engine.world, ctable.body);
@@ -4499,8 +4342,8 @@ module.exports = function (nsp, ns, mLab) {
 						}),
 						1
 					);
-					Entities.splice(
-						Entities.findIndex((e) => e.id === chest.id),
+					game.Entities.splice(
+						game.Entities.findIndex((e) => e.id === chest.id),
 						1
 					);
 					World.remove(engine.world, chest.body);
@@ -4510,40 +4353,35 @@ module.exports = function (nsp, ns, mLab) {
 		},
 	});
 	class STree {
-		constructor(x, y, baselen = 100) {
+		constructor(x, y, game) {
 			this.x = x;
             this.y = y;
             this.rad = 50;
 			this.id = Math.random();
 			this.wood = 0;
-			this.growInterval = setInterval(() => {
-				this.wood += 1;
-			}, 1000);
+			this.game = game
 			this.health = 50;
 			this.deathTimeout = setTimeout(() => {
-				clearTimeout(this.growInterval);
 				removePack.tree.push(this.id);
 				STrees.list.splice(
 					STrees.list.findIndex((element) => element.id === this.id),
 					1
 				);
 				World.remove(engine.world, this.body);
-				Entities.splice(
-					Entities.findIndex((e) => e.id === this.id),
+				this.game.Entities.splice(
+					this.game.Entities.findIndex((e) => e.id === this.id),
 					1
 				);
 			}, 300000);
 			this.body = Bodies.circle(this.x, this.y, 50, { isStatic: true });
-			Entities.push(this);
+			this.game.Entities.push(this);
 			World.addBody(engine.world, this.body);
 			this.toplayer = 8;
-			this.baselen = baselen;
 			this.needsUpdate = false;
 			//grow(this)
 			var pack = {
 				x: this.x,
 				y: this.y,
-				baselen: this.baselen,
 				id: this.id,
 				dead: this.dead || false,
 			};
@@ -4554,7 +4392,6 @@ module.exports = function (nsp, ns, mLab) {
 			var pack = {
 				x: this.x,
 				y: this.y,
-				baselen: this.baselen,
 				id: this.id,
 				dead: this.dead || false,
 			};
@@ -4562,26 +4399,27 @@ module.exports = function (nsp, ns, mLab) {
 		}
 	}
 	class Stone {
-		constructor(x, y) {
+		constructor(x, y, game) {
 			this.x = x;
-			this.y = y;this.rad = 50;
+			this.y = y;
+			this.rad = 50;
+			this.game = game;
 			this.id = Math.random();
 			this.health = 100;
 			this.deathTimeout = setTimeout(() => {
-				clearTimeout(this.growInterval);
 				removePack.stone.push(this.id);
 				Stones.list.splice(
 					Stones.list.findIndex((element) => element.id === this.id),
 					1
 				);
-				Entities.splice(
-					Entities.findIndex((e) => e.id === this.id),
+				this.game.Entities.splice(
+					this.game.Entities.findIndex((e) => e.id === this.id),
 					1
 				);
 				World.remove(engine.world, this.body);
 			}, 400000);
 			this.body = Bodies.circle(this.x, this.y, 50, { isStatic: true });
-			Entities.push(this);
+			this.game.Entities.push(this);
 			World.addBody(engine.world, this.body);
 			this.needsUpdate = false;
 			//grow(this)
@@ -4602,26 +4440,26 @@ module.exports = function (nsp, ns, mLab) {
 		}
 	}
 	class Iron {
-		constructor(x, y) {
+		constructor(x, y, game) {
 			this.x = x;
 			this.y = y;this.rad = 50;
+			this.game = game;
 			this.id = Math.random();
 			this.health = 175;
 			this.deathTimeout = setTimeout(() => {
-				clearTimeout(this.growInterval);
 				removePack.iron.push(this.id);
 				Irons.list.splice(
 					Irons.list.findIndex((element) => element.id === this.id),
 					1
 				);
 				World.remove(engine.world, this.body);
-				Entities.splice(
-					Entities.findIndex((e) => e.id === this.id),
+				this.game.Entities.splice(
+					this.game.Entities.findIndex((e) => e.id === this.id),
 					1
 				);
 			}, 600000);
 			this.body = Bodies.circle(this.x, this.y, 50, { isStatic: true });
-			Entities.push(this);
+			this.game.Entities.push(this);
 			World.addBody(engine.world, this.body);
 			this.needsUpdate = false;
 			//grow(this)
@@ -4642,9 +4480,10 @@ module.exports = function (nsp, ns, mLab) {
 		}
 	}
 	class Gold {
-		constructor(x, y) {
+		constructor(x, y, game) {
 			this.x = x;
 			this.y = y;this.rad = 50;
+			this.game = game;
 			this.id = Math.random();
 			this.health = 275;
 			this.deathTimeout = setTimeout(() => {
@@ -4655,13 +4494,13 @@ module.exports = function (nsp, ns, mLab) {
 					1
 				);
 				World.remove(engine.world, this.body);
-				Entities.splice(
-					Entities.findIndex((e) => e.id === this.id),
+				this.game.Entities.splice(
+					this.game.Entities.findIndex((e) => e.id === this.id),
 					1
 				);
 			}, 800000);
 			this.body = Bodies.circle(this.x, this.y, 50, { isStatic: true });
-			Entities.push(this);
+			this.game.Entities.push(this);
 			World.addBody(engine.world, this.body);
 			this.needsUpdate = false;
 			//grow(this)
@@ -4682,9 +4521,10 @@ module.exports = function (nsp, ns, mLab) {
 		}
 	}
 	class Diamond {
-		constructor(x, y) {
+		constructor(x, y, game) {
 			this.x = x;
 			this.y = y;this.rad = 50;
+			this.game = game;
 			this.id = Math.random();
 			this.health = 400;
 			this.deathTimeout = setTimeout(() => {
@@ -4694,13 +4534,13 @@ module.exports = function (nsp, ns, mLab) {
 					1
 				);
 				World.remove(engine.world, this.body);
-				Entities.splice(
-					Entities.findIndex((e) => e.id === this.id),
+				this.game.Entities.splice(
+					this.game.Entities.findIndex((e) => e.id === this.id),
 					1
 				);
 			}, 1000000);
 			this.body = Bodies.circle(this.x, this.y, 50, { isStatic: true });
-			Entities.push(this);
+			this.game.Entities.push(this);
 			World.addBody(engine.world, this.body);
 			this.needsUpdate = false;
 			//grow(this)
@@ -4721,9 +4561,10 @@ module.exports = function (nsp, ns, mLab) {
 		}
 	}
 	class Emerald {
-		constructor(x, y) {
+		constructor(x, y, game) {
 			this.x = x;
 			this.y = y;this.rad = 50;
+			this.game = game;
 			this.id = Math.random();
 			this.health = 275;
 			this.deathTimeout = setTimeout(() => {
@@ -4734,13 +4575,13 @@ module.exports = function (nsp, ns, mLab) {
 					1
 				);
 				World.remove(engine.world, this.body);
-				Entities.splice(
-					Entities.findIndex((e) => e.id === this.id),
+				this.game.Entities.splice(
+					this.game.Entities.findIndex((e) => e.id === this.id),
 					1
 				);
 			}, 800000);
 			this.body = Bodies.circle(this.x, this.y, 50, { isStatic: true });
-			Entities.push(this);
+			this.game.Entities.push(this);
 			World.addBody(engine.world, this.body);
 			this.needsUpdate = false;
 			//grow(this)
@@ -4761,9 +4602,10 @@ module.exports = function (nsp, ns, mLab) {
 		}
 	}
 	class Amethyst {
-		constructor(x, y) {
+		constructor(x, y, game) {
 			this.x = x;
 			this.y = y;this.rad = 50;
+			this.game = game;
 			this.id = Math.random();
 			this.health = 400;
 			this.deathTimeout = setTimeout(() => {
@@ -4773,13 +4615,13 @@ module.exports = function (nsp, ns, mLab) {
 					1
 				);
 				World.remove(engine.world, this.body);
-				Entities.splice(
-					Entities.findIndex((e) => e.id === this.id),
+				this.game.Entities.splice(
+					this.game.Entities.findIndex((e) => e.id === this.id),
 					1
 				);
 			}, 1000000);
 			this.body = Bodies.circle(this.x, this.y, 50, { isStatic: true });
-			Entities.push(this);
+			this.game.Entities.push(this);
 			World.addBody(engine.world, this.body);
 			this.needsUpdate = false;
 			//grow(this)
@@ -4800,9 +4642,10 @@ module.exports = function (nsp, ns, mLab) {
 		}
 	}
 	class CarrotFarm {
-		constructor(x, y) {
+		constructor(x, y, game) {
 			this.x = x;
 			this.y = y;this.rad = 50;
+			this.game = game;
 			this.id = Math.random();
 			this.health = 100;
 			this.deathTimeout = setTimeout(() => {
@@ -4815,7 +4658,7 @@ module.exports = function (nsp, ns, mLab) {
 				World.remove(engine.world, this.body);
 			}, 400000);
 			this.body = Bodies.circle(this.x, this.y, 50, { isStatic: true });
-			Entities.push(this);
+			this.game.Entities.push(this);
 			World.addBody(engine.world, this.body);
 			this.needsUpdate = false;
 			//grow(this)
@@ -4836,9 +4679,10 @@ module.exports = function (nsp, ns, mLab) {
 		}
 	}
 	class Wall {
-		constructor(x, y, material) {
+		constructor(x, y, material, game) {
 			this.x = x;
 			this.y = y;this.rad = 50;
+			this.game = game;
 			this.id = Math.random();
 			this.material = material;
 
@@ -4846,7 +4690,7 @@ module.exports = function (nsp, ns, mLab) {
 			if(material == 'stone') this.health = 225;
 			if(material == 'iron') this.health = 375;
 			this.body = Bodies.rectangle(this.x, this.y, 100, 100, { isStatic: true });
-			Entities.push(this);
+			this.game.Entities.push(this);
 			World.addBody(engine.world, this.body);
 			this.needsUpdate = false;
 			//grow(this)
@@ -4869,13 +4713,13 @@ module.exports = function (nsp, ns, mLab) {
 		}
 	}
 	class Campfire {
-		constructor(x, y) {
+		constructor(x, y, game) {
 			this.x = x;
-			this.y = y;this.rad = 50;
+			this.y = y;this.rad = 14.83;
 			this.id = Math.random();
 			this.health = 50;
 			this.body = Bodies.circle(this.x, this.y, 175 / 12, { isStatic: true });
-			Entities.push(this);
+			this.game.Entities.push(this);
 			World.addBody(engine.world, this.body);
 			this.needsUpdate = false;
 			this.lit = false;
@@ -4899,9 +4743,10 @@ module.exports = function (nsp, ns, mLab) {
 		}
 	}
 	class Floor {
-		constructor(x, y, material) {
+		constructor(x, y, material, game) {
 			this.x = x;
 			this.y = y;this.rad = 50;
+			this.game = game;
 			this.id = Math.random();
 			this.material = material;
 
@@ -4909,7 +4754,7 @@ module.exports = function (nsp, ns, mLab) {
 			if(material == 'stone') this.health = 150;
 			if(material == 'iron') this.health = 275;
 			this.body = Bodies.rectangle(this.x, this.y, 100, 100, { isStatic: true });
-			Entities.push(this);
+			this.game.Entities.push(this);
 			this.needsUpdate = false;
 			//grow(this)
 			var pack = {
@@ -4934,6 +4779,7 @@ module.exports = function (nsp, ns, mLab) {
 		constructor(x, y, material, ang) {
 			this.x = x;
 			this.y = y;this.rad = 50;
+			this.game = game;
 			this.id = Math.random();
 			this.material = material;
 			this.ang = ang;
@@ -4955,7 +4801,7 @@ module.exports = function (nsp, ns, mLab) {
 				ang: this.ang,
 				open: false,
 			};
-			Entities.push(this);
+			this.game.Entities.push(this);
 			Doors.list.push(this);
 			game.initPack.door.push(pack);
 		}
@@ -5089,9 +4935,10 @@ module.exports = function (nsp, ns, mLab) {
 		}
 	}
 	class Chest {
-		constructor(x, y, ang) {
+		constructor(x, y, ang, game) {
 			this.x = x;
 			this.y = y;this.rad = 50;
+			this.game = game;
 			this.ang = ang;
 			this.id = Math.random();
 			this.health = 50;
@@ -5104,7 +4951,7 @@ module.exports = function (nsp, ns, mLab) {
 				this.height = 50;
 				this.wdith = 95;
 			}
-			Entities.push(this);
+			this.game.Entities.push(this);
 			World.addBody(engine.world, this.body);
 			this.needsUpdate = false;
 			this.storage = new Storage(null, 9);
@@ -5219,17 +5066,17 @@ module.exports = function (nsp, ns, mLab) {
 						1
 					);
 
-					Entities.splice(
-						Entities.findIndex((e) => e.id === player.id),
+					game.Entities.splice(
+						game.Entities.findIndex((e) => e.id === player.id),
 						1
 					);
 					World.remove(engine.world, player.body);
 					leaderboard.removePlayer(player.id);
 					player.structures.forEach((s) => (s.health = 0));
 					if(player.clan) player.clan.removeMember(player);
-					let toDrop = player.inventory.findAll((slot) => slot !== 'empty');
+					let toDrop = player.inventory.filter((slot) => slot !== 'empty');
 					toDrop.forEach((slot, i) => {
-						let a = 360 / toDrop.length;
+						let a = 360 / toDrop.size;
 						let ang = a * i + 77;
 						let offset = Vector.create(0, player.rad + 20);
 						offset.x = Math.cos((ang * Math.PI) / 180) * Vector.magnitude(offset);
@@ -5285,12 +5132,12 @@ module.exports = function (nsp, ns, mLab) {
 						}),
 						1
 					);
-					Entities.splice(
-						Entities.findIndex((e) => e.id === demon.id),
+					game.Entities.splice(
+						game.Entities.findIndex((e) => e.id === demon.id),
 						1
 					);
 					World.remove(engine.world, demon.body);
-					/*let toDrop = demon.inventory.findAll(slot => slot !== 'empty') 
+					/*let toDrop = demon.inventory.filter(slot => slot !== 'empty') 
                     toDrop.forEach((slot, i) => {
                         let a = 360/toDrop.length
                         let ang = a * i + 77
@@ -5378,8 +5225,8 @@ module.exports = function (nsp, ns, mLab) {
 						}),
 						1
 					);
-					Entities.splice(
-						Entities.findIndex((e) => e.id === demon.id),
+					game.Entities.splice(
+						game.Entities.findIndex((e) => e.id === demon.id),
 						1
 					);
 					World.remove(engine.world, demon.body);
@@ -5402,8 +5249,8 @@ module.exports = function (nsp, ns, mLab) {
 						}),
 						1
 					);
-					Entities.splice(
-						Entities.findIndex((e) => e.id === rabbit.id),
+					game.Entities.splice(
+						game.Entities.findIndex((e) => e.id === rabbit.id),
 						1
 					);
 					World.remove(engine.world, rabbit.body);
@@ -5562,7 +5409,7 @@ module.exports = function (nsp, ns, mLab) {
 		let tempx = Math.getRandomInt(0, game.map.forest.width / 100 - 1) * 100 + 50;
 		let tempy = Math.getRandomInt(0, game.map.forest.height / 100 - 1) * 100 + 50;
 		let inWay = false;
-		Entities.forEach((e) => {
+		game.Entities.forEach((e) => {
 			if(
 				(e.body.position.x == tempx && e.body.position.y == tempy) ||
 				(e instanceof Player &&
@@ -5574,7 +5421,7 @@ module.exports = function (nsp, ns, mLab) {
 			tempx = Math.getRandomInt(0, game.map.forest.width / 100 - 1) * 100 + 50;
 			tempy = Math.getRandomInt(0, game.map.forest.height / 100 - 1) * 100 + 50;
 			inWay = false;
-			Entities.forEach((e) => {
+			game.Entities.forEach((e) => {
 				if(
 					(e.body.position.x == tempx && e.body.position.y == tempy) ||
 					(e instanceof Player &&
@@ -5592,36 +5439,36 @@ module.exports = function (nsp, ns, mLab) {
 		let canAdd = [];
 		if(STrees.list.length < 12) {
 			let p = getGoodPosition();
-			new STree(p.x, p.y, 50);
+			new STree(p.x, p.y, game);
 		}
 		if(Stones.list.length < 7) {
 			let p = getGoodPosition();
-			new Stone(p.x, p.y, 50);
+			new Stone(p.x, p.y, game);
 		}
 		if(Irons.list.length < 6) {
 			let p = getGoodPosition();
-			new Iron(p.x, p.y, 50);
+			new Iron(p.x, p.y, game);
 		}
 		if(Golds.list.length < 3) {
 			let p = getGoodPosition();
-			new Gold(p.x, p.y, 50);
+			new Gold(p.x, p.y, game);
 		}
 		if(Diamonds.list.length < 2) {
 			let p = getGoodPosition();
-			new Diamond(p.x, p.y, 50);
+			new Diamond(p.x, p.y, game);
 		}
 		if(Emeralds.list.length < 1) {
 			let p = getGoodPosition();
-			new Emerald(p.x, p.y, 50);
+			new Emerald(p.x, p.y, game);
 		}
 		if(Amethysts.list.length < 1) {
 			let p = getGoodPosition();
-			new Amethyst(p.x, p.y, 50);
+			new Amethyst(p.x, p.y, game);
 		}
 		if(Players.list.some((player) => player.score > 700)) {
 			if(Demons.list.length < 3 && timeOfDay == 'night') {
 				let p = getGoodPosition();
-				new Demon(p.x, p.y, 50);
+				new Demon(p.x, p.y, game);
 			}
 			if(
 				Destroyers.list.length < 1 &&
@@ -5630,16 +5477,16 @@ module.exports = function (nsp, ns, mLab) {
 				dayTimeout.percntDone < 0.75
 			) {
 				let p = getGoodPosition();
-				new Destroyer(p.x, p.y, 50);
+				new Destroyer(p.x, p.y, game);
 			}
 		}
 		if(CarrotFarms.list.length < 3) {
 			let p = getGoodPosition();
-			new CarrotFarm(p.x, p.y, 50);
+			new CarrotFarm(p.x, p.y, game);
 		}
 		if(Rabbits.list.length < 1 && timeOfDay == 'day') {
 			let p = getGoodPosition();
-			new Rabbit(p.x, p.y, 50);
+			new Rabbit(p.x, p.y, game);
 		}
 	}, 10);
 	this.nsp.on('connection', function (socket) {
@@ -6130,8 +5977,14 @@ module.exports = function (nsp, ns, mLab) {
 	setInterval(() => {
 		Players.update();
 	}, 1000 / 60);
-	setInterval(function () {
+	let frameCount = 0
+	let currentFrame = false
+	let framesPerSecond = 60
+	setInterval(() => {
 		if(Players.list[0] === undefined) return;
+		if(currentFrame) return
+		currentFrame = true
+		frameCount++
 		Engine.update(engine);
 		leaderboard.update();
 		let pack = {
@@ -6169,8 +6022,7 @@ module.exports = function (nsp, ns, mLab) {
 		};
 		let alr = false;
 		for (let prop in game.initPack) {
-			if(alr === true) return;
-			if(game.initPack[prop].length > 0) {
+			if(!alr && game.initPack[prop].length > 0) {
 				alr = true;
 				self.nsp.emit('initPack', game.initPack);
 				game.initPack = {
@@ -6236,8 +6088,7 @@ module.exports = function (nsp, ns, mLab) {
 		});
 		alr = false;
 		for (let prop in removePack) {
-			if(alr === true) return;
-			if(removePack[prop].length > 0) {
+			if(!alr && removePack[prop].length > 0) {
 				alr = true;
 				self.nsp.emit('removePack', removePack);
 				removePack = {
@@ -6263,7 +6114,12 @@ module.exports = function (nsp, ns, mLab) {
 				};
 			}
 		}
+		currentFrame = false
 	}, 1000 / 60);
+	setInterval(() => {
+		framesPerSecond = frameCount
+		frameCount = 0
+	}, 1000)
 	this.STrees = STrees;
 	this.Stones = Stones;
 	this.Irons = Irons;

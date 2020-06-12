@@ -1,6 +1,8 @@
 const {MessageEmbed, Message} = require('discord.js')
-const {API} = require('nhentai-api')
-module.exports = {
+const { API } = require('nhentai-api')
+const Command = require('../../Command.js')
+const Argument = require('../../Argument.js')
+module.exports = new Command({
     name:'nhentai',
     /**
      * @param {Message} message
@@ -112,4 +114,4 @@ module.exports = {
                 break;
         }
     }
-}
+})
