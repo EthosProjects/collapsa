@@ -15,8 +15,11 @@ module.exports = new Command({
     permissions:['MANAGE_MESSAGES'],
     /**
      * @param {Message} message
+     * @param {Array.<string>} args
+     * @param {CollapsaBot} client
+     * @param {mlabInteractor} mLab
      */
-    execute: async (message, args) => {
+    execute: async (message, args = [], client, mLab) => {
         args = args.length ? args : ['10']
         if(!message.guild.me.hasPermission(['MANAGE_MESSAGES'])) return message.reply('I don\'t have permission to do that')
         let limit = parseFloat(args[0]) || 10

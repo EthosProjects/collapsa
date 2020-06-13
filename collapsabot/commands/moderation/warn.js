@@ -15,6 +15,8 @@ module.exports = new Command({
     /**
      * @param {Message} message
      * @param {Array.<string>} args
+     * @param {CollapsaBot} client
+     * @param {mlabInteractor} mLab
      */
     execute: async (message, args = [], client, mLab) => {
         if(!args[0]){

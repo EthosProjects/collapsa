@@ -14,8 +14,11 @@ module.exports = new Command({
     description:'Kicks a user',
     /**
      * @param {Message} message
+     * @param {Array.<string>} args
+     * @param {CollapsaBot} client
+     * @param {mlabInteractor} mLab
      */
-    execute: async (message, args = []) => {
+    execute: async (message, args = [], client, mLab) => {
         if(!args[0]){
             return message.reply('No user specified')
         }

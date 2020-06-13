@@ -14,8 +14,11 @@ module.exports = new Command({
     description:'Bans a user',
     /**
      * @param {Message} message
+     * @param {Array.<string>} args
+     * @param {CollapsaBot} client
+     * @param {mlabInteractor} mLab
      */
-    execute: async (message, args = [], client) => {
+    execute: async (message, args = [], client, mLab) => {
         if(!args[0]){
             return message.reply('No user specified')
         }
