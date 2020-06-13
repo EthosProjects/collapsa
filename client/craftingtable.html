@@ -633,7 +633,7 @@
         drawPolygon(9, size/2, x, y, 0, "#767676")
     }
     let drawGold = (x, y, size) =>{
-        drawPolygon(8, size, x, y, 0, "#ffd700")
+        drawPolygon(8, size, x, y, 0, "#f4de64")
         drawPolygon(9, size/2, x, y, 0, "#c0c0c0")
     }
     let drawDiamond = (x, y, size) =>{
@@ -754,7 +754,8 @@
                 drawStone(x, y, 40)
             }
         }
-        drawFavicon('Updates')
+        //drawFavicon('Updates')
+        drawGold(pixelNum/2, pixelNum/2, pixelNum/2)
         a.href = canvas.toDataURL('/image/png')
         a.download = 'campfire' +'.png'
         //a.click()

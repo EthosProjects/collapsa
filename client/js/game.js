@@ -2462,9 +2462,16 @@ var init = function (name) {
             var x = canvas.width / 2 - playa.x;
             var y = canvas.height / 2 - playa.y;
 
-            ctx.fillStyle = '#01571b';
+            ctx.fillStyle = '#416C01';
+            ctx.globalAlpha = 0.95
+            ctx.fillRect(canvas.width / 2 - playa.x - 1000, canvas.height / 2 - playa.y - 2000, 2000 + 2000, 1000 + 2000);
+            ctx.globalAlpha = 1
             ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y, 2000, 1000);
+            
             ctx.fillStyle = '#e2d0a7';
+            ctx.globalAlpha = 0.95
+            ctx.fillRect(canvas.width / 2 - playa.x - 1000, canvas.height / 2 - playa.y + 1000, 2000 + 2000, 500 + 2000);
+            ctx.globalAlpha = 1
             ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y + 1000, 2000, 500);
             pack.player.forEach(function (pack) {
                 /**
@@ -2872,58 +2879,6 @@ var init = function (name) {
                         ctx.restore();
                     }
                 });
-                /*ctx.save()
-                ctx.translate(375 + 25, 125 + 25)
-                ctx.rotate(8 * Math.PI/180)
-                ctx.drawImage(Img['woodwall'], -25, -25, 50, 50)
-                ctx.restore()
-
-                ctx.save()
-                ctx.translate(375 + 25, 225 + 25)
-                ctx.rotate(45 * Math.PI/180)
-                ctx.drawImage(Img['stonepickaxe'], -25, -25, 50, 50)
-                ctx.restore()*/
-                /**ctx.fillStyle = 'black'
-                ctx.lineWidth = 2
-                ctx.beginPath()
-                ctx.globalAlpha = 0.5
-                
-                ctx.rect(100, 100, canvas.width - 200, canvas.height - 300)
-                ctx.fill()
-                playa.craftablesEx.forEach((craft, i) => {
-                    ctx.lineWidth = 2
-                    let offSetX = ((i - Math.floor(i/13) * 13) * 80)
-                    let offSetY = (Math.floor(i / 13) * 80)
-                    ctx.beginPath()
-                    ctx.globalAlpha = 0.875
-                    ctx.rect(120 + offSetX, 120 + offSetY, 60, 60)
-                    ctx.stroke()
-                    if(craft.craftable) ctx.fillStyle = 'black'
-                    else ctx.fillStyle = 'red'
-                    ctx.globalAlpha = 0.5
-                    ctx.beginPath()
-                    ctx.fillRect(120 + offSetX, 120 + offSetY, 60, 60)
-                    if(/Axe|Pickaxe|Shovel|Sword|Hammer/.test(craft.craft)){
-                        let img = craft.craft.toLowerCase().replace(/\s/, '')
-                        ctx.globalAlpha = 1
-                        ctx.save()
-                        ctx.translate(120 + offSetX + 27.5, 120 + offSetY + 27.5 + 5)
-                        ctx.rotate(Math.PI/180 * 45)
-                        ctx.drawImage(Img[img], 0 - 27.5, 0 - 27.5, 55, 55)
-                        ctx.restore()
-                    }
-                    if(/Wall|Campfire|Door|Floor|Crafting Table|Chest|Armor/.test(craft.craft)){
-                        let img = craft.craft.toLowerCase().replace(/\s/, '')
-                        ctx.globalAlpha = 1
-                        ctx.save()
-                        ctx.translate(120 + offSetX + 30, 120 + offSetY + 30)
-                        ctx.rotate(Math.PI/180 * 8)
-                        if(craft.craft == 'Chest') ctx.drawImage(Img[img], 0 - 12.75, 0 - 7.5, 25.5, 15)
-                        else ctx.drawImage(Img[img], 0 - 15, 0 - 15, 30, 30)
-                        ctx.restore()
-                    }
-                })
-                ctx.globalAlpha = 1*/
             } else {
                 playa.craftables.forEach((craft, i) => {
                     if (/Axe|Pickaxe|Shovel|Sword|Hammer/.test(craft)) {
@@ -3161,6 +3116,12 @@ var init = function (name) {
                 ctx.lineWidth = 1.5;
                 ctx.font = '20px Arial';
                 ctx.fillStyle = '#696969';
+
+                
+            ctx.fillStyle = '#B5651D';
+            ctx.strokeStyle = '#521c18';
+
+                //ctx.strokeStyle = 'red'
                 ctx.textAlign = 'start';
                 ctx.globalAlpha = 0.75;
                 ctx.rect(canvas.width / 10 + (canvas.width / 10) * i - 45, canvas.height - 100 - 45, 90, 90);
@@ -3471,7 +3432,7 @@ var init = function (name) {
             if (pack.tod == 'night') {
                 ctx.fillStyle = '#000033';
                 ctx.globalAlpha = (-1 * Math.abs(pack.per - 0.5) + 0.5) * 0.9;
-                ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y, 2000, 1000);
+                ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y, 2000, 1500);
             }
 
             ctx.globalAlpha = 1;
