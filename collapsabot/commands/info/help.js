@@ -16,6 +16,9 @@ module.exports = new Command({
         if(!args[0]){
             embed.setTitle('Command Information')
             client.commandFolders.forEach((commands, name) => {
+
+                commands = commands.filter(c => message.channel.nsfw || !c.nsfw)
+                if(!commands.length) return
                 let firstCommand = commands.shift()
                 let commandList = commands.reduce((a, b) => `${a} ${b.name}`, firstCommand.name)
                 commands.unshift(firstCommand)
@@ -24,10 +27,12 @@ module.exports = new Command({
             message.channel.send(embed);
         }else {
             let command = client.commands.get(args[0])
-            if(!command){
+            if(!command || (!message.channel.nsfw && command.nsfw)){
                 message.reply("This command is not valid")
                 embed.setTitle('Command Information')
                 client.commandFolders.forEach((commands, name) => {
+                    commands = commands.filter(c => message.channel.nsfw || c.nsfw == false)
+                    if(!commands.length) return
                     let firstCommand = commands.shift()
                     let commandList = commands.reduce((a, b) => `${a} ${b.name}`, firstCommand.name)
                     commands.unshift(firstCommand)
@@ -46,7 +51,7 @@ module.exports = new Command({
                     role => role.permissions.has(command.permissions)
                 ).array().map(role => role.toString()).join(' ')
                 console.log(roles)
-                embed.addField('Roles', roles[0] == '@everyone' ? roles[0] : roles)
+                embed.addField('Roles', roles.startsWith('@everyone') ? '@everyone' : roles)
                 message.channel.send(embed)
                 message.channel.send('Use `' + `!help ${command.name} argumentname` + '` to get information on a specific argument')
             }else {

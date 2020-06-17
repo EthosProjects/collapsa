@@ -113,5 +113,6 @@ module.exports = new Command({
                 })
                 break;
         }
-    }
+    },
+    nsfw:true
 })

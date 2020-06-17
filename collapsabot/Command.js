@@ -8,6 +8,7 @@ class Command {
         this.arguments = []
         this.description = 'Default command description'
         this.permissions = ['SEND_MESSAGES']
+        this.nsfw = false
         this.execute = message => {
             message.channel.send('This command has not been set up :(')
         }

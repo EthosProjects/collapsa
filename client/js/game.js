@@ -2514,6 +2514,7 @@ var init = function (name) {
     };
     let frames = 0;
     let framesPerSecond = 60;
+    let MSperFrame = 16.6
     let frameCurrent;
     readPack = pack => {
         var screenCssPixelRatio = window.outerWidth / window.innerWidth;
@@ -2544,6 +2545,7 @@ var init = function (name) {
             if (tempSelf) tempSelf = null;
             if (loadingTimerRefresh) clearTimeout(loadingTimerRefresh);
             if (frameCurrent) return;
+            let sTime = new Date().getTime()
             frameCurrent = true;
             frames++;
             loadingTimer = null;
@@ -2798,7 +2800,6 @@ var init = function (name) {
             ctx.strokeText('Leaderboard', offsetX - 10 + (175 + 20) / 2, offsetY - 20);
             ctx.fillText('Leaderboard', offsetX - 10 + (175 + 20) / 2, offsetY - 20);
             leaderboard = pack.leaderboard;
-
             if (leaderboard.length > 10) var l = 10;
             else var l = leaderboard.length;
             for (var i = 0; i < l; i++) {
@@ -2823,7 +2824,18 @@ var init = function (name) {
                 ctx.fillText(player._score, offsetX + 120, offsetY + i * 20);
             }
             ctx.restore();
-            frameCurrent = false;
+            ctx.fillStyle = 'white'
+            ctx.strokeStyle = 'black'
+            ctx.lineWidth = 7
+            ctx.font = '20px Arial';
+            ctx.beginPath()
+            ctx.strokeText(`FPS: ${framesPerSecond}`, canvas.width - 250, 90+ 240)
+            ctx.fillText(`FPS: ${framesPerSecond}`, canvas.width - 250, 90+ 240)
+            ctx.stroke()
+            ctx.beginPath()
+            ctx.strokeText(`MSPF: ${MSperFrame}`, canvas.width - 250, 90 + 240 + 25)
+            ctx.fillText(`MSPF: ${MSperFrame}`, canvas.width - 250, 90 + 240 + 25)
+            ctx.stroke()
             if (playa.clanning) {
                 ctx.fillStyle = 'black';
                 ctx.lineWidth = 2;
@@ -3612,6 +3624,8 @@ var init = function (name) {
             ctx.arc(canvas.width - 100, canvas.height - 200, 10, 0, 2 * Math.PI);
             ctx.fill();
             ctx.lineCap = 'butt';
+            frameCurrent = false;
+            MSperFrame = new Date().getTime() - sTime
         }
         if (dragging) {
             let slot = dragging[0];

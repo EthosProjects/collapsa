@@ -24,8 +24,8 @@ module.exports = (mLab) => {
     });
     client.once('ready', () => {
         let statusChannel = client.guilds.cache.find(guild => guild.id == client.mainGuild).channels.cache.find(channel => channel.id == '720399190089531393')
-        statusChannel.bulkDelete(100, true)
-        statusChannel.send('I\'m online!')
+        //statusChannel.bulkDelete(100, true)
+        //statusChannel.send('I\'m online!')
         //console.log(statusChannel.messages.cache)
         console.log(
             `${client.user.username} is now online in ${
