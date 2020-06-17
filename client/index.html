@@ -22,8 +22,8 @@
     </head>
     <body>
         <div class ="modal" id="start">
-            <br>
-            <div id="login">
+            <canvas id="background"></canvas>
+            <div id="login" class='mainModal'>
                 <button class="accountButton" id='loginButton'><h1>Login</h1></button>
                 <div id="dropdown-content">
                     <a id="loginwithDiscordWrapper">
@@ -34,38 +34,24 @@
             
                 <button class="accountButton" id='accountButton'><h1>Account</h1></button>
             </div>
-                
-            <div id="instructions">
-                <h1>How to play?</h1>
-                <p>
-                  Kill players and fight whilst you avoid demons and destroyers. Use WASD to move and E to pick up items and open doors. 
-                  
-                  Basic Crafting:
-                  <ul>
-                    <li>20 of the main ore and 15 iron to make pickaxes and hammers after stone. </li>
-                      <li>20 main ore and 10 iron for axes. </li>
-                      <li>10 main ore, 10 iron, and 10 of the ore below the main iron or stone if the ore below is iron for swords. </li>
-                  </ul>
-              </p>
+            <div class="mainModal" id="entryPoint">
+                <form id="enterForm">
+                    <h3 id="enter">Join the collapse</h3>
+                    <label id="enter-label" for="nameyourself">
+                        <input id="nameyourself" maxlength="16" placeholder="Input Username"/>
+                    </label>
+                    <label id="server-label" for="server">
+                        <select id="server">
+                            <option value="usaeast1">USA East #1</option>
+                        </select>
+                    </label>
+                    <button type="submit" id="submitEntry">Play</button>
+                </form>
             </div>
-            
-            
-            <form class="modal-content" id="enterForm">
-                <h1 class="title">Collapsa.io</h1>
-                <h3 id="enter">Join the collapse</h3>
-                <label id="server-label" for="server">
-                    <select id="server">
-                        <option value="usaeast1">USA East #1</option>
-                    </select>
-                </label>
-                <label id="enter-label" for="nameyourself">
-                    <input id="nameyourself" maxlength="16" placeholder="Input Username"/>
-                </label>
-            </form>
-            <div id="changelog">
+            <div id="changelog" class="mainModal">
                 <h1>Changelog</h1>
             </div>
-            <div id="leaderboard">
+            <div id="leaderboard" class="mainModal">
                 <a href="leaderboard.html"><h1>Leaderboard</h1></a>
                     <table class="leaderboardTable">
                     <thead>
@@ -100,7 +86,7 @@
                 <div class="widgetSizingWrapper">
                     <div class='widgetWrapper'>
                         <div class="widget" id="facebook">
-                            <a href="https://www.facebook.com/logos.king.3/">
+                            <a href="https://www.facebook.com/logos.king.125/">
                                 <img class="widgetIcon" src="/client/img/facebook.png">
                             </a>
                         </div>

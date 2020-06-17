@@ -46,7 +46,7 @@ class CollapsaBot extends Client {
             }
             this.commandFolders.set(folder, folderArr)
         }
-        console.log(this.commands, this.commandFolders)
+        //console.log(this.commands, this.commandFolders)
     }
 }
 module.exports = CollapsaBot

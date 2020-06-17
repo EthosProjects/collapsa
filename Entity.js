@@ -349,12 +349,12 @@ module.exports = function (nsp, ns, mLab) {
 	}, 40000);
 	this.map = {
 		forest: {
-			width: 2000,
-			height: 1000,
+			width: 1500,
+			height: 700,
 		},
 		total: {
-			width: 2000,
-			height: 1500,
+			width: 8000,
+			height: 6000,
 		},
 	};
 	let clans = new Map();
@@ -5444,7 +5444,7 @@ module.exports = function (nsp, ns, mLab) {
 		if(Stones.list.length < 7) {
 			let p = getGoodPosition();
 			new Stone(p.x, p.y, game);
-		}
+		}/*
 		if(Irons.list.length < 6) {
 			let p = getGoodPosition();
 			new Iron(p.x, p.y, game);
@@ -5464,7 +5464,7 @@ module.exports = function (nsp, ns, mLab) {
 		if(Amethysts.list.length < 1) {
 			let p = getGoodPosition();
 			new Amethyst(p.x, p.y, game);
-		}
+		}*/
 		if(Players.list.some((player) => player.score > 700)) {
 			if(Demons.list.length < 3 && timeOfDay == 'night') {
 				let p = getGoodPosition();
@@ -5479,7 +5479,7 @@ module.exports = function (nsp, ns, mLab) {
 				let p = getGoodPosition();
 				new Destroyer(p.x, p.y, game);
 			}
-		}
+		}/*
 		if(CarrotFarms.list.length < 3) {
 			let p = getGoodPosition();
 			new CarrotFarm(p.x, p.y, game);
@@ -5487,7 +5487,7 @@ module.exports = function (nsp, ns, mLab) {
 		if(Rabbits.list.length < 1 && timeOfDay == 'day') {
 			let p = getGoodPosition();
 			new Rabbit(p.x, p.y, game);
-		}
+		}*/
 	}, 10);
 	this.nsp.on('connection', function (socket) {
 		socket.emit('images', images);
@@ -5943,7 +5943,6 @@ module.exports = function (nsp, ns, mLab) {
 			this.nsp.to(socket.id).emit('initPack', pack);
 		});
 	});
-	globalDoors.push(new Door(150, 150, 'stone', 'left'));
 	//c.storage.set('7', new Slot('Stone Sword', 1, 'stonesword', 1, true))
 	setInterval(() => {
 		Demons.list.forEach((d) => {

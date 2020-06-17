@@ -2,6 +2,47 @@
 
 /* global changelog io usr loadingTimer*/
 console.log(Math.sin(45), Math.cos(45));
+background.width = window.innerWidth
+background.height = window.innerHeight
+/**
+ * @type {CanvasRenderingContext2D}
+ */
+let ctx = background.getContext('2d')
+ctx.fillStyle = '#01571b'
+ctx.fillRect(0, 0, background.width, background.height)
+
+let drawPolygon = (sides,  size, x, y, angle, color) => {
+    ctx.beginPath();
+    ctx.moveTo (x +  size * Math.cos(0), y +  size *  Math.sin(0));          
+    
+    for (var i = 1; i <= sides;i += 1) {
+        ctx.lineTo (x + size * Math.cos(i * 2 *  Math.PI / sides), y + size * Math.sin(i * 2 * Math.PI / sides));
+    }
+    
+    ctx.fillStyle = color;
+    ctx.lineWidth = 1;
+    ctx.fill();
+    ctx.restore()
+}
+let drawConcave = (sides,  size, x, y, angle, color) => {
+    ctx.beginPath();
+    ctx.moveTo (x +  size * Math.cos(0), y +  size *  Math.sin(0));          
+    
+    for (var i = 1; i <= sides;i += 1) {
+        ctx.lineTo (x + size * Math.cos(i * 2 * angle *  Math.PI / sides), y + size * Math.sin(i * 2 * angle * Math.PI / sides));
+    }
+    
+    ctx.fillStyle = color;
+    ctx.lineWidth = 1;
+    ctx.fill();
+    ctx.restore()
+}
+let drawTree = (x, y, size) => {
+    drawConcave(8, size + 10, x, y, 45, "black")
+    drawConcave(8, size, x, y, 45, "#50c878")
+    drawPolygon(13, size * 350/900, x, y, 0, "#b06831")
+}
+drawTree(350, 500, 100)
 class Mapper extends Map {
     constructor(iterator) {
         super(iterator);
@@ -2462,17 +2503,17 @@ var init = function (name) {
             var x = canvas.width / 2 - playa.x;
             var y = canvas.height / 2 - playa.y;
 
-            ctx.fillStyle = '#416C01';
+            ctx.fillStyle = '#01571b';
             ctx.globalAlpha = 0.95
-            ctx.fillRect(canvas.width / 2 - playa.x - 1000, canvas.height / 2 - playa.y - 2000, 2000 + 2000, 1000 + 2000);
+            ctx.fillRect(canvas.width / 2 - playa.x - 1000, canvas.height / 2 - playa.y - 2000, 8000 + 2000, 4000 + 2000);
             ctx.globalAlpha = 1
-            ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y, 2000, 1000);
+            ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y, 8000, 4000);
             
             ctx.fillStyle = '#e2d0a7';
             ctx.globalAlpha = 0.95
-            ctx.fillRect(canvas.width / 2 - playa.x - 1000, canvas.height / 2 - playa.y + 1000, 2000 + 2000, 500 + 2000);
+            ctx.fillRect(canvas.width / 2 - playa.x - 1000, canvas.height / 2 - playa.y + 4000, 8000 + 2000, 2000 + 2000);
             ctx.globalAlpha = 1
-            ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y + 1000, 2000, 500);
+            ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y + 4000, 8000, 2000);
             pack.player.forEach(function (pack) {
                 /**
                  * @type {Player} toUpdate
@@ -3432,7 +3473,7 @@ var init = function (name) {
             if (pack.tod == 'night') {
                 ctx.fillStyle = '#000033';
                 ctx.globalAlpha = (-1 * Math.abs(pack.per - 0.5) + 0.5) * 0.9;
-                ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y, 2000, 1500);
+                ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y, 8000, 6000);
             }
 
             ctx.globalAlpha = 1;

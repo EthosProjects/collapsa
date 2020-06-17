@@ -11,6 +11,7 @@ module.exports = new Command({
         if(!args[0].match(emojiRegex)) return message.reply('No emoji specified?')
         let id = args[0].replace(/<:[a-zA-Z0-9_]{2,32}:/, '').replace(/>/, '')
         let emoji = client.emojis.cache.get(id)
+        console.log(emoji.url)
         if(!emoji) return message.reply('Why the fake emoji?')
         let embed = new MessageEmbed()
             .setImage(emoji.url)

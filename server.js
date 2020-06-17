@@ -6,6 +6,7 @@ var path = require('path');
 var fs = require('fs');
 var app = express();
 const httpApp = express();
+const { EventEmitter } = require('events');
 //console.log(fs.readFileSync('./httpsServer.csr'))
 var key = fs.readFileSync('encryption/server.key') + '';
 var cert = fs.readFileSync( 'encryption/www_collapsa_io.crt' ) + '';
@@ -19,14 +20,90 @@ var port = process.env.PORT || 3000; // Used by Heroku and http on localhost
 process.env['PORT'] = process.env.PORT || 4000; // Used by https on localhost
 let httpsServer
 let httpServer = http.createServer(app)
+const mongodburi = 'mongodb+srv://LogosKing:TBKCKD6B@cluster0-cpzc9.mongodb.net/collapsa?retryWrites=true&w=majority'
+const { MongoClient } = require('mongodb')
+const mclient = new MongoClient(mongodburi)
+class discorduserbaseUser {
+    constructor(options){
+        this._id = genSnowflake(reqCount.toString(2), '2', '0')
+        this.id = this._id
+        this.guilds = {}
+        Object.assign(this, options)
+        for(const prop in this.guilds){
+            let guild = Object.assign({
+                muteTimeEnd:false,
+                banTimeEnd:false,
+                exp:{
+                    amount:0,
+                    level:0
+                },
+                warnings:[]
+            }, this.guilds[prop])
+            guild.warnings = guild.warnings.map(w => Object.assign({by:'BasicAuthor', reason:'BasicReason', time:new Date().getTime()}, w))
+            this.guilds[prop] = guild
+        }
+    }
+}
+class discordguildbaseGuild {
+    constructor(options){
+        this._id = genSnowflake(reqCount.toString(2), '2', '0')
+        this.id = this._id
+        this.mute = {
+            role:false
+        }
+        this.moderation = {
+            channel:false
+        }
+        this.welcome = {
+            channel:false,
+            role:false
+        }
+        Object.assign(this, options)
+    }
+}
+class collapsauserbaseUser {
+    constructor(options){
+        this._id = genSnowflake(reqCount.toString(2), '2', '0')
+        this.id = this._id
+        this.token = 'Aph_basic'
+        this.password = 'basicPassword'
+        this.username = 'basicUsername'
+        this.email = 'basic@email.com'
+        this.discordid = false
+        this.highscore = 0
+        Object.assign(this, options)
+    }
+}
+let toLiteral = obj => JSON.parse(JSON.stringify(obj))
+class mongodbInteractor extends EventEmitter {
+    constructor(username, password){
+        super()
+        this.client = new MongoClient(`mongodb+srv://${username}:${password}@cluster0-cpzc9.mongodb.net/collapsa?retryWrites=true&w=majority`)
+        this.client.connect().then(async client => {
+            let collapsa = this.client.db('collapsa')
+            let collections = await collapsa.listCollections().toArray()
+            collections.forEach(collection => {
+                
+            })
+        })
+    }
+}
+const mongoDB = new mongodbInteractor('LogosKing', 'TBKCKD6B')
+async function listDatabases(client){
+    let databasesList = await client.db().admin().listDatabases();
+ 
+    console.log("Databases:");
+    databasesList.databases.forEach(db => console.log(` - ${db.name}`));
+};
+mclient.connect()
+    .then(client => {
+        listDatabases(client)
+        let collectionsList = client.db().listCollections()
+    })
 try {
     const { mlabInteractor } = require('../mlab-promise')
 }catch {
     const { mlabInteractor } = require('mlab-promise')
-}
-if(process.env.NODE_ENV == 'production'){
-    
-    
 }
 // Run separate https server if on localhost
 
@@ -150,6 +227,7 @@ app.route('/api/login')
         if(req.body.token){
             if(!collapsauserbase.findDocument(d => d.data.token == req.body.token)) return res.send(JSON.stringify({message:"invalidToken", err:true}))
             let userbase = collapsauserbase.findDocument(d => d.data.token == req.body.token)
+            userbase.data = toLiteral(new collapsauserbaseUser(userbase.data))
             res.send(JSON.stringify({message:"validToken", username:userbase.data.username, email:userbase.data.email}))
             return
         }
@@ -166,7 +244,6 @@ app.route('/api/login')
             var d = new Date();
             d.setTime(d.getTime() + (30 * 24 * 60 * 60 * 1000));
             var expires = "Expires="+ d.toUTCString();
-            console.log(document.data.token)
             res.set('Set-Cookie', `token=${document.data.token}; ${expires}; path=/`)
             res.send(JSON.stringify({token:document.data.token, username:document.data.username, email:document.data.email}))
         }
@@ -183,8 +260,6 @@ app.route('/api/updateAccount')
         if(!collapsauserbase.findDocument(d => d.data.token == token)) return res.send(JSON.stringify({message:"invalidUsername", err:true}))
         let document = collapsauserbase.findDocument(d => d.data.token == token)
         let newDoc = Object.assign({}, document.data)
-        console.log(document)
-        console.log(req.body)
         if(!password){
             if(document.data.password) return res.send(JSON.stringify({message:"neededPassword", err:true}))
             
@@ -205,7 +280,6 @@ app.route('/api/updateAccount')
             newDoc.email = email
         }
         await collapsauserbase.updateDocument(newDoc)
-        console.log(newDoc, collapsauserbase.documents.get(newDoc.id))
         res.send(JSON.stringify({message:"Account update successful"}))
     })
 app.route('/api/leaderboard')
@@ -317,7 +391,6 @@ app.route('/api/discordLogin')
         })
         if(tokens.error){ 
             res.status(404)
-            console.log(tokens.error)
             return res.send(JSON.stringify({error: "invalid token"}))
         }
         let access_token = tokens.access_token
@@ -335,7 +408,6 @@ app.route('/api/discordLogin')
                 res.on('end', () => resolve(JSON.parse(buffer.join(''))))
             })
         })
-        console.log(user)
         if(user.error){ 
             res.status(404)
             return res.send(JSON.stringify({error: "invalid user"}))
@@ -367,7 +439,7 @@ app.route('/api/discordLogin')
             res.redirect('../../')
         }
     })
-var Vector = require('./Vector.js')
+var Vector = require('./Vector.js');
 // Aliases
 io.on('connection', socket => {
     console.log('New connection')

@@ -26,17 +26,17 @@ module.exports = (mLab) => {
         let statusChannel = client.guilds.cache.find(guild => guild.id == client.mainGuild).channels.cache.find(channel => channel.id == '720399190089531393')
         statusChannel.bulkDelete(100, true)
         statusChannel.send('I\'m online!')
-        console.log(statusChannel.messages.cache)
+        //console.log(statusChannel.messages.cache)
         console.log(
             `${client.user.username} is now online in ${
                 client.guilds.cache.size
             } guild${client.guilds.cache.size > 1 ? 's' : ''}`
         );
         client.guilds.cache.forEach((guild) => {
-            console.log(guild.name);
+            //console.log(guild.name);
     
             guild.channels.cache.forEach((channel) => {
-                console.log(` - ${channel.name} ${channel.type} ${channel.id}`);
+                //console.log(` - ${channel.name} ${channel.type} ${channel.id}`);
             });
             // general text 679422692931272744
         });
@@ -238,13 +238,19 @@ module.exports = (mLab) => {
             });
         let defaultChannel = '';
         guild.channels.cache.forEach((channel) => {
+            if (channel.name.includes('general') || channel.name.includes('lounge') || channel.name.includes('chat')) {
+                if (channel.permissionsFor(guild.me).has('SEND_MESSAGES')) {
+                    defaultChannel = channel;
+                }
+            }
+        });
+        guild.channels.cache.forEach((channel) => {
             if (channel.type == 'text' && defaultChannel == '') {
                 if (channel.permissionsFor(guild.me).has('SEND_MESSAGES')) {
                     defaultChannel = channel;
                 }
             }
         });
-        //defaultChannel will be the channel object that the bot first finds permissions for
         defaultChannel.send(
             "Hello! It's CollapsaBot. Use !configure to begin configuration"
         );
