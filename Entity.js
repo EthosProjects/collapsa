@@ -2,7 +2,7 @@ Math = require('./math.js');
 const Matter = require('matter-js');
 const Timeout = require('./timeout.js');
 const images = require('./images.json');
-const { Engine, Render, World, Bodies, Body, Vector } = require('matter-js');
+const { Engine, Render, World, Bodies, Body, Vector, SAT } = require('matter-js');
 const EventEmitter = require('events');
 const PF = require('pathfinding');
 const socketIO = require('socket.io');
@@ -277,12 +277,12 @@ class Game extends EventEmitter {
 		this.Entities = new Mapper();
 		this.map = {
 			forest: {
-				width: 2000,
-				height: 1000,
+				width: 3000,
+				height: 1400,
 			},
 			total: {
-				width: 2000,
-				height: 1500,
+				width: 3000,
+				height: 2000,
 			},
 		};
 		this.walls = {
@@ -333,7 +333,7 @@ module.exports = function (nsp, ns, mLab) {
 	let sunlight = 1;
 	let sunpertree = 1;
 	engine.world.gravity.y = 0;
-	let timeOfDay = 'night';
+	let timeOfDay = 'day';
 	let dayTimeout;
 	let setDayTimeout = () => {
 		dayTimeout = new Timeout(() => {
@@ -357,8 +357,56 @@ module.exports = function (nsp, ns, mLab) {
 			height: 2000,
 		},
 	};
+	/**
+	 * let grid = new PF.Grid(
+				game.map.forest.width / 100,
+				game.map.forest.width / 100
+			);
+			let finder = new PF.AStarFinder();
+			this.game.Entities.filter(e => e != this.pos && e != this).forEach(e => {
+                grid.setWalkableAt(Math.roundToDeca(e.body.position.x - 50, 100)/100, Math.roundToDeca(e.body.position.y - 50, 100)/100, false)
+            })
+			Demons.list.filter(e => e != this.pos && e != this).forEach(e => {
+                grid.setWalkableAt(Math.roundToDeca(e.body.position.x - 50, 100)/100, Math.roundToDeca(e.body.position.y - 50, 100)/100, false)
+            })
+            Destroyers.list.filter(e => e != this.pos && e != this).forEach(e => {
+                grid.setWalkableAt(Math.roundToDeca(e.body.position.x - 50, 100)/100, Math.roundToDeca(e.body.position.y - 50, 100)/100, false)
+            })
+            Players.list.filter(e => e != this.pos && e != this).forEach(e => {
+                grid.setWalkableAt(Math.roundToDeca(e.body.position.x - 50, 100)/100, Math.roundToDeca(e.body.position.y - 50, 100)/100, false)
+            })
+			let x = Math.roundToDeca(this.body.position.x - 50, 100) / 100;
+			let y = Math.roundToDeca(this.body.position.y - 50, 100) / 100;
+			let fx = Math.roundToDeca(this.pos.body.position.x - 50, 100) / 100;
+			let fy = Math.roundToDeca(this.pos.body.position.y - 50, 100) / 100;
+			if(
+				x > game.map.forest.width / 100 - 1 ||
+				y > game.map.forest.width / 100 - 1 ||
+				fx > game.map.forest.width / 100 - 1 ||
+				fy > game.map.forest.width / 100 - 1 ||
+				x < 0 ||
+				y < 0 ||
+				fx < 0 ||
+				fy < 0
+			) return (this.path = null);
+			this.path = finder.findPath(x, y, fx, fy, grid);
+	 */
 	let clans = new Map();
 	this.Entities = [];
+	let gameGrid = new PF.Grid(
+		this.map.forest.width / 50,
+		this.map.forest.height / 50
+	);
+	for(let i = 0;i < gameGrid.nodes.length;i++){
+		for(let j = 0;j < gameGrid.nodes[0].length;j++){
+			this.Entities.forEach(e => {
+				if(e instanceof EventEmitter) return
+				let currSquare = Bodies.rectangle(i * 50 - 25, j * 50 - 25, 50, 50)
+				let collision = SAT.collides(currSquare, e.body)
+				if(collision.collided) gameGrid.setWalkableAt(i, j, false)
+			})
+		}
+	}
 	let walls = {
 		top: Bodies.rectangle(
 			this.map.total.width / 2,
@@ -669,7 +717,7 @@ module.exports = function (nsp, ns, mLab) {
 				});
 			}
 			this.token = token;
-			this.body = Bodies.circle(50, 50, this.rad, {
+			this.body = Bodies.circle(tempx, tempy, this.rad, {
 				frictionAir: 0.02,
 				restitution: 0.15,
 			});
@@ -2741,7 +2789,7 @@ module.exports = function (nsp, ns, mLab) {
 			}
 			let grid = new PF.Grid(
 				game.map.forest.width / 100,
-				game.map.forest.width / 100
+				game.map.forest.height / 100
 			);
 			let finder = new PF.AStarFinder();
 			this.game.Entities.filter(e => e != this.pos && e != this).forEach(e => {
@@ -2769,8 +2817,7 @@ module.exports = function (nsp, ns, mLab) {
 				y < 0 ||
 				fx < 0 ||
 				fy < 0
-			)
-				return (this.path = null);
+			) return (this.path = null);
 			this.path = finder.findPath(x, y, fx, fy, grid);
 			setTimeout(() => {
 				if(Vector.magnitude(this.body.velocity) < 1) this.updatePath(this.pos);
@@ -3241,7 +3288,7 @@ module.exports = function (nsp, ns, mLab) {
 			}
 			let grid = new PF.Grid(
 				game.map.forest.width / 100,
-				game.map.forest.width / 100
+				game.map.forest.height / 100
 			);
             let finder = new PF.AStarFinder();
             let Stationaries = [...STrees.list, ...Stones.list, ...Irons.list, ...Golds.list, ...Diamonds.list, ...Emeralds.list, ...Amethysts.list, ...CarrotFarms.list]
@@ -3701,22 +3748,13 @@ module.exports = function (nsp, ns, mLab) {
 			}
 			let grid = new PF.Grid(
 				game.map.forest.width / 100,
-				game.map.forest.width / 100
+				game.map.forest.height / 100
 			);
-            let finder = new PF.AStarFinder();
             let Stationaries = [...STrees.list, ...Stones.list, ...Irons.list, ...Golds.list, ...Diamonds.list, ...Emeralds.list, ...Amethysts.list, ...CarrotFarms.list]
 			this.game.Entities.filter(e => e != this.pos && e != this).forEach(e => {
-                grid.setWalkableAt(Math.roundToDeca(e.body.position.x - 50, 100)/100, Math.roundToDeca(e.body.position.y - 50, 100)/100, false)
+				if(e.body.position.x > game.map.forest.width || e.body.position.y > game.map.forest.height) return
+				grid.setWalkableAt(Math.roundToDeca(e.body.position.x - 50, 100)/100, Math.roundToDeca(e.body.position.y - 50, 100)/100, false)
 			})
-			Demons.list.filter(e => e != this.pos && e != this).forEach(e => {
-                grid.setWalkableAt(Math.roundToDeca(e.body.position.x - 50, 100)/100, Math.roundToDeca(e.body.position.y - 50, 100)/100, false)
-            })
-            Destroyers.list.filter(e => e != this.pos && e != this).forEach(e => {
-                grid.setWalkableAt(Math.roundToDeca(e.body.position.x - 50, 100)/100, Math.roundToDeca(e.body.position.y - 50, 100)/100, false)
-            })
-            Players.list.filter(e => e != this.pos && e != this).forEach(e => {
-                grid.setWalkableAt(Math.roundToDeca(e.body.position.x - 50, 100)/100, Math.roundToDeca(e.body.position.y - 50, 100)/100, false)
-            })
 			let x = Math.roundToDeca(this.body.position.x - 50, 100) / 100;
 			let y = Math.roundToDeca(this.body.position.y - 50, 100) / 100;
 			let fx = Math.roundToDeca(this.pos.body.position.x - 50, 100) / 100;
@@ -3730,8 +3768,8 @@ module.exports = function (nsp, ns, mLab) {
 				y < 0 ||
 				fx < 0 ||
 				fy < 0
-			)
-				return (this.path = null);
+			) return (this.path = null);
+            let finder = new PF.AStarFinder();
 			this.path = finder.findPath(x, y, fx, fy, grid);
 			setTimeout(() => {
 				if(Vector.magnitude(this.body.velocity) < 0.06) this.updatePath(this.pos);
@@ -3773,9 +3811,9 @@ module.exports = function (nsp, ns, mLab) {
 			if(
 				!n ||
 				this.pos.health <= 0 ||
-				Vector.getDistance(this.pos.body.position, path[path.length - 1]) > 500
-			)
-				this.updatePath();
+				Vector.getDistance(this.pos.body.position, path[path.length - 1]) > this.rad + (this.pos.rad ? this.pos.rad : 70.7) + 100
+				|| Vector.getDistance(this.body.position, this.pos.body.position) < this.rad + (this.pos.rad ? this.pos.rad : 70.7)
+			) this.updatePath();
 			if(!this.path || !this.path.length) return;
 			path = this.path.map((pos) => ({
 				x: 100 * pos[0] + 50,
@@ -4657,7 +4695,7 @@ module.exports = function (nsp, ns, mLab) {
 				);
 				World.remove(engine.world, this.body);
 			}, 400000);
-			this.body = Bodies.circle(this.x, this.y, 50, { isStatic: true });
+			this.body = Bodies.rectangle(this.x, this.y, 100, 100, { isStatic: true });
 			this.game.Entities.push(this);
 			World.addBody(engine.world, this.body);
 			this.needsUpdate = false;
@@ -5446,14 +5484,13 @@ module.exports = function (nsp, ns, mLab) {
 			y: tempy,
 		};
 	};
-	new Rabbit(100, 100, game)
 	setInterval(function () {
 		let canAdd = [];
-		if(STrees.list.length < 12) {
+		if(STrees.list.length < 6) {
 			let p = getGoodPosition('circle', 'tempx', 'tempy', 110, { isStatic: true });
 			new STree(p.x, p.y, game);
 		}
-		if(Stones.list.length < 3) {
+		if(Stones.list.length < 2) {
 			let p = getGoodPosition('circle', 'tempx', 'tempy', 90, { isStatic: true });
 			new Stone(p.x, p.y, game);
 		}/*
@@ -5491,13 +5528,13 @@ module.exports = function (nsp, ns, mLab) {
 				let p = getGoodPosition();
 				new Destroyer(p.x, p.y, game);
 			}
-		}/*
+		}
 		if(CarrotFarms.list.length < 3) {
-			let p = getGoodPosition();
+			let p = getGoodPosition('rectangle', 'tempx', 'tempy', 100, 100, { isStatic: true });
 			new CarrotFarm(p.x, p.y, game);
-		}*/
-		if(Rabbits.list.length < 1 && timeOfDay == 'day') {
-			let p = getGoodPosition();
+		}
+		if(Rabbits.list.length < 1 && timeOfDay == 'day'){
+			let p = getGoodPosition('circle', 'tempx', 'tempy', 25, { isStatic: true });
 			new Rabbit(p.x, p.y, game);
 		}
 	}, 10);
