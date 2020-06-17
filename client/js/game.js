@@ -1,8 +1,6 @@
 //Sets a few core values and then sets up onsubmits
 /* global changelog io usr loadingTimer*/
 console.log(Math.sin(45), Math.cos(45));
-background.width = window.innerWidth
-background.height = window.innerHeight
 /**
  * @type {CanvasRenderingContext2D}
  */
@@ -42,7 +40,11 @@ let drawStone = (x, y, size) =>{
     drawPolygon(8, size, x, y, 0, "#73757e")
     drawPolygon(9, size/2, x, y, 0, "#b3b4bb")
 }
-setInterval(() => {
+let backgroundInterval = setInterval(() => {
+    var screenCssPixelRatio = window.outerWidth / window.innerWidth;
+    //console.log(zoomLevel, Math.round(screenCssPixelRatio * 100) + '%', window.innerWidth, window.outerWidth)
+    background.width = window.innerWidth * screenCssPixelRatio;
+    background.height = window.innerHeight * screenCssPixelRatio;
     ctx.clearRect(0, 0, background.width, background.height)
     ctx.fillStyle = '#01571b'
     ctx.fillRect(0, 0, background.width, background.height)
@@ -275,6 +277,7 @@ document.getElementById('server').addEventListener('change', e => {
 });
 socket.on('disconnect', die);
 var init = function (name) {
+    clearInterval(backgroundInterval)
     let clientX = 0;
     let clientY = 0;
     //Either sets username equal to the input or defaults to quasar.io
@@ -1732,8 +1735,6 @@ var init = function (name) {
             ctx.arc(0 + (6.5 * this.rad) / 28, 0 + (7 * this.rad) / 28, (2.5 * this.rad) / 28, 0, 2 * Math.PI);
             ctx.arc(0 + (6.5 * this.rad) / 28, 0 - (7 * this.rad) / 28, (2.5 * this.rad) / 28, 0, 2 * Math.PI);
             ctx.fill();
-            ctx.restore();
-            ctx.restore();
         }
         processInitpack(initPack) {
             if (!this.receivedUpdate) this.receivedUpdate = true;
@@ -2285,6 +2286,7 @@ var init = function (name) {
     let Rabbits = [];
     var ctx = canvas.getContext('2d');
     let drawAxis = () => {
+        ctx.lineWidth = 3
         let xGradient = ctx.createLinearGradient(-100, 0, 100, 0);
         xGradient.addColorStop(0, 'green');
         xGradient.addColorStop(0.5, 'yellow');
@@ -3723,4 +3725,27 @@ var die = function () {
     document.getElementById('loadingScreen').style.display = 'none';
     star.style.display = 'block';
     canvas.style.display = 'none';
+    backgroundInterval = setInterval(() => {
+        background.width = window.innerWidth
+        background.height = window.innerHeight
+        ctx.clearRect(0, 0, background.width, background.height)
+        ctx.fillStyle = '#01571b'
+        ctx.fillRect(0, 0, background.width, background.height)
+        drawTree(390, 500, 110)
+        drawTree(390, 500, 110)
+        drawTree(1122, 381, 110)
+        drawTree(800, 589, 110)
+        drawTree(45, 716, 110)
+        drawTree(110, 132, 110)
+        drawStone(460, 259, 90)
+        drawStone(1319, 597, 110)
+        drawStone(1131, 147, 50)
+        ctx.font = "100px Zorque"
+        ctx.textAlign = 'center'
+        ctx.lineWidth = 50;
+        ctx.beginPath();
+        ctx.strokeText('Collapsa.io', background.width/2, 200);
+        ctx.fillStyle = 'white';
+        ctx.fillText('Collapsa.io', background.width/2, 200);
+    }, 10)
 };

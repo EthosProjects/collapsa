@@ -669,7 +669,7 @@ module.exports = function (nsp, ns, mLab) {
 				});
 			}
 			this.token = token;
-			this.body = Bodies.circle(tempx, tempy, this.rad, {
+			this.body = Bodies.circle(50, 50, this.rad, {
 				frictionAir: 0.02,
 				restitution: 0.15,
 			});
@@ -2744,9 +2744,10 @@ module.exports = function (nsp, ns, mLab) {
 				game.map.forest.width / 100
 			);
 			let finder = new PF.AStarFinder();
-			let Stationaries = [...STrees.list, ...Stones.list, ...Irons.list, ...Golds.list, ...Diamonds.list, ...Emeralds.list, ...Amethysts.list, ...CarrotFarms.list]
-            Stationaries.forEach(stationary => grid.setWalkableAt((stationary.x - 50) / 100, (stationary.y - 50) / 100, false))
-            Demons.list.filter(e => e != this.pos && e != this).forEach(e => {
+			this.game.Entities.filter(e => e != this.pos && e != this).forEach(e => {
+                grid.setWalkableAt(Math.roundToDeca(e.body.position.x - 50, 100)/100, Math.roundToDeca(e.body.position.y - 50, 100)/100, false)
+            })
+			Demons.list.filter(e => e != this.pos && e != this).forEach(e => {
                 grid.setWalkableAt(Math.roundToDeca(e.body.position.x - 50, 100)/100, Math.roundToDeca(e.body.position.y - 50, 100)/100, false)
             })
             Destroyers.list.filter(e => e != this.pos && e != this).forEach(e => {
@@ -2755,8 +2756,6 @@ module.exports = function (nsp, ns, mLab) {
             Players.list.filter(e => e != this.pos && e != this).forEach(e => {
                 grid.setWalkableAt(Math.roundToDeca(e.body.position.x - 50, 100)/100, Math.roundToDeca(e.body.position.y - 50, 100)/100, false)
             })
-			if(this.pos.x)
-				grid.setWalkableAt((this.pos.x - 50) / 100, (this.pos.y - 50) / 100, true);
 			let x = Math.roundToDeca(this.body.position.x - 50, 100) / 100;
 			let y = Math.roundToDeca(this.body.position.y - 50, 100) / 100;
 			let fx = Math.roundToDeca(this.pos.body.position.x - 50, 100) / 100;
@@ -3245,9 +3244,11 @@ module.exports = function (nsp, ns, mLab) {
 				game.map.forest.width / 100
 			);
             let finder = new PF.AStarFinder();
-            let Stationaries = [...STrees.list, ...Stones.list, ...Irons.list, ...Golds.list, ...Diamonds.list, ...Emeralds.list, ...Amethysts.list, ...CarrotFarms.list, ...CraftingTables.list, ...Walls.list]
-            Stationaries.forEach(stationary => grid.setWalkableAt((stationary.x - 50) / 100, (stationary.y - 50) / 100, false))
-            Demons.list.filter(e => e != this.pos && e != this).forEach(e => {
+            let Stationaries = [...STrees.list, ...Stones.list, ...Irons.list, ...Golds.list, ...Diamonds.list, ...Emeralds.list, ...Amethysts.list, ...CarrotFarms.list]
+			this.game.Entities.filter(e => e != this.pos && e != this).forEach(e => {
+                grid.setWalkableAt(Math.roundToDeca(e.body.position.x - 50, 100)/100, Math.roundToDeca(e.body.position.y - 50, 100)/100, false)
+			})
+			Demons.list.filter(e => e != this.pos && e != this).forEach(e => {
                 grid.setWalkableAt(Math.roundToDeca(e.body.position.x - 50, 100)/100, Math.roundToDeca(e.body.position.y - 50, 100)/100, false)
             })
             Destroyers.list.filter(e => e != this.pos && e != this).forEach(e => {
@@ -3256,7 +3257,6 @@ module.exports = function (nsp, ns, mLab) {
             Players.list.filter(e => e != this.pos && e != this).forEach(e => {
                 grid.setWalkableAt(Math.roundToDeca(e.body.position.x - 50, 100)/100, Math.roundToDeca(e.body.position.y - 50, 100)/100, false)
             })
-			if(this.pos.x) grid.setWalkableAt((this.pos.x - 50) / 100, (this.pos.y - 50) / 100, true);
 			let x = Math.roundToDeca(this.body.position.x - 50, 100) / 100;
 			let y = Math.roundToDeca(this.body.position.y - 50, 100) / 100;
 			let fx = Math.roundToDeca(this.pos.body.position.x - 50, 100) / 100;
@@ -3704,9 +3704,11 @@ module.exports = function (nsp, ns, mLab) {
 				game.map.forest.width / 100
 			);
             let finder = new PF.AStarFinder();
-            let Stationaries = [...STrees.list, ...Stones.list, ...Irons.list, ...Golds.list, ...Diamonds.list, ...Emeralds.list, ...Amethysts.list, ...CarrotFarms.list, ...CraftingTables.list, ...Walls.list]
-            Stationaries.forEach(stationary => grid.setWalkableAt((stationary.x - 50) / 100, (stationary.y - 50) / 100, false))
-            Demons.list.filter(e => e != this.pos && e != this).forEach(e => {
+            let Stationaries = [...STrees.list, ...Stones.list, ...Irons.list, ...Golds.list, ...Diamonds.list, ...Emeralds.list, ...Amethysts.list, ...CarrotFarms.list]
+			this.game.Entities.filter(e => e != this.pos && e != this).forEach(e => {
+                grid.setWalkableAt(Math.roundToDeca(e.body.position.x - 50, 100)/100, Math.roundToDeca(e.body.position.y - 50, 100)/100, false)
+			})
+			Demons.list.filter(e => e != this.pos && e != this).forEach(e => {
                 grid.setWalkableAt(Math.roundToDeca(e.body.position.x - 50, 100)/100, Math.roundToDeca(e.body.position.y - 50, 100)/100, false)
             })
             Destroyers.list.filter(e => e != this.pos && e != this).forEach(e => {
@@ -3715,8 +3717,6 @@ module.exports = function (nsp, ns, mLab) {
             Players.list.filter(e => e != this.pos && e != this).forEach(e => {
                 grid.setWalkableAt(Math.roundToDeca(e.body.position.x - 50, 100)/100, Math.roundToDeca(e.body.position.y - 50, 100)/100, false)
             })
-			if(this.pos.x)
-				grid.setWalkableAt((this.pos.x - 50) / 100, (this.pos.y - 50) / 100, true);
 			let x = Math.roundToDeca(this.body.position.x - 50, 100) / 100;
 			let y = Math.roundToDeca(this.body.position.y - 50, 100) / 100;
 			let fx = Math.roundToDeca(this.pos.body.position.x - 50, 100) / 100;
@@ -5446,6 +5446,7 @@ module.exports = function (nsp, ns, mLab) {
 			y: tempy,
 		};
 	};
+	new Rabbit(100, 100, game)
 	setInterval(function () {
 		let canAdd = [];
 		if(STrees.list.length < 12) {
@@ -5494,11 +5495,11 @@ module.exports = function (nsp, ns, mLab) {
 		if(CarrotFarms.list.length < 3) {
 			let p = getGoodPosition();
 			new CarrotFarm(p.x, p.y, game);
-		}
+		}*/
 		if(Rabbits.list.length < 1 && timeOfDay == 'day') {
 			let p = getGoodPosition();
 			new Rabbit(p.x, p.y, game);
-		}*/
+		}
 	}, 10);
 	this.nsp.on('connection', function (socket) {
 		socket.emit('images', images);
