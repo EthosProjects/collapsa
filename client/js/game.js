@@ -1,5 +1,4 @@
 //Sets a few core values and then sets up onsubmits
-
 /* global changelog io usr loadingTimer*/
 console.log(Math.sin(45), Math.cos(45));
 background.width = window.innerWidth
@@ -8,9 +7,6 @@ background.height = window.innerHeight
  * @type {CanvasRenderingContext2D}
  */
 let ctx = background.getContext('2d')
-ctx.fillStyle = '#01571b'
-ctx.fillRect(0, 0, background.width, background.height)
-
 let drawPolygon = (sides,  size, x, y, angle, color) => {
     ctx.beginPath();
     ctx.moveTo (x +  size * Math.cos(0), y +  size *  Math.sin(0));          
@@ -38,11 +34,35 @@ let drawConcave = (sides,  size, x, y, angle, color) => {
     ctx.restore()
 }
 let drawTree = (x, y, size) => {
-    drawConcave(8, size + 10, x, y, 45, "black")
-    drawConcave(8, size, x, y, 45, "#50c878")
-    drawPolygon(13, size * 350/900, x, y, 0, "#b06831")
+    drawConcave(8, (size), x, y, 45, "#50c878")
+    drawConcave(8, size * 10/11, x, y, 45, "#6ee696")
+    drawPolygon(13, size * 350/990, x, y, 0, "#b06831")
 }
-drawTree(350, 500, 100)
+let drawStone = (x, y, size) =>{
+    drawPolygon(8, size, x, y, 0, "#73757e")
+    drawPolygon(9, size/2, x, y, 0, "#b3b4bb")
+}
+setInterval(() => {
+    ctx.clearRect(0, 0, background.width, background.height)
+    ctx.fillStyle = '#01571b'
+    ctx.fillRect(0, 0, background.width, background.height)
+    drawTree(390, 500, 110)
+    drawTree(390, 500, 110)
+    drawTree(1122, 381, 110)
+    drawTree(800, 589, 110)
+    drawTree(45, 716, 110)
+    drawTree(110, 132, 110)
+    drawStone(460, 259, 90)
+    drawStone(1319, 597, 110)
+    drawStone(1131, 147, 50)
+    ctx.font = "100px Zorque"
+    ctx.textAlign = 'center'
+    ctx.lineWidth = 50;
+    ctx.beginPath();
+    ctx.strokeText('Collapsa.io', background.width/2, 200);
+    ctx.fillStyle = 'white';
+    ctx.fillText('Collapsa.io', background.width/2, 200);
+}, 10)
 class Mapper extends Map {
     constructor(iterator) {
         super(iterator);
@@ -80,6 +100,9 @@ socket.on('recon', () => {
 var nme = document.getElementById('enterForm');
 var star = document.getElementById('start');
 var form = document.getElementById('form');
+/**
+ * @type {HTMLCanvasElement}
+ */
 var canvas = document.getElementById('canvas');
 var m = document.getElementById('m');
 var clog = document.getElementById('changelog');
@@ -949,6 +972,41 @@ var init = function (name) {
     ctx.arc(290, 120, 47, 0, 2 * Math.PI)
     ctx.fill()
     */
+    let drawPolygon = (sides,  size, x, y, angle, color) => {
+        ctx.beginPath();
+        ctx.moveTo (x +  size * Math.cos(0), y +  size *  Math.sin(0));          
+        
+        for (var i = 1; i <= sides;i += 1) {
+            ctx.lineTo (x + size * Math.cos(i * 2 *  Math.PI / sides), y + size * Math.sin(i * 2 * Math.PI / sides));
+        }
+        
+        ctx.fillStyle = color;
+        ctx.lineWidth = 1;
+        ctx.fill();
+        ctx.restore()
+    }
+    let drawConcave = (sides,  size, x, y, angle, color) => {
+        ctx.beginPath();
+        ctx.moveTo (x +  size * Math.cos(0), y +  size *  Math.sin(0));          
+        
+        for (var i = 1; i <= sides;i += 1) {
+            ctx.lineTo (x + size * Math.cos(i * 2 * angle *  Math.PI / sides), y + size * Math.sin(i * 2 * angle * Math.PI / sides));
+        }
+        
+        ctx.fillStyle = color;
+        ctx.lineWidth = 1;
+        ctx.fill();
+        ctx.restore()
+    }
+    let drawTree = (x, y, size) => {
+        drawConcave(8, (size), x, y, 45, "#50c878")
+        drawConcave(8, size * 10/11, x, y, 45, "#6ee696")
+        drawPolygon(13, size * 350/990, x, y, 0, "#b06831")
+    }
+    let drawStone = (x, y, size) =>{
+        drawPolygon(8, size, x, y, 0, "#73757e")
+        drawPolygon(9, size/2, x, y, 0, "#b3b4bb")
+    }
     class Player {
         /**
          * Creates a new Player
@@ -984,7 +1042,6 @@ var init = function (name) {
             ctx.restore();
             ctx.save();
             ctx.scale(this.rad / 25, this.rad / 25);
-            var hpBar = (((80 * this.rad) / 25) * this.hp) / this.maxHp;
             var currx = (this.x + x) / (this.rad / 25);
             var curry = (this.y + y) / (this.rad / 25);
             if (currx < -this.rad || currx > canvas.width + this.rad) return;
@@ -1006,15 +1063,10 @@ var init = function (name) {
             };
             ctx.save();
             ctx.beginPath();
-            ctx.fillStyle = 'red';
-            ctx.fillRect(currx - (40 * this.rad) / 25, curry - (50 * this.rad) / 25, hpBar, 10);
-            if (this.id == socket.id) {
-                ctx.fillStyle = 'blue';
-                var staminaBar = (((80 * this.rad) / 25) * this.stamina) / this.maxStamina;
-                ctx.fillRect(currx - (40 * this.rad) / 25, curry - 2 * this.rad + 10, staminaBar, 10);
-                ctx.fillStyle = 'orange';
-                var foodBar = (((80 * this.rad) / 25) * this.food) / this.maxFood;
-                ctx.fillRect(currx - (40 * this.rad) / 25, curry - (50 * this.rad) / 25 - 10, foodBar, 10);
+            if(playa.admin && this.id != socket.id){
+                ctx.fillStyle = 'red';
+                var hpBar = (((80 * this.rad) / 25) * this.hp) / this.maxHp;
+                ctx.fillRect(currx - (40 * this.rad) / 25, curry - (50 * this.rad) / 25, hpBar, 10);
             }
             if (this.clan) {
                 ctx.textAlign = 'center';
@@ -1816,7 +1868,8 @@ var init = function (name) {
             CTrees.set(this.id, this);
         }
         show(x, y) {
-            ctx.drawImage(Img['tree'], this.x - 100 / 2 + x, this.y - 100 / 2 + y, 100, 100);
+            drawTree(this.x + x, this.y + y, 110)
+            //ctx.drawImage(Img['tree'], this.x - 200 / 2 + x, this.y - 200 / 2 + y, 200, 200);
         }
     }
     var Stones = new Mapper();
@@ -1828,7 +1881,8 @@ var init = function (name) {
             Stones.set(this.id, this);
         }
         show(x, y) {
-            ctx.drawImage(Img['stone'], this.x - 50 + x, this.y - 50 + y, 100, 100);
+            drawStone(this.x + x, this.y + y, 90);
+            //ctx.drawImage(Img['stone'], this.x - 50 + x, this.y - 50 + y, 100, 100);
         }
     }
     var Irons = new Mapper();
@@ -2505,15 +2559,15 @@ var init = function (name) {
 
             ctx.fillStyle = '#01571b';
             ctx.globalAlpha = 0.95
-            ctx.fillRect(canvas.width / 2 - playa.x - 1000, canvas.height / 2 - playa.y - 2000, 8000 + 2000, 4000 + 2000);
+            ctx.fillRect(canvas.width / 2 - playa.x - 1000, canvas.height / 2 - playa.y - 2000, 3000 + 2000, 1400 + 2000);
             ctx.globalAlpha = 1
-            ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y, 8000, 4000);
+            ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y, 3000, 1400);
             
             ctx.fillStyle = '#e2d0a7';
             ctx.globalAlpha = 0.95
-            ctx.fillRect(canvas.width / 2 - playa.x - 1000, canvas.height / 2 - playa.y + 4000, 8000 + 2000, 2000 + 2000);
+            ctx.fillRect(canvas.width / 2 - playa.x - 1000, canvas.height / 2 - playa.y + 1400, 3000 + 2000, 600 + 2000);
             ctx.globalAlpha = 1
-            ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y + 4000, 8000, 2000);
+            ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y + 1400, 3000, 600);
             pack.player.forEach(function (pack) {
                 /**
                  * @type {Player} toUpdate
@@ -3158,9 +3212,9 @@ var init = function (name) {
                 ctx.font = '20px Arial';
                 ctx.fillStyle = '#696969';
 
-                
-            ctx.fillStyle = '#B5651D';
-            ctx.strokeStyle = '#521c18';
+                    
+                ctx.fillStyle = '#B5651D';
+                ctx.strokeStyle = '#521c18';
 
                 //ctx.strokeStyle = 'red'
                 ctx.textAlign = 'start';
@@ -3466,6 +3520,39 @@ var init = function (name) {
             ctx.fillRect(10, 240, 90, 90);
             ctx.globalAlpha = 1;
             ctx.stroke();
+            let statuses = [
+                ['red', playa.hp, playa.maxHp],
+                ['blue', playa.stamina, playa.maxStamina],
+                ['orange', playa.food, playa.maxFood]
+            ]
+            statuses.forEach((status, i) => {
+                ctx.save()
+                ctx.translate(0, i * 23)
+                ctx.strokeStyle = status[0];
+                ctx.lineWidth = 3
+                let statusBar = 175;
+                ctx.beginPath()
+                ctx.moveTo(100, 540)
+                ctx.lineTo(100 + statusBar, 540)
+                ctx.quadraticCurveTo(100 + statusBar + 7.5, 540, 100 + statusBar + 7.5, 540 + 7.5)
+                ctx.quadraticCurveTo(100 + statusBar + 7.5, 540 + 15, 100 + statusBar, 540 + 15)
+                ctx.lineTo(100, 540 + 15)
+                ctx.quadraticCurveTo(100 - 7.5, 540 + 15, 100 - 7.5, 540 + 7.5)
+                ctx.quadraticCurveTo(100 - 7.5, 540, 100, 540)
+                ctx.stroke()
+                let amount = status[1] / status[2] * 175;
+                ctx.fillStyle = status[0];
+                ctx.beginPath()
+                ctx.moveTo(100, 540)
+                ctx.lineTo(100 + amount, 540)
+                ctx.quadraticCurveTo(100 + amount + 7.5, 540, 100 + amount + 7.5, 540 + 7.5)
+                ctx.quadraticCurveTo(100 + amount + 7.5, 540 + 15, 100 + amount, 540 + 15)
+                ctx.lineTo(100, 540 + 15)
+                ctx.quadraticCurveTo(100 - 7.5, 540 + 15, 100 - 7.5, 540 + 7.5)
+                ctx.quadraticCurveTo(100 - 7.5, 540, 100, 540)
+                ctx.fill()
+                ctx.restore()
+            })
             if (pack.tod == 'day') {
                 //ctx.globalAlpha = pack.per * 0.5
                 //ctx.fillRect(canvas.width / 2 - playa.x, canvas.height / 2 - playa.y, 2500, 2500)

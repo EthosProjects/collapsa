@@ -39,7 +39,7 @@ class discorduserbaseUser {
                 },
                 warnings:[]
             }, this.guilds[prop])
-            guild.warnings = guild.warnings.map(w => Object.assign({by:'BasicAuthor', reason:'BasicReason', time:new Date().getTime()}, w))
+            guild.warnings = guild.warnings.map(w => Object.assign({by:'DefaultAuthor', reason:'DefaultReason', time:new Date().getTime()}, w))
             this.guilds[prop] = guild
         }
     }
@@ -65,10 +65,10 @@ class collapsauserbaseUser {
     constructor(options){
         this._id = genSnowflake(reqCount.toString(2), '2', '0')
         this.id = this._id
-        this.token = 'Aph_basic'
-        this.password = 'basicPassword'
-        this.username = 'basicUsername'
-        this.email = 'basic@email.com'
+        this.token = 'Aph_Default'
+        this.password = 'DefaultPassword'
+        this.username = 'DefaultUsername'
+        this.email = 'Default@email.com'
         this.discordid = false
         this.highscore = 0
         Object.assign(this, options)
@@ -114,7 +114,7 @@ if (process.env.NODE_ENV != 'production') {
 };
 
 if (process.env.NODE_ENV == 'production') {
-    /*app.use(function (req, res, next) {
+    app.use(function (req, res, next) {
         //res.setHeader('Strict-Transport-Security', 'max-age=8640000; includeSubDomains');
         if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === "http") {
             return next()
@@ -122,7 +122,7 @@ if (process.env.NODE_ENV == 'production') {
         } else {
             return next();
         }
-    });*/
+    });
 } else {
     app.use(function (req, res, next) {
         res.setHeader('Strict-Transport-Security', 'max-age=8640000; includeSubDomains');

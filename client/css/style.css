@@ -36,7 +36,7 @@ button:focus {
 #entryPoint {
 	border-radius: 25px;
 	position: absolute;
-	top:10%;
+	top:40%;
 	left:37.5%;
   	width: calc(25% - 5px); /* Could be more or less, depending on screen size */
 }

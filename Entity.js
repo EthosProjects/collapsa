@@ -349,12 +349,12 @@ module.exports = function (nsp, ns, mLab) {
 	}, 40000);
 	this.map = {
 		forest: {
-			width: 1500,
-			height: 700,
+			width: 3000,
+			height: 1400,
 		},
 		total: {
-			width: 8000,
-			height: 6000,
+			width: 3000,
+			height: 2000,
 		},
 	};
 	let clans = new Map();
@@ -1255,7 +1255,7 @@ module.exports = function (nsp, ns, mLab) {
 								e instanceof Emerald ||
 								e instanceof Amethyst
 							) {
-								if(Vector.getDistance(axep, e.body.position) < 50 + axerad)
+								if(Vector.getDistance(axep, e.body.position) < e.rad + axerad)
 									rtargs.push(e);
 							}
 							if(
@@ -1418,7 +1418,7 @@ module.exports = function (nsp, ns, mLab) {
 								e instanceof Emerald ||
 								e instanceof Amethyst
 							) {
-								if(Vector.getDistance(paxep, e.body.position) < 50 + paxerad)
+								if(Vector.getDistance(paxep, e.body.position) < e.rad + paxerad)
 									rtargs.push(e);
 							}
 							if(
@@ -1705,7 +1705,7 @@ module.exports = function (nsp, ns, mLab) {
 								e instanceof Emerald ||
 								e instanceof Amethyst
 							) {
-								if(Vector.getDistance(axep, e.body.position) < 50 + axerad)
+								if(Vector.getDistance(axep, e.body.position) < e.rad + axerad)
 									rtargs.push(e);
 							}
 							if(
@@ -1838,7 +1838,7 @@ module.exports = function (nsp, ns, mLab) {
 								e instanceof Emerald ||
 								e instanceof Amethyst
 							) {
-								if(Vector.getDistance(paxep, e.body.position) < 50 + paxerad)
+								if(Vector.getDistance(paxep, e.body.position) < e.rad + paxerad)
 									rtargs.push(e);
 							}
 							if(
@@ -2298,7 +2298,7 @@ module.exports = function (nsp, ns, mLab) {
 						e instanceof Amethyst ||
 						e instanceof CarrotFarm
 					) {
-						if(Vector.getDistance(this.hposfr, e.body.position) < 50 + this.hrad)
+						if(Vector.getDistance(this.hposfr, e.body.position) < e.rad + this.hrad)
 							rtargs.push(e);
 					}
 					if(
@@ -4356,7 +4356,7 @@ module.exports = function (nsp, ns, mLab) {
 		constructor(x, y, game) {
 			this.x = x;
             this.y = y;
-            this.rad = 50;
+            this.rad = 110;
 			this.id = Math.random();
 			this.wood = 0;
 			this.game = game
@@ -4373,7 +4373,7 @@ module.exports = function (nsp, ns, mLab) {
 					1
 				);
 			}, 300000);
-			this.body = Bodies.circle(this.x, this.y, 50, { isStatic: true });
+			this.body = Bodies.circle(this.x, this.y, 110, { isStatic: true });
 			this.game.Entities.push(this);
 			World.addBody(engine.world, this.body);
 			this.toplayer = 8;
@@ -4402,7 +4402,7 @@ module.exports = function (nsp, ns, mLab) {
 		constructor(x, y, game) {
 			this.x = x;
 			this.y = y;
-			this.rad = 50;
+			this.rad = 90;
 			this.game = game;
 			this.id = Math.random();
 			this.health = 100;
@@ -4418,7 +4418,7 @@ module.exports = function (nsp, ns, mLab) {
 				);
 				World.remove(engine.world, this.body);
 			}, 400000);
-			this.body = Bodies.circle(this.x, this.y, 50, { isStatic: true });
+			this.body = Bodies.circle(this.x, this.y, 90, { isStatic: true });
 			this.game.Entities.push(this);
 			World.addBody(engine.world, this.body);
 			this.needsUpdate = false;
@@ -5405,30 +5405,41 @@ module.exports = function (nsp, ns, mLab) {
 			}
 		}
 	}
-	let getGoodPosition = () => {
-		let tempx = Math.getRandomInt(0, game.map.forest.width / 100 - 1) * 100 + 50;
-		let tempy = Math.getRandomInt(0, game.map.forest.height / 100 - 1) * 100 + 50;
+	let getGoodPosition = (...arguments) => {
+		let args = [...arguments]
+		if(!args.length) args = [ 'circle', 'tempx', 'tempy', 50, { isStatic: true } ];
+		let type = args.shift();
+		let tempx = Math.getRandomInt(0, game.map.forest.width);
+		let tempy = Math.getRandomInt(0, game.map.forest.height);
+		let toUse = args.map(arg => {
+			if(arg == 'tempx') return tempx
+			if(arg == 'tempy') return tempy
+			else return arg
+		})
+		let bodyA = Bodies[type](...toUse);
 		let inWay = false;
 		game.Entities.forEach((e) => {
-			if(
-				(e.body.position.x == tempx && e.body.position.y == tempy) ||
-				(e instanceof Player &&
-					Vector.getDistance({ x: tempx, y: tempy }, e.body.position) <= 150)
-			)
-				inWay = true;
+			if(Matter.SAT.collides(bodyA, e.body).collided) inWay = true;
 		});
+		Object.values(walls).forEach(w => {
+			if(Matter.SAT.collides(bodyA, w).collided) inWay = true;
+		})
 		while (inWay) {
-			tempx = Math.getRandomInt(0, game.map.forest.width / 100 - 1) * 100 + 50;
-			tempy = Math.getRandomInt(0, game.map.forest.height / 100 - 1) * 100 + 50;
+			tempx = Math.getRandomInt(0, game.map.forest.width);
+			tempy = Math.getRandomInt(0, game.map.forest.height);
+			let toUse = args.map(arg => {
+				if(arg == 'tempx') return tempx
+				if(arg == 'tempy') return tempy
+				else return arg
+			})
+			bodyA = Bodies[type](...toUse);
 			inWay = false;
 			game.Entities.forEach((e) => {
-				if(
-					(e.body.position.x == tempx && e.body.position.y == tempy) ||
-					(e instanceof Player &&
-						Vector.getDistance({ x: tempx, y: tempy }, e.body.position) <= 150)
-				)
-					inWay = true;
+				if(Matter.SAT.collides(bodyA, e.body).collided) inWay = true;
 			});
+			Object.values(walls).forEach(w => {
+				if(Matter.SAT.collides(bodyA, w).collided) inWay = true;
+			})
 		}
 		return {
 			x: tempx,
@@ -5438,11 +5449,11 @@ module.exports = function (nsp, ns, mLab) {
 	setInterval(function () {
 		let canAdd = [];
 		if(STrees.list.length < 12) {
-			let p = getGoodPosition();
+			let p = getGoodPosition('circle', 'tempx', 'tempy', 110, { isStatic: true });
 			new STree(p.x, p.y, game);
 		}
-		if(Stones.list.length < 7) {
-			let p = getGoodPosition();
+		if(Stones.list.length < 3) {
+			let p = getGoodPosition('circle', 'tempx', 'tempy', 90, { isStatic: true });
 			new Stone(p.x, p.y, game);
 		}/*
 		if(Irons.list.length < 6) {

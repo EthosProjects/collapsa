@@ -68,15 +68,14 @@
 }
 #widgets {
 	position:absolute;
-	left:40%;
-	top:87%; /* */
+	left:42.5%;
+	top:88%; /* */
 	border-radius: 25px 25px 5px 5px;
 	padding-left:2%;
 	padding-right:2%;
 	padding-top:1%;
-	padding-bottom:0;
-	background-color: #fefefe;
-	border: 1px solid #888;
-	width: 11%; /* Could be more or less, depending on screen size */
-	height:10%;
+	padding-bottom:1%;
+	box-sizing: border-box;
+	width: 15%; /* Could be more or less, depending on screen size */
+	height:12%;
 }
