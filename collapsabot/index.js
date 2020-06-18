@@ -5,6 +5,25 @@ const {
     WebhookClient,
     TextChannel,
 } = require('discord.js');
+const { 
+    Client
+} = require('discord-rpc')
+const DiscordRPC = require('discord-rpc')
+DiscordRPC.register('717959362131263609')
+const rpcClient = new Client({ transport:'ipc' })
+rpcClient.on('ready', () => {
+    const startTimestamp = new Date();
+    rpcClient.setActivity({
+        state: 'Working on Collapsa.io',
+        startTimestamp,
+        largeImageKey: 'favicon',
+        largeImageText: 'Awesome Developer',
+        smallImageKey: 'devshovel',
+        smallImageText: 'Shoveling away errors',
+        instance: false,
+    });
+})
+rpcClient.login({ clientId:'717959362131263609'})
 const Collection = require('discord.js').Collection;
 let { token, prefix } = require('./config.json');
 prefix = process.env.NODE_ENV == 'production' ? '!' : '?'

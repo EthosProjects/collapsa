@@ -52,7 +52,7 @@
             localStorage.setItem('locked', 'false')
         }
     })
-    let pixel = '480px'
+    let pixel = '1080'
     let pixelNum = parseInt(pixel)
     console.log(pixelNum)
     let ctx = document.getElementById('ctx').getContext('2d')
@@ -648,7 +648,12 @@
         drawPolygon(8, size, x, y, 0, "#9966cc")
         drawPolygon(9, size/2, x, y, 0, "#c0c0c0")
     }
-    let drawShovel = (handleColor, mainColor, tintColor) => {
+    let drawShovel = (handleColor, mainColor, tintColor, pNum = 480, rotate) => {
+        ctx.save()
+        ctx.translate(pixelNum/2, pixelNum/2)
+        ctx.rotate(rotate * Math.PI/180)
+        ctx.scale(pNum/480, pNum/480)
+        ctx.translate(-pixelNum/2, - pixelNum/2)
         let leftControlPointX = pixelNum/2 - 80
         let leftControlPointY = pixelNum/2 - 80 - 80
         let rightControlPointX = pixelNum/2 + 80
@@ -685,8 +690,46 @@
         ctx.quadraticCurveTo(rightControlPointX, rightControlPointY, tipX, tipY);
         ctx.lineTo(tipX, rightStartPointY)
         ctx.fill()
+        ctx.restore()
     }
+    let drawSword = (handleColor, mainColor, tintColor, pixelNum = 480) => {
+        let leftControlPointX = pixelNum/2 - 80
+        let leftControlPointY = pixelNum/2 - 80 - 80
+        let rightControlPointX = pixelNum/2 + 80
+        let rightControlPointY = pixelNum/2 - 80 - 80
+        let leftStartPointX = pixelNum/2 - 60
+        let leftStartPointY = pixelNum/2 - 50
+        let rightStartPointX = pixelNum/2 + 60
+        let rightStartPointY = pixelNum/2 - 50
+        
+        let tipX = pixelNum/2
+        let tipY = pixelNum/2 - 140 - 80
+        ctx.beginPath()
+        ctx.moveTo(tipX + 25, rightStartPointY)
+        ctx.lineTo(tipX + 25, rightStartPointY + 283 - 25)
+        ctx.quadraticCurveTo(tipX + 25, rightStartPointY + 283, tipX, rightStartPointY + 283)
+        ctx.quadraticCurveTo(tipX - 25, rightStartPointY + 283, tipX - 25, rightStartPointY + 283 - 25)
+        ctx.lineTo(tipX - 25, rightStartPointY)
+        ctx.fillStyle = handleColor
+        ctx.fill()
+        ctx.beginPath()
+        ctx.moveTo(rightStartPointX, rightStartPointY)
+        ctx.lineTo(leftStartPointX, leftStartPointY)
+        /*
+        ctx.fillStyle = mainColor
+        ctx.beginPath()
+        ctx.moveTo(leftStartPointX, leftStartPointY);
+        ctx.quadraticCurveTo(leftControlPointX,leftControlPointY, tipX, tipY);
+        ctx.lineTo(tipX, rightStartPointY)
+        ctx.fill()
 
+        ctx.fillStyle = tintColor
+        ctx.beginPath()
+        ctx.moveTo(rightStartPointX, rightStartPointY);
+        ctx.quadraticCurveTo(rightControlPointX, rightControlPointY, tipX, tipY);
+        ctx.lineTo(tipX, rightStartPointY)
+        ctx.fill()*/
+    }
     let leftToDraw = []
     let sorted = [1, 3, 5, 10, 7, 9].sort((a, b) => a - b)
     console.log(sorted)
@@ -754,10 +797,12 @@
                 drawStone(x, y, 40)
             }
         }
-        //drawFavicon('Updates')
-        drawGold(pixelNum/2, pixelNum/2, pixelNum/2)
+        drawShovel('red', 'orange', 'yellow', pixelNum, 45)
+        //ctx.drawImage(Img.amethystsword, 0, 0, pixelNum, pixelNum)
+        //drawSword('green', 'blue', 'violet')
+        //drawGold(pixelNum/2, pixelNum/2, pixelNum/2)
         a.href = canvas.toDataURL('/image/png')
-        a.download = 'campfire' +'.png'
+        a.download = 'devshovel' +'.png'
         //a.click()
     }
     quality.addEventListener('input',draw)

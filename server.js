@@ -20,9 +20,9 @@ var port = process.env.PORT || 3000; // Used by Heroku and http on localhost
 process.env['PORT'] = process.env.PORT || 4000; // Used by https on localhost
 let httpsServer
 let httpServer = http.createServer(app)
-const mongodburi = 'mongodb+srv://LogosKing:TBKCKD6B@cluster0-cpzc9.mongodb.net/collapsa?retryWrites=true&w=majority'
+const { Collection } = require('discord.js')
 const { MongoClient } = require('mongodb')
-const mclient = new MongoClient(mongodburi)
+const { mlabInteractor, document } = require('mlab-promise')
 class discorduserbaseUser {
     constructor(options){
         this._id = genSnowflake(reqCount.toString(2), '2', '0')
@@ -75,36 +75,8 @@ class collapsauserbaseUser {
     }
 }
 let toLiteral = obj => JSON.parse(JSON.stringify(obj))
-class mongodbInteractor extends EventEmitter {
-    constructor(username, password){
-        super()
-        this.client = new MongoClient(`mongodb+srv://${username}:${password}@cluster0-cpzc9.mongodb.net/collapsa?retryWrites=true&w=majority`)
-        this.client.connect().then(async client => {
-            let collapsa = this.client.db('collapsa')
-            let collections = await collapsa.listCollections().toArray()
-            collections.forEach(collection => {
-                
-            })
-        })
-    }
-}
+const { mongodbInteractor } = require('./mongoDB')
 const mongoDB = new mongodbInteractor('LogosKing', 'TBKCKD6B')
-async function listDatabases(client){
-    let databasesList = await client.db().admin().listDatabases();
- 
-    console.log("Databases:");
-    databasesList.databases.forEach(db => console.log(` - ${db.name}`));
-};
-mclient.connect()
-    .then(client => {
-        listDatabases(client)
-        let collectionsList = client.db().listCollections()
-    })
-try {
-    const { mlabInteractor } = require('../mlab-promise')
-}catch {
-    const { mlabInteractor } = require('mlab-promise')
-}
 // Run separate https server if on localhost
 
 if (process.env.NODE_ENV != 'production') {
@@ -112,7 +84,6 @@ if (process.env.NODE_ENV != 'production') {
         console.log("Express server listening with https on port %d in %s mode", this.address().port, app.settings.env);
     });
 };
-
 if (process.env.NODE_ENV == 'production') {
     app.use(function (req, res, next) {
         res.setHeader('Strict-Transport-Security', 'max-age=8640000; includeSubDomains');
@@ -144,13 +115,12 @@ let io;
 if(httpsServer) io = socketIO(httpsServer);
 else io = socketIO(httpServer);
 var favicon = require('serve-favicon')
-const { mlabInteractor, collection } = require('mlab-promise')
-const mLab = new mlabInteractor('4unBPu8hpfod29vxgQI57c0NMUqMObzP', ['lexybase', 'chatbase'])
-var game = require("./Entity.js", mLab)
-new game(io.of('/usaeast1'), '/usaeast1', mLab);
+//const mongoDB = new mlabInteractor('4unBPu8hpfod29vxgQI57c0NMUqMObzP', ['lexybase', 'chatbase'])
+var game = require("./Entity.js", mongoDB)
+new game(io.of('/usaeast1'), '/usaeast1', mongoDB);
 //new game(io.of('/usaeast2'), '/usaeast2');
 const discordRoute = require('./api/routes/discord')
-require('./collapsabot')(mLab)/*
+require('./collapsabot')(mongoDB)/*
 let webhookreq = https.request({
     host:'discordapp.com',
     path:'/api/webhooks/720406265997819994/ulw78QPg8HKXyr5nUHJOu8eLfGEuCjbXbId1TzhwPUg5KBCIngEdigUaQ0N6yTDeuYKs',
@@ -199,9 +169,9 @@ let collapsauserbase
 let leaderboard
 let reqCount = 0
 let formFormat = data => Object.keys(data).map(k => `${k}=${encodeURIComponent(data[k])}`).join('&')
-mLab.on('ready', () => {
+mongoDB.on('ready', () => {
     console.log('Mlab interface loaded')
-    collapsa = mLab.databases.get('collapsa')
+    collapsa = mongoDB.databases.get('collapsa')
     collapsauserbase = collapsa.collections.get('collapsauserbase')
 })
 let zeroFill = (s, w) => new Array(w - s.length).fill('0').join('') + s
@@ -210,7 +180,7 @@ const genSnowflake = (increment, processID, workerID) => {
     increment = zeroFill(reqCount.toString(2), 12)
     processID = zeroFill(processID, 5)
     workerID = zeroFill(workerID, 5)
-    return parseInt(timestamp + processID + workerID + increment, 2)
+    return parseInt(timestamp + processID + workerID + increment, 2).toString()
 }
 Math = require('./math.js')
 app.use(bodyParser.json())
@@ -440,6 +410,8 @@ app.route('/api/discordLogin')
         }
     })
 var Vector = require('./Vector.js');
+const { strict } = require('assert');
+const { stringify } = require('querystring');
 // Aliases
 io.on('connection', socket => {
     console.log('New connection')
