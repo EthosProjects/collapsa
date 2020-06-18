@@ -1,5 +1,6 @@
 // Dependencies
 var express = require('express');
+const cors = require('cors')
 var http = require('http');
 var https = require('https');
 var path = require('path');
@@ -422,6 +423,8 @@ httpServer.listen(
         console.log('Your http server is listening on port ' + httpServer.address().port);
     }
 )
+
+app.use(cors())
 app.get('/.well-known/pki-validation', (req, res) => {
     res.sendFile(path.join(__dirname, '/client/index.html'))
 })

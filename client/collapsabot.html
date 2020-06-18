@@ -1,19 +1,19 @@
 <html>
     <head>
     <title>Collapsa.io</title>
-    <link rel="stylesheet" type="text/css" href="/client/css/style.css">
-    <link rel="stylesheet" type="text/css" href="/client/css/widget.css">
-    <link rel="stylesheet" type="text/css" href="/client/css/account.css">
-    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://www.collapsa.io/client/css/style.css">
+    <link rel="stylesheet" type="text/css" href="https://www.collapsa.io/client/css/widget.css">
+    <link rel="stylesheet" type="text/css" href="https://www.collapsa.io/client/css/account.css">
+    <script src="https://www.collapsa.io/socket.io/socket.io.js"></script>
     <link rel='icon' href='/favicon.ico' type='image/x-icon'/>
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://www.collapsa.io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://www.collapsa.io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://www.collapsa.io/favicon-16x16.png">
+    <link rel="manifest" href="https://www.collapsa.io/site.webmanifest">
     <meta property="og:title" content="Collapsa.io">
     <meta property="og:description" content="Leaderboard page for collapsa.io">
-    <meta property="og:image" content="/img/favicon.png">
-    <script src="/client/js/CanvasInput.js"></script>
+    <meta property="og:image" content="https://www.collapsa.io/img/favicon.png">
+    <script src="https://www.collapsa.io/client/js/CanvasInput.js"></script>
     <style>
         #leaderboardMain {           
             border-radius: 25px;
@@ -23,34 +23,9 @@
             width: calc(50% - 5px); /* Could be more or less, depending on screen size */
             overflow: auto;
         }
-        .leaderboardTable td, th {
-            padding:12px 15px;
-        }
-        .leaderboardTable {
-            border-collapse: collapse;
-            margin:auto;
-            width:75%;
-        }
-        .leaderboardTable th:first-child {
-            border-radius: 25px 0 0 0;
-        }
-        .leaderboardTable th:last-child {
-            border-radius: 0 25px 0 0;
-        }
-        .leaderboardTable th {
-            text-align: left;
-            background: #b06831;
-        }
-        .leaderboardTable tbody tr:nth-child(1) {background-color: #9966cc;}
-        .leaderboardTable tbody tr:nth-child(2) {background-color: #50c978;}
-        .leaderboardTable tbody tr:nth-child(3) {background-color: #32f2ff;}
-        .leaderboardTable tbody tr:nth-child(4) {background-color: #ffd700;}
-        .leaderboardTable tbody tr:nth-child(5) {background-color: #c0c0c0;}
-        .leaderboardTable tbody tr:nth-child(2n+6) {background-color: #767676;}
-        .leaderboardTable tbody tr:nth-child(2n+7) {background-color: #a9aab3;}
-        .leaderboardTable {
-            overflow: auto;
-            height:60%
+        #collapsaDesc {
+            margin-left:10%;
+	        font: 20px Helvetica, Arial; 
         }
     </style>
     </head>
@@ -69,19 +44,14 @@
                 <button class="accountButton" id='accountButton'><h1>Account</h1></button>
             </div>
             <div class="mainModal" id="leaderboardMain">
-                <h1 class="title">Leaderboard</h1>
-                <h3 id="enter">Compare your score to your friends</h3>
-                <table class="leaderboardTable">
-                    <thead>
-                    <tr>
-                      <th id="leaderboardUsername">Username</th>
-                      <th id="leaderboardHighscore">Highscore</th>
-                      <th id="leaderboardDiscordexp">Discord EXP</th>
-                    </tr>
-                    </thead>
-                    <tbody id="leaderboardBody">
-                    </tbody>
-                </table>
+                <h1 class="title">CollapsaBot</h1>
+                <h3 id="enter">Information about CollapsaBot</h3>
+                <p id="collapsaDesc">CollapsaBot is a bot meant to be used on the CollapsaCord discord, where you
+                     can receive extensive support for the bot if you need it. The bot has frequest updates with new commands, so 
+                     you never have to worry about it being abandoned. It has guaranteed 100% uptime with fast responses. There
+                     are currently 4 command types: moderation, fun, and information based commands. You can get information about a
+                     user or yourself ranging from account creation date to avatar to userID. 
+                </p>
             </div>
             <div id="changelog" class="mainModal">
                 <h1>Changelog</h1>
@@ -99,7 +69,7 @@
                     <div class='widgetWrapper'>
                         <div class="widget" id="twitter">
                             <a href="https://twitter.com/Logos_King">
-                                <img class="widgetIcon" src="/client/img/Twitter_Logo_WhiteOnImage.png">
+                                <img class="widgetIcon" src="https://www.collapsa.io/client/img/Twitter_Logo_WhiteOnImage.png">
                             </a>
                         </div>
                     </div>
@@ -108,7 +78,7 @@
                     <div class='widgetWrapper'>
                         <div class="widget" id="facebook">
                             <a href="https://www.facebook.com/logos.king.125/">
-                                <img class="widgetIcon" src="/client/img/facebook.png">
+                                <img class="widgetIcon" src="https://www.collapsa.io/client/img/facebook.png">
                             </a>
                         </div>
                     </div>
@@ -224,49 +194,6 @@
                     sessionStorage.setItem('username', res.username)
                     sessionStorage.setItem('email', res.email)
                 }
-                req = await fetch(`${window.location.origin}/api/leaderboard`, {
-                    method:'GET',
-                    headers:{
-                        'content-type':'application/json'
-                    },
-                })
-                res = await req.json()
-                res.forEach(item => {
-                    let entry = document.createElement('tr')
-                    let username = document.createElement('td')
-                    username.textContent = item.username == sessionStorage.getItem('username') ? `(You)${item.username}` : item.username
-                    let highscore = document.createElement('td')
-                    highscore.textContent = item.score
-                    let discordexp = document.createElement('td')
-                    discordexp.textContent = item.discordexp || 'Not in the discord'
-                    entry.appendChild(username)
-                    entry.appendChild(highscore)
-                    entry.appendChild(discordexp)
-                    leaderboardBody.appendChild(entry)
-                })
-                })()
-            }else {
-                (async () => {
-                    let req = await fetch(`${window.location.origin}/api/leaderboard`, {
-                        method:'GET',
-                        headers:{
-                            'content-type':'application/json'
-                        },
-                    })
-                    let res = await req.json()
-                    res.forEach(item => {
-                        let entry = document.createElement('tr')
-                        let username = document.createElement('td')
-                        username.textContent = item.username
-                        let highscore = document.createElement('td')
-                        highscore.textContent = item.score
-                        let discordexp = document.createElement('td')
-                        discordexp.textContent = item.discordexp || 'Not in the discord'
-                        entry.appendChild(username)
-                        entry.appendChild(highscore)
-                        entry.appendChild(discordexp)
-                        leaderboardBody.appendChild(entry)
-                    })
                 })()
             }
         </script>
