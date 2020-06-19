@@ -24,6 +24,7 @@ rpcClient.on('ready', () => {
     });
 })
 rpcClient.login({ clientId:'717959362131263609'})
+//
 const Collection = require('discord.js').Collection;
 let { token, prefix } = require('./config.json');
 prefix = process.env.NODE_ENV == 'production' ? '!' : '?'
@@ -64,10 +65,6 @@ module.exports = (mLab) => {
     });
     let antiSpam = new Collection();
     let expRate = new Collection();
-    client.on('message', async (message) => {
-        if (message.author.bot || message.webhookID) return;
-        
-    });
     client.on('message', async (message) => {
         let channel = message.channel;
         let content = message.content;

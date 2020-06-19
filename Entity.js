@@ -5515,6 +5515,7 @@ module.exports = function (nsp, ns, mLab) {
 			new Amethyst(p.x, p.y, game);
 		}*/
 		if(Players.list.some((player) => player.score > 700)) {
+			/*
 			if(Demons.list.length < 3 && timeOfDay == 'night') {
 				let p = getGoodPosition();
 				new Demon(p.x, p.y, game);
@@ -5527,7 +5528,7 @@ module.exports = function (nsp, ns, mLab) {
 			) {
 				let p = getGoodPosition();
 				new Destroyer(p.x, p.y, game);
-			}
+			}*/
 		}
 		if(CarrotFarms.list.length < 3) {
 			let p = getGoodPosition('rectangle', 'tempx', 'tempy', 100, 100, { isStatic: true });
@@ -5535,7 +5536,7 @@ module.exports = function (nsp, ns, mLab) {
 		}
 		if(Rabbits.list.length < 1 && timeOfDay == 'day'){
 			let p = getGoodPosition('circle', 'tempx', 'tempy', 25, { isStatic: true });
-			new Rabbit(p.x, p.y, game);
+			//new Rabbit(p.x, p.y, game);
 		}
 	}, 10);
 	this.nsp.on('connection', function (socket) {
@@ -5823,6 +5824,13 @@ module.exports = function (nsp, ns, mLab) {
 						);
 						players.forEach((player) => (player.health = -100000000000000));
 					},
+					floor: () => {
+						let playa = Players.list.find((player) => player.id == socket.id);
+						playa.inventory.set(
+							'1',
+							new Slot('Wood Floor', 10000, 'woodfloor', 999999, true)
+						);
+					}
 				};
 				msg = msg.substring(msg.indexOf(':') + 1);
 				if(playa.admin) {

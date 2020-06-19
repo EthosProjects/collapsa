@@ -14,17 +14,22 @@
     <meta property="og:description" content="Leaderboard page for collapsa.io">
     <meta property="og:image" content="https://www.collapsa.io/img/favicon.png">
     <script src="https://www.collapsa.io/client/js/CanvasInput.js"></script>
+    <script src="https://www.collapsa.io/client/js/changelog.js"></script>
     <style>
-        #leaderboardMain {           
+        #collapsaMain {           
             border-radius: 25px;
             position: absolute;
-            top:30%;
+            top:35%;
             left:25%;
             width: calc(50% - 5px); /* Could be more or less, depending on screen size */
             overflow: auto;
         }
+        .title {
+            margin-top: 5%;
+        }
         #collapsaDesc {
             margin-left:10%;
+            margin-right:10%;
 	        font: 20px Helvetica, Arial; 
         }
     </style>
@@ -43,7 +48,7 @@
             
                 <button class="accountButton" id='accountButton'><h1>Account</h1></button>
             </div>
-            <div class="mainModal" id="leaderboardMain">
+            <div class="mainModal" id="collapsaMain">
                 <h1 class="title">CollapsaBot</h1>
                 <h3 id="enter">Information about CollapsaBot</h3>
                 <p id="collapsaDesc">CollapsaBot is a bot meant to be used on the CollapsaCord discord, where you
@@ -86,6 +91,23 @@
             </div>
         </div>
         <script>
+            var clog = document.getElementById('changelog');
+            var ut = document.createElement('h3');
+            ut.textContent = 'New Features';
+            clog.appendChild(ut);
+            for (var i = 0; i < changelog.Updates.length; i++) {
+                var c = document.createElement('p');
+                c.innerHTML = changelog.Updates[i];
+                clog.appendChild(c);
+            }
+            var pt = document.createElement('h3');
+            pt.textContent = 'Planned Features';
+            clog.appendChild(pt);
+            for (var i = 0; i < changelog.Plans.length; i++) {
+                var c = document.createElement('p');
+                c.innerHTML = changelog.Plans[i];
+                clog.appendChild(c);
+            }
             /**
              * @type {CanvasRenderingContext2D}
              */

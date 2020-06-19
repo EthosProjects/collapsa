@@ -14,6 +14,7 @@
     <meta property="og:description" content="Leaderboard page for collapsa.io">
     <meta property="og:image" content="/img/favicon.png">
     <script src="/client/js/CanvasInput.js"></script>
+    <script src="/client/js/changelog.js"></script>
     <style>
         #leaderboardMain {           
             border-radius: 25px;
@@ -116,6 +117,23 @@
             </div>
         </div>
         <script>
+            var clog = document.getElementById('changelog');
+            var ut = document.createElement('h3');
+            ut.textContent = 'New Features';
+            clog.appendChild(ut);
+            for (var i = 0; i < changelog.Updates.length; i++) {
+                var c = document.createElement('p');
+                c.innerHTML = changelog.Updates[i];
+                clog.appendChild(c);
+            }
+            var pt = document.createElement('h3');
+            pt.textContent = 'Planned Features';
+            clog.appendChild(pt);
+            for (var i = 0; i < changelog.Plans.length; i++) {
+                var c = document.createElement('p');
+                c.innerHTML = changelog.Plans[i];
+                clog.appendChild(c);
+            }
             /**
              * @type {CanvasRenderingContext2D}
              */
