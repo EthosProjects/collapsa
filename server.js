@@ -117,7 +117,8 @@ httpServer.listen(
     port,
     () => {
         console.log('Your http server is listening on port ' + httpServer.address().port);
-        let io = httpsServer ? socketIO(httpsServer) : socketIO(httpServer);
+        let io = socketIO(httpServer)
+        //let io = httpsServer ? socketIO(httpsServer) : socketIO(httpServer);
         io.on('connection', socket => {
             console.log('New connection')
         })
