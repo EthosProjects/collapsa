@@ -425,6 +425,7 @@ const { strict } = require('assert');
 const { stringify } = require('querystring');
 const { nextTick } = require('process');
 // Aliases
+/*
 app.use(cors())
 app.get('/.well-known/pki-validation', (req, res) => {
     res.sendFile(path.join(__dirname, '/client/index.html'))
@@ -445,5 +446,5 @@ app.use('/', express.static(__dirname + '/client'))
 app.use(favicon(path.join(__dirname, '/client/favicon.ico')));
 app.use(function(req, res, next) {
     res.status(404).sendFile(__dirname + '/404.html')
-})
+})*/
 var adminList = [];
