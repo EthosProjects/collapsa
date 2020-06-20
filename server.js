@@ -91,7 +91,6 @@ if (process.env.NODE_ENV == 'development') {
     app.use(function (req, res, next) {
         res.setHeader('Strict-Transport-Security', 'max-age=8640000; includeSubDomains');
         if (!req.secure) {
-            console.log('Redirecting')
             return res.redirect(301, 'https://' + req.hostname  + ":" + process.env.PORT + req.url);
         } else {
             return next();
@@ -101,7 +100,7 @@ if (process.env.NODE_ENV == 'development') {
     app.use(function (req, res, next) {
         res.setHeader('Strict-Transport-Security', 'max-age=8640000; includeSubDomains');
         if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === "http") {
-            return res.redirect(301, 'https://' + req.host + req.url);
+            return next() /*res.redirect(301, 'https://' + req.host + req.url);*/
         } else {
             return next();
         }
@@ -415,6 +414,7 @@ app.route('/api/discordLogin')
 var Vector = require('./Vector.js');
 const { strict } = require('assert');
 const { stringify } = require('querystring');
+const { nextTick } = require('process');
 // Aliases
 io.on('connection', socket => {
     console.log('New connection')
