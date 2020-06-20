@@ -114,6 +114,7 @@ let dotenv = require('dotenv')
 dotenv.config();
 var socketIO = require('socket.io');
 let io;
+console.log(httpsServer, httpServer)
 if(httpsServer) io = socketIO(httpsServer);
 else io = socketIO(httpServer);
 var favicon = require('serve-favicon')
