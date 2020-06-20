@@ -123,8 +123,8 @@ httpServer.listen(
         io.on('connection', socket => {
             console.log('New connection')
         })
-        //var game = require("./Entity.js", mongoDB)
-        //new game(io.of('/usaeast1'), '/usaeast1', mongoDB);
+        var game = require("./Entity.js")
+        new game(io.of('/usaeast1'), '/usaeast1', mongoDB);
     }
 )/*
 if(httpsServer) io = socketIO(httpsServer);
