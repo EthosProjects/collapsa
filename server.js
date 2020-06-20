@@ -23,10 +23,9 @@ var port = process.env.PORT || 3000; // Used by Heroku and http on localhost
 process.env['PORT'] = process.env.PORT || 4000; // Used by https on localhost
 let httpsServer
 let httpServer = http.createServer(app)
-/*
 const { Collection } = require('discord.js')
 const { MongoClient } = require('mongodb')
-const { mlabInteractor, document } = require('mlab-promise')*/
+const { mlabInteractor, document } = require('mlab-promise')
 class discorduserbaseUser {
     constructor(options){
         this._id = genSnowflake(reqCount.toString(2), '2', '0')
@@ -78,10 +77,10 @@ class collapsauserbaseUser {
         Object.assign(this, options)
     }
 }
-/*
+
 let toLiteral = obj => JSON.parse(JSON.stringify(obj))
 const { mongodbInteractor } = require('./mongoDB')
-const mongoDB = new mongodbInteractor('LogosKing', 'TBKCKD6B')*/
+const mongoDB = new mongodbInteractor('LogosKing', 'TBKCKD6B')
 // Run separate https server if on localhost
 /*
 if (process.env.NODE_ENV == 'development') {
@@ -109,9 +108,8 @@ if (process.env.NODE_ENV == 'development') {
     });
 };*/
 //var httpsServer = http.Server(app);
-/*
 const bodyParser = require('body-parser')
-const bcrypt = require('bcrypt')*/
+const bcrypt = require('bcrypt')
 let dotenv = require('dotenv')
 dotenv.config();
 var socketIO = require('socket.io');
@@ -119,21 +117,18 @@ httpServer.listen(
     port,
     () => {
         console.log('Your http server is listening on port ' + httpServer.address().port);
-        let io = socketIO(httpServer);
-        io.on('connection', socket => {
-            console.log('New connection')
-        })
-        var game = require("./Entity.js")
-        new game(io.of('/usaeast1'), '/usaeast1', mongoDB);
+        
     }
-)/*
-if(httpsServer) io = socketIO(httpsServer);
-else io = socketIO(httpServer);*/
-/*
+)
+let io = httpsServer ? socketIO(httpsServer) : socketIO(httpServer);
+io.on('connection', socket => {
+    console.log('New connection')
+})
+var game = require("./Entity.js")
+new game(io.of('/usaeast1'), '/usaeast1', mongoDB);
 var favicon = require('serve-favicon')
 const discordRoute = require('./api/routes/discord')
 require('./collapsabot')(mongoDB)
-*/
 /*
 let webhookreq = https.request({
     host:'discordapp.com',
@@ -179,7 +174,7 @@ let collapsa
 let collapsauserbase
 /**
  * @type {collection}
- *//*
+ */
 let leaderboard
 let reqCount = 0
 let formFormat = data => Object.keys(data).map(k => `${k}=${encodeURIComponent(data[k])}`).join('&')
@@ -449,4 +444,4 @@ app.use(favicon(path.join(__dirname, '/client/favicon.ico')));
 app.use(function(req, res, next) {
     res.status(404).sendFile(__dirname + '/404.html')
 })
-var adminList = [];*/
+var adminList = [];
