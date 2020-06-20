@@ -112,20 +112,21 @@ const bcrypt = require('bcrypt')
 let dotenv = require('dotenv')
 dotenv.config();
 var socketIO = require('socket.io');
-let io = socketIO(httpServer);
 httpServer.listen(
     port,
     () => {
         console.log('Your http server is listening on port ' + httpServer.address().port);
+        let io = socketIO(httpServer);
+        io.on('connection', socket => {
+            console.log('New connection')
+        })
+        var game = require("./Entity.js", mongoDB)
+        new game(io.of('/usaeast1'), '/usaeast1', mongoDB);
     }
 )/*
 if(httpsServer) io = socketIO(httpsServer);
 else io = socketIO(httpServer);*/
 var favicon = require('serve-favicon')
-//const mongoDB = new mlabInteractor('4unBPu8hpfod29vxgQI57c0NMUqMObzP', ['lexybase', 'chatbase'])
-var game = require("./Entity.js", mongoDB)
-new game(io.of('/usaeast1'), '/usaeast1', mongoDB);
-//new game(io.of('/usaeast2'), '/usaeast2');
 const discordRoute = require('./api/routes/discord')
 require('./collapsabot')(mongoDB)/*
 let webhookreq = https.request({
@@ -421,9 +422,6 @@ const { strict } = require('assert');
 const { stringify } = require('querystring');
 const { nextTick } = require('process');
 // Aliases
-io.on('connection', socket => {
-    console.log('New connection')
-})
 app.use(cors())
 app.get('/.well-known/pki-validation', (req, res) => {
     res.sendFile(path.join(__dirname, '/client/index.html'))
