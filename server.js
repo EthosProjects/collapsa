@@ -193,6 +193,7 @@ const genSnowflake = (increment, processID, workerID) => {
 }
 Math = require('./math.js')
 app.use(bodyParser.json())
+/*
 app.route('/api')
     .get(async (req, res) => {
         reqCount++
@@ -418,6 +419,7 @@ app.route('/api/discordLogin')
             res.redirect('../../')
         }
     })
+*/
 var Vector = require('./Vector.js');
 const { strict } = require('assert');
 const { stringify } = require('querystring');
