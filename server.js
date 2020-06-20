@@ -8,6 +8,8 @@ var fs = require('fs');
 var app = express();
 const httpApp = express();
 const { EventEmitter } = require('events');
+const { config } = require('dotenv');
+config()
 //console.log(fs.readFileSync('./httpsServer.csr'))
 var key = fs.readFileSync('encryption/server.key') + '';
 var cert = fs.readFileSync( 'encryption/www_collapsa_io.crt' ) + '';
@@ -80,26 +82,26 @@ const { mongodbInteractor } = require('./mongoDB')
 const mongoDB = new mongodbInteractor('LogosKing', 'TBKCKD6B')
 // Run separate https server if on localhost
 
-if (process.env.NODE_ENV != 'production') {
+if (process.env.NODE_ENV == 'development') {
     httpsServer = https.createServer(httpsOptions, app).listen(process.env.PORT, function () {
         console.log("Express server listening with https on port %d in %s mode", this.address().port, app.settings.env);
     });
 };
-if (process.env.NODE_ENV == 'production') {
-    /*app.use(function (req, res, next) {
-        res.setHeader('Strict-Transport-Security', 'max-age=8640000; includeSubDomains');
-        if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === "http") {
-            return res.redirect(301, 'https://' + req.host + req.url);
-        } else {
-            return next();
-        }
-    });*/
-} else {
+if (process.env.NODE_ENV == 'development') {
     app.use(function (req, res, next) {
         res.setHeader('Strict-Transport-Security', 'max-age=8640000; includeSubDomains');
         if (!req.secure) {
             console.log('Redirecting')
             return res.redirect(301, 'https://' + req.hostname  + ":" + process.env.PORT + req.url);
+        } else {
+            return next();
+        }
+    });
+} else {
+    app.use(function (req, res, next) {
+        res.setHeader('Strict-Transport-Security', 'max-age=8640000; includeSubDomains');
+        if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === "http") {
+            return res.redirect(301, 'https://' + req.host + req.url);
         } else {
             return next();
         }
