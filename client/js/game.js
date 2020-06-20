@@ -686,7 +686,7 @@ var init = function (name) {
             this.usr = initPack.usr || '';
             this.x = initPack.x;
             this.y = initPack.y;
-            this.hp = initPack.health || 20;
+            this.health = initPack.health || 20;
             this.maxHp = initPack.maxHp || 20;
             this.food = initPack.food || 20;
             this.maxFood = initPack.maxFood || 20;
@@ -715,7 +715,7 @@ var init = function (name) {
             ctx.save();
             ctx.beginPath();
             ctx.fillStyle = 'red';
-            if (opt.drawHp) var hpBar = (((80 * this.rad) / 25) * this.hp) / this.maxHp;
+            if (opt.drawHp) var hpBar = (((80 * this.rad) / 25) * this.health) / this.maxHp;
             ctx.fillRect(currx - (40 * this.rad) / 25, curry - (50 * this.rad) / 25, hpBar, 10);
             ctx.fillStyle = 'blue';
             if (opt.drawStamina) var staminaBar = (((80 * this.rad) / 25) * this.stamina) / this.maxStamina;
@@ -1021,7 +1021,7 @@ var init = function (name) {
             this.usr = initPack.usr;
             this.x = initPack.x;
             this.y = initPack.y;
-            this.hp = initPack.health;
+            this.health = initPack.health;
             this.maxHp = initPack.maxHp;
             this.food = initPack.food;
             this.maxFood = initPack.maxFood;
@@ -1068,7 +1068,7 @@ var init = function (name) {
             ctx.beginPath();
             if(playa.admin && this.id != socket.id){
                 ctx.fillStyle = 'red';
-                var hpBar = (((80 * this.rad) / 25) * this.hp) / this.maxHp;
+                var hpBar = (((80 * this.rad) / 25) * this.health) / this.maxHp;
                 ctx.fillRect(currx - (40 * this.rad) / 25, curry - (50 * this.rad) / 25, hpBar, 10);
             }
             if (this.clan) {
@@ -1340,9 +1340,18 @@ var init = function (name) {
                 ctx.restore();
                 ctx.save();
                 ctx.globalAlpha = 0.5;
-                if (/Wall|Campfire|Floor|Crafting Table/.test(this.mainHand))
+                if (/Wall|Campfire|Floor|Crafting Table/.test(this.mainHand)){
                     ctx.drawImage(Img[img], this.posPlace.x - 50 + x, this.posPlace.y - 50 + y, 100, 100);
+                    if(!playa.canPlace){
+                        ctx.save()
+                        ctx.globalAlpha = 0.3
+                        ctx.fillStyle = 'red'
+                        ctx.fillRect(this.posPlace.x - 50 + x, this.posPlace.y - 50 + y, 100, 100)
+                        ctx.restore()
+                    }
+                }
                 else if (/Door/.test(this.mainHand)) {
+                    console.log(this.mainHand)
                     if (pang == 'up') {
                         ctx.save();
                         ctx.beginPath();
@@ -1433,6 +1442,13 @@ var init = function (name) {
                         ctx.restore();
                     }
                     ctx.drawImage(Img[img], this.posPlace.x - 50 + x, this.posPlace.y - 50 + y, 100, 100);
+                    if(!playa.canPlace){
+                        ctx.save()
+                        ctx.globalAlpha = 0.5
+                        ctx.fillStyle = 'red'
+                        ctx.fillRect(this.posPlace.x - 50 + x, this.posPlace.y - 50 + y, 100, 100)
+                        ctx.restore()
+                    }
                 } else if (/Chest/.test(this.mainHand)) {
                     ctx.save();
                     ctx.translate(this.posPlace.x + x, this.posPlace.y + y);
@@ -1440,6 +1456,13 @@ var init = function (name) {
                         ctx.rotate((Math.PI / 180) * 90);
                     }
                     ctx.drawImage(Img[img], 0 - 47.5, 0 - 25, 95, 50);
+                    if(!playa.canPlace){
+                        ctx.save()
+                        ctx.globalAlpha = 0.5
+                        ctx.fillStyle = 'red'
+                        ctx.fillRect(0 - 47.5, 0 - 25, 95, 50)
+                        ctx.restore()
+                    }
                 }
                 ctx.restore();
             }
@@ -1450,40 +1473,10 @@ var init = function (name) {
             this.receivePackTimer = setTimeout(() => {
                 this.receivedUpdate = false;
             }, 1000 / 5);
-            this.x = initPack.x;
-            this.y = initPack.y;
-            this.hp = initPack.health;
-            this.maxHp = initPack.maxHp;
-            this.food = initPack.food;
-            this.maxFood = initPack.maxFood;
-            this.mainHand = initPack.mainHand;
-            this.id = initPack.id;
-            this.angle = initPack.angle;
-            this.lhit = initPack.lhit;
-            this.rhit = initPack.rhit;
-            this.armor = initPack.armor;
-            this.hitting = initPack.hitting;
-            this.punchper = initPack.punchper;
-            this.per = initPack.per;
-            this.msg = initPack.msg;
-            this.clan = initPack.clan;
-            this.owner = initPack.owner;
+            Object.assign(this, initPack)
         }
         processSelfInitPack(initPack) {
-            this.stamina = initPack.stamina;
-            this.maxStamina = initPack.maxStamina;
-            this.inventory = initPack.inventory;
-            this.crafting = initPack.crafting;
-            this.chesting = initPack.chesting;
-            this.craftables = initPack.craftables;
-            this.craftablesEx = initPack.craftablesEx;
-            this.chestables = initPack.chestables;
-            this.posPlace = initPack.posPlace;
-            this.clanning = initPack.clanning;
-            this.clans = initPack.clans;
-            this.clanMembers = initPack.clanMembers;
-            this.req = initPack.req;
-            this.admin = initPack.admin;
+            Object.assign(this, initPack)
             //if(this.clans) console.log(this.clans)
         }
     }
@@ -1516,7 +1509,7 @@ var init = function (name) {
             ctx.restore();
             ctx.save();
             ctx.scale(this.rad / 25, this.rad / 25);
-            var hpBar = (((80 * this.rad) / 25) * this.hp) / this.maxHp;
+            var hpBar = (((80 * this.rad) / 25) * this.health) / this.maxHp;
             var currx = (this.x + x) / (this.rad / 25);
             var curry = (this.y + y) / (this.rad / 25);
             if (currx < -this.rad || currx > canvas.width + this.rad) return;
@@ -1652,7 +1645,7 @@ var init = function (name) {
             ctx.restore();
             ctx.save();
             ctx.scale(this.rad / 25, this.rad / 25);
-            var hpBar = (((80 * this.rad) / 25) * this.hp) / this.maxHp;
+            var hpBar = (((80 * this.rad) / 25) * this.health) / this.maxHp;
             var currx = (this.x + x) / (this.rad / 25);
             var curry = (this.y + y) / (this.rad / 25);
             //if(currx < -this.rad/25 || currx > canvas.width) return
@@ -1777,7 +1770,7 @@ var init = function (name) {
             ctx.restore();
             ctx.save();
             ctx.scale(this.rad / 25, this.rad / 25);
-            var hpBar = (((80 * this.rad) / 25) * this.hp) / this.maxHp;
+            var hpBar = (((80 * this.rad) / 25) * this.health) / this.maxHp;
             var currx = (this.x + x) / (this.rad / 25);
             var curry = (this.y + y) / (this.rad / 25);
             if (currx < -this.rad || currx > canvas.width + this.rad) return;
@@ -3535,7 +3528,7 @@ var init = function (name) {
             ctx.globalAlpha = 1;
             ctx.stroke();
             let statuses = [
-                ['red', playa.hp, playa.maxHp],
+                ['red', playa.health, playa.maxHp],
                 ['blue', playa.stamina, playa.maxStamina],
                 ['orange', playa.food, playa.maxFood]
             ]

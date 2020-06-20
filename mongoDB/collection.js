@@ -31,7 +31,7 @@ class collection {
             let col = db.collection(this.name)
             col.insertOne(doc)
                 .then(() => {
-                    this.set(doc.id, new document(null, doc.id, doc))
+                    this.documents.set(doc.id, new document(null, doc.id, doc))
                     resolve()
                 })
         })

@@ -84,12 +84,11 @@ if (process.env.NODE_ENV != 'production') {
     httpsServer = https.createServer(httpsOptions, app).listen(process.env.PORT, function () {
         console.log("Express server listening with https on port %d in %s mode", this.address().port, app.settings.env);
     });
-};
+};/*
 if (process.env.NODE_ENV == 'production') {
     app.use(function (req, res, next) {
         res.setHeader('Strict-Transport-Security', 'max-age=8640000; includeSubDomains');
         if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === "http") {
-            return next()
             return res.redirect(301, 'https://' + req.host + req.url);
         } else {
             return next();
@@ -105,7 +104,7 @@ if (process.env.NODE_ENV == 'production') {
             return next();
         }
     });
-};
+};*/
 //var httpsServer = http.Server(app);
 const bodyParser = require('body-parser')
 const bcrypt = require('bcrypt')

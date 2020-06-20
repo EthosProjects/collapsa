@@ -46,6 +46,13 @@ class CollapsaBot extends Client {
             }
             this.commandFolders.set(folder, folderArr)
         }
+        const eventFiles = fs.readdirSync('./collapsabot/events')
+        for(const file of eventFiles){
+            const event = require(`./events/${file}`)
+            this.on(event.name, eventData => {
+                event.execute(eventData, this)
+            })
+        }
         //console.log(this.commands, this.commandFolders)
     }
 }

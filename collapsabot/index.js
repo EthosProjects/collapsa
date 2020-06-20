@@ -42,27 +42,7 @@ module.exports = (mLab) => {
         client.databaseLoaded = true;
         //console.log(owner)
     });
-    client.once('ready', () => {
-        let statusChannel = client.guilds.cache.find(guild => guild.id == client.mainGuild).channels.cache.find(channel => channel.id == '720399190089531393')
-        //statusChannel.bulkDelete(100, true)
-        //statusChannel.send('I\'m online!')
-        //console.log(statusChannel.messages.cache)
-        console.log(
-            `${client.user.username} is now online in ${
-                client.guilds.cache.size
-            } guild${client.guilds.cache.size > 1 ? 's' : ''}`
-        );
-        client.guilds.cache.forEach((guild) => {
-            //console.log(guild.name);
     
-            guild.channels.cache.forEach((channel) => {
-                //console.log(` - ${channel.name} ${channel.type} ${channel.id}`);
-            });
-            // general text 679422692931272744
-        });
-        client.user.setActivity('Collapsa.io', { type: 'PLAYING' })
-        //console.log(client)
-    });
     let antiSpam = new Collection();
     let expRate = new Collection();
     client.on('message', async (message) => {
@@ -70,16 +50,6 @@ module.exports = (mLab) => {
         let content = message.content;
         let author = message.author;
         if(!message.guild) return
-        if (
-            message.content.startsWith('!join ') &&
-            message.author.id == client.owner
-        ) {
-            let member = message.guild.members.cache.get(
-                message.mentions.users.first().id
-            );
-            client.emit('guildMemberAdd', member);
-            return;
-        }
         if (
             message.content.startsWith('!joinGuild') &&
             message.author.id == client.owner
@@ -183,57 +153,32 @@ module.exports = (mLab) => {
                     antiSpam.delete(author.id + message.guild.id);
             }, 2000);
         }
+        
         let prefixRegex = new RegExp(`^(<@!{0,1}\\d+> |${prefix == '!' ?'!' : '\\' + prefix})`)
+        console.log(prefixRegex)
         if(!content.match(prefixRegex)) return;
         if(content.match(/^d+/) && message.mentions.members.first().id != client.user.id) return
+        if (
+            message.content.match(`\\${prefix}eval`) &&
+            message.author.id == client.owner
+        ) {
+            let args = content.replace(prefixRegex, '').replace(/^eval +/, '').split(/ +/);
+            client.commands
+                    .get('eval')
+                    .execute(message, args, client, mLab);
+                return;
+            }
         let args;
         args = content.replace(prefixRegex, '').split(/ +/);
         const commandName = args.shift().toLowerCase();
+        
         if (client.commands.has(commandName))
             client.commands
                 .get(commandName)
                 .execute(message, args, client, mLab);
     });
     client.on('guildMemberAdd', async (member) => {
-        let guildSetup = mLab.databases
-            .get('collapsa')
-            .collections.get('discordguildbase')
-            .documents.get(member.guild.id).data;
-        if (
-            mLab.databases
-                .get('collapsa')
-                .collections.get('discorduserbase')
-                .documents.has(member.id)
-        ) {
-            let mData = mLab.databases
-                .get('collapsa')
-                .collections.get('discorduserbase')
-                .documents.get(member.id);
-            if (
-                mData.data.muteTimeEnd &&
-                guildSetup.mute.role &&
-                member.guild.roles.cache.has(guildSetup.mute.role)
-            ) {
-                let role = guildSetup.mute.role;
-            }
-        }
-        if (guildSetup.moderation.channel) {
-            let channel = member.guild.channels.cache.get(
-                guildSetup.moderation.channel
-            );
-            let embed = new MessageEmbed()
-                .setTitle('Member joined')
-                .setAuthor(member.user.username, member.user.avatarURL())
-                .addField('Account creation', member.user.createdAt)
-                .addField('Joined date', member.joinedAt);
-            channel.send(embed);
-        }
-        if (guildSetup.welcome.role) {
-            let role = member.guild.roles.cache.find(
-                (r) => r.id == guildSetup.welcome.role
-            );
-            member.roles.add(role);
-        }
+        
     });
     client.on('guildCreate', async (guild) => {
         await mLab.databases
