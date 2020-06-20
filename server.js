@@ -81,7 +81,7 @@ let toLiteral = obj => JSON.parse(JSON.stringify(obj))
 const { mongodbInteractor } = require('./mongoDB')
 const mongoDB = new mongodbInteractor('LogosKing', 'TBKCKD6B')
 // Run separate https server if on localhost
-
+/*
 if (process.env.NODE_ENV == 'development') {
     httpsServer = https.createServer(httpsOptions, app).listen(process.env.PORT, function () {
         console.log("Express server listening with https on port %d in %s mode", this.address().port, app.settings.env);
@@ -105,22 +105,22 @@ if (process.env.NODE_ENV == 'development') {
             return next();
         }
     });
-};
+};*/
 //var httpsServer = http.Server(app);
 const bodyParser = require('body-parser')
 const bcrypt = require('bcrypt')
 let dotenv = require('dotenv')
 dotenv.config();
 var socketIO = require('socket.io');
-let io;
+let io = socketIO(httpServer);
 httpServer.listen(
     port,
     () => {
         console.log('Your http server is listening on port ' + httpServer.address().port);
     }
-)
+)/*
 if(httpsServer) io = socketIO(httpsServer);
-else io = socketIO(httpServer);
+else io = socketIO(httpServer);*/
 var favicon = require('serve-favicon')
 //const mongoDB = new mlabInteractor('4unBPu8hpfod29vxgQI57c0NMUqMObzP', ['lexybase', 'chatbase'])
 var game = require("./Entity.js", mongoDB)
