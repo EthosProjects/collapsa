@@ -82,7 +82,6 @@ let toLiteral = obj => JSON.parse(JSON.stringify(obj))
 const { mongodbInteractor } = require('./mongoDB')
 const mongoDB = new mongodbInteractor('LogosKing', 'TBKCKD6B')
 // Run separate https server if on localhost
-/*
 if (process.env.NODE_ENV == 'development') {
     httpsServer = https.createServer(httpsOptions, app).listen(process.env.PORT, function () {
         console.log("Express server listening with https on port %d in %s mode", this.address().port, app.settings.env);
@@ -106,7 +105,7 @@ if (process.env.NODE_ENV == 'development') {
             return next();
         }
     });
-};*/
+};
 //var httpsServer = http.Server(app);
 const bodyParser = require('body-parser')
 const bcrypt = require('bcrypt')
@@ -117,16 +116,15 @@ httpServer.listen(
     port,
     () => {
         console.log('Your http server is listening on port ' + httpServer.address().port);
-        let io = socketIO(httpServer)
-        //let io = httpsServer ? socketIO(httpsServer) : socketIO(httpServer);
-        io.on('connection', socket => {
-            console.log('New connection')
-        })
-        var game = require("./Entity.js")
-        new game(io.of('/usaeast1'), '/usaeast1', mongoDB);
         
     }
 )
+let io = httpsServer ? socketIO(httpsServer) : socketIO(httpServer);
+io.on('connection', socket => {
+    console.log('New connection')
+})
+var game = require("./Entity.js")
+new game(io.of('/usaeast1'), '/usaeast1', mongoDB);
 var favicon = require('serve-favicon')
 const discordRoute = require('./api/routes/discord')
 require('./collapsabot')(mongoDB)
@@ -194,7 +192,6 @@ const genSnowflake = (increment, processID, workerID) => {
 }
 Math = require('./math.js')
 app.use(bodyParser.json())
-/*
 app.route('/api')
     .get(async (req, res) => {
         reqCount++
@@ -420,13 +417,11 @@ app.route('/api/discordLogin')
             res.redirect('../../')
         }
     })
-*/
 var Vector = require('./Vector.js');
 const { strict } = require('assert');
 const { stringify } = require('querystring');
 const { nextTick } = require('process');
 // Aliases
-/*
 app.use(cors())
 app.get('/.well-known/pki-validation', (req, res) => {
     res.sendFile(path.join(__dirname, '/client/index.html'))
@@ -447,5 +442,5 @@ app.use('/', express.static(__dirname + '/client'))
 app.use(favicon(path.join(__dirname, '/client/favicon.ico')));
 app.use(function(req, res, next) {
     res.status(404).sendFile(__dirname + '/404.html')
-})*/
+})
 var adminList = [];
