@@ -23,6 +23,10 @@ var port = process.env.PORT || 3000; // Used by Heroku and http on localhost
 process.env['PORT'] = process.env.PORT || 4000; // Used by https on localhost
 let httpsServer
 let httpServer = http.createServer(app)
+app.use((res, req, next) => {
+    console.log('request')
+    next()
+})
 const { Collection } = require('discord.js')
 const { MongoClient } = require('mongodb')
 const { mlabInteractor, document } = require('mlab-promise')
