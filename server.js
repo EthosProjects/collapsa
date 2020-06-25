@@ -121,7 +121,6 @@ httpServer.listen(
     port,
     () => {
         console.log('Your http server is listening on port ' + httpServer.address().port);
-        
     }
 )
 let io = httpsServer ? socketIO(httpsServer) : socketIO(httpServer);
@@ -129,10 +128,9 @@ io.on('connection', socket => {
     console.log('New connection')
 })
 var game = require("./Entity.js")
-new game(io.of('/usaeast1'), '/usaeast1', mongoDB);
+//new game(io.of('/usaeast1'), '/usaeast1', mongoDB);
 var favicon = require('serve-favicon')
-const discordRoute = require('./api/routes/discord')
-//require('./collapsabot')(mongoDB)
+let client = require('./collapsabot')(mongoDB)
 /*
 let webhookreq = https.request({
     host:'discordapp.com',
