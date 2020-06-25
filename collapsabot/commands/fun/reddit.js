@@ -39,7 +39,7 @@ module.exports = new Command({
         })
         .on('response', async res => {
             getAllData(res)
-                .then(async body => {
+                .then(body => {
                     if(body.error) throw new Error('Damn')
                     const allowed = message.channel.nsfw ? body.data.children : body.data.children.filter(post => !post.data.over_18);
                     if (!allowed.length) return message.channel.send('It apears that this is an NSFW subreddit');
@@ -52,17 +52,21 @@ module.exports = new Command({
                         .setImage(post.data.url)
                         .setFooter("React with ❌ to delete this post");
                     if(post.data.selftext) embed.addField('Text', post.data.selftext)
-                    let m = await message.channel.send(embed)
-                    await m.react("❌")
-                    let filter = (reaction, user) => (reaction.emoji.name == '❌') && user.id == message.author.id
-                    let collector = m.createReactionCollector(filter, {})
-                    collector.on('collect', reaction => m.delete())
+                    message.channel.send(embed)
+                        .then(m => {
+                            m.react("❌")
+                                .then(reaction => {
+                                    let filter = (reaction, user) => (reaction.emoji.name == '❌') && user.id == message.author.id
+                                    let collector = m.createReactionCollector(filter, {})
+                                    collector.on('collect', reaction => m.delete())
+                                })
+                        })
                 })
-                .catch(async err => {
+                .catch(err => {
                     const embed = new MessageEmbed()
                         .setColor('red')
                         .setTitle("This subreddit was not found")
-                    let m = await message.channel.send(embed)
+                    message.channel.send(embed)
                 })
             
         })

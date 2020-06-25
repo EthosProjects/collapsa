@@ -30,6 +30,7 @@ app.use((res, req, next) => {
 const { Collection } = require('discord.js')
 const { MongoClient } = require('mongodb')
 const { mlabInteractor, document } = require('mlab-promise')
+
 class discorduserbaseUser {
     constructor(options){
         this._id = genSnowflake(reqCount.toString(2), '2', '0')
@@ -131,7 +132,7 @@ var game = require("./Entity.js")
 new game(io.of('/usaeast1'), '/usaeast1', mongoDB);
 var favicon = require('serve-favicon')
 const discordRoute = require('./api/routes/discord')
-require('./collapsabot')(mongoDB)
+//require('./collapsabot')(mongoDB)
 /*
 let webhookreq = https.request({
     host:'discordapp.com',
