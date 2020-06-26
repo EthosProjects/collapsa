@@ -5159,11 +5159,11 @@ module.exports = function (nsp, ns, mLab) {
     };
     setInterval(function () {
         let canAdd = [];
-        if (STrees.list.length < 6) {
+        if (STrees.list.length < 4) {
             let p = getGoodPosition('circle', 'tempx', 'tempy', 110, { isStatic: true });
             new STree(p.x, p.y, game);
         }
-        if (Stones.list.length < 2) {
+        if (Stones.list.length < 1) {
             let p = getGoodPosition('circle', 'tempx', 'tempy', 90, { isStatic: true });
             new Stone(p.x, p.y, game);
         } /*

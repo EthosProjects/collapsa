@@ -26,12 +26,14 @@ class collection {
     }
     addDocument(doc){
         if(this.documents.has(doc.id)) return this.updateDocument(doc)
+        console.log(doc)
         return new Promise((resolve, reject) => {
             let db = this.client.db(this.databaseName)
             let col = db.collection(this.name)
             col.insertOne(doc)
                 .then(() => {
-                    this.documents.set(doc.id, new document(null, doc.id, doc))
+                    console.log('aaaaa')
+                    this.documents.set(doc.id, new document(doc.id, doc))
                     resolve()
                 })
         })

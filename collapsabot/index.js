@@ -223,5 +223,6 @@ module.exports = (mLab) => {
     process.on('uncaughtException', (error) => {
         console.error(error);
     });
+    return client
 };
 //let mLab = new mlabInteractor('4unBPu8hpfod29vxgQI57c0NMUqMObzP', ['lexybase', 'chatbase'])

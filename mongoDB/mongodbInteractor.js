@@ -7,7 +7,7 @@ const database = require('./database.js')
 class mongodbInteractor extends EventEmitter {
     constructor(username, password){
         super()
-        this.client = new MongoClient(`mongodb+srv://${username}:${password}@cluster0-cpzc9.mongodb.net/collapsa?retryWrites=true&w=majority`)
+        this.client = new MongoClient(`mongodb+srv://${username}:${password}@cluster0-cpzc9.mongodb.net/collapsa?retryWrites=true&w=majority`, { useUnifiedTopology: true })
         /**
          * @type {Collection<string, collection>}
          */

@@ -57,18 +57,18 @@ let valid = [0, 0, 0];
 accountButton.addEventListener('click', e => {
     accountModal.style.display = 'block'
 })
-if(getCookie('token')){
+if(getCookie('token') && localStorage.getItem('userid')){
     loginButton.style.display = 'none'
     signupButton.style.display = 'none'
     accountButton.style.display = 'block';
     (async () => {
     let token = getCookie('token')
-    let req = await fetch(`${window.location.href}api/login`, {
-        method:'POST',
+    let req = await fetch(`${window.location.href}api/v1/users/${localStorage.getItem('userid')}`, {
+        method:'GET',
         headers:{
-            'content-type':'application/json'
-        },
-        body:JSON.stringify({token})
+            'content-type':'application/json',
+            'authorization':`Basic ${token}`
+        }
     })
     let res = await req.json()
     if(res.err){
@@ -77,9 +77,9 @@ if(getCookie('token')){
         accountButton.style.display = 'none'
         setCookie('token', '', -30)
     }else {
-        sessionStorage.setItem('username', res.username)
+        localStorage.setItem('username', res.username)
         accountUsername.value = res.username
-        sessionStorage.setItem('email', res.email)
+        localStorage.setItem('email', res.email)
         accountEmail.value = res.email
         document.getElementById("nameyourself").value = res.username
         accountModalSubmit.disabled = false
@@ -94,7 +94,7 @@ if(getCookie('token')){
     res.forEach(item => {
         let entry = document.createElement('tr')
         let username = document.createElement('td')
-            username.textContent = item.username == sessionStorage.getItem('username') ? `(You)${item.username}` : item.username
+            username.textContent = item.username == localStorage.getItem('username') ? `(You)${item.username}` : item.username
         let highscore = document.createElement('td')
         highscore.textContent = item.score
         let discordexp = document.createElement('td')
@@ -231,7 +231,7 @@ loginForm.addEventListener('submit', async e => {
     let password = document.getElementById('loginPassword').value
     let username = document.getElementById('loginUsername').value
     let loginErr = document.getElementById('loginErr')
-    let req = await fetch(`${window.location.href}api/login`, {
+    let req = await fetch(`${window.location.href}api/v1/users/login`, {
         method:'POST',
         headers:{
             'content-type':'application/json'
@@ -250,6 +250,12 @@ loginForm.addEventListener('submit', async e => {
         }
         loginModalSubmit.disabled = false
     }else {
+        localStorage.setItem('username', res.username)
+        accountUsername.value = res.username
+        localStorage.setItem('email', res.email)
+        accountEmail.value = res.email
+        localStorage.setItem('userid', res.id)
+        document.getElementById("nameyourself").value = res.username
         loginErr.style.display = 'none'
         loginButton.style.display = 'none'
         signupButton.style.display = 'none'
@@ -264,7 +270,7 @@ signupForm.addEventListener('submit', async e => {
     let username = signupUsername.value
     let email = signupEmail.value
     signupModalSubmit.disabled = true
-    let req = await fetch(`${window.location.href}api/signup`, {
+    let req = await fetch(`${window.location.href}api/v1/users`, {
         method:'POST',
         headers:{
             'content-type':'application/json'
@@ -279,10 +285,11 @@ signupForm.addEventListener('submit', async e => {
         if(res.message == 'emailTaken') signupErrs[1].style.display = 'block'
         signupModalSubmit.disabled = false;
     }else {
-        sessionStorage.setItem('username', username)
+        localStorage.setItem('username', username)
         accountUsername.value = username
-        sessionStorage.setItem('email', email)
+        localStorage.setItem('email', email)
         accountEmail.value = email
+        localStorage.setItem('userid', res.data.id)
         document.getElementById("nameyourself").value = username
         loginButton.style.display = 'none'
         signupButton.style.display = 'none'
@@ -343,34 +350,24 @@ accountForm.addEventListener('submit', async e => {
     let newPassword = accountNewPassword.value
     let token = getCookie('token')
     //let loginErr = document.getElementById('loginErr')
-    let req = await fetch(`${window.location.href}api/updateAccount`, {
-        method:'POST',
+    let req = await fetch(`${window.location.href}api/v1/users`, {
+        method:'PUT',
         headers:{
             'content-type':'application/json'
         },
-        body:JSON.stringify({username:username, password:password, email, newPassword, token})
+        body:JSON.stringify({
+            username, 
+            password, 
+            email, newPassword, 
+            token
+        })
     })
+    
     let res = await req.json()
     console.log(res)
     //loginErr.style.display = 'none'
     if(res.err){
-        /*loginErr.style.display = 'block'
-        if(res.acceptedLogins){
-            console.log(res.acceptedLogins.length, res.acceptedLogins[0])
-            if(res.acceptedLogins.length == 1 && res.acceptedLogins[0] == 'Discord') loginErr.textContent = 'You can only log in through discord'
-        }else {
-            loginErr.textContent = 'Incorrect username or password'
-        }
-        loginModalSubmit.disabled = false*/
-    }else {
-        /*
-        setCookie('token', res.token, 30)
-        loginErr.style.display = 'none'
-        loginButton.style.display = 'none'
-        signupButton.style.display = 'none'
-        accountButton.style.display = 'block'
-        loginModal.style.display = 'none'
-        loginModalSubmit.disabled = */
+        //location.reload()
     }
 })
 let percentageWidth = window.innerWidth/window.outerWidth
