@@ -128,7 +128,9 @@ module.exports = mongoDB => {
         //res.sendFile(path.join(__dirname, '/client/index.html'));
         let client_id = '710904657811079258'
         let client_secret = 'ZabZmWdAlMZFPl2O7xGRqtqpZhIar9tE'
-        let redirect_uri = process.env.NODE_ENV == 'development' ? 'https://localhost:4000/api/v1/users/link?site=discord' : 'http://www.collapsa.io/api/v1/users/link?site=discord'
+        let redirect_uri = `https://${req.hostname}${process.env.NODE_ENV == 'development' ? `:${process.env.PORT}` : ''}/api/v1/users/link?site=discord`
+        console.log(req)
+        console.log(redirect_uri)
         let code = req.query.code
         let obj = {
             'code': code,

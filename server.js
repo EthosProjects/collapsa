@@ -50,7 +50,7 @@ if (process.env.NODE_ENV == 'development') {
     app.use(function (req, res, next) {
         res.setHeader('Strict-Transport-Security', 'max-age=8640000; includeSubDomains');
         if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === "http") {
-            return res.redirect(301, 'https://' + req.host + req.url);
+            return res.redirect(301, 'https://' + req.hostname + req.url);
         } else {
             return next();
         }
@@ -94,13 +94,13 @@ webhookreq.write(JSON.stringify({
     content:'@everyone',
     embeds:[
         {
-            title: "New Collapsa.io Login System with account linking",
+            title: "Fully functioning building system",
             type: "rich",
-            description: "Haven't you ever wanted to compare your highscore to your friends and keep your username? Well, Now you can!",
+            description: "Fun fact! The building system is now completely up to date. Only thing left to add is a red part for unplaceable campfires, which can wait until another day",
             timestamp: new Date().toISOString(),
-            color:parseInt('2ecc71', 16),
+            color:parseInt('ff7d36', 16),
             thumbnail:{
-                url:'http://www.collapsa.io/img/favicon.png',
+                url:'http://www.collapsa.io/img/woodwall.png',
             },
             author:{
                 url:'http://www.collapsa.io/img/favicon.png',
