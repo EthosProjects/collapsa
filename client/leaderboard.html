@@ -254,7 +254,7 @@
                     let username = document.createElement('td')
                     username.textContent = item.username == sessionStorage.getItem('username') ? `(You)${item.username}` : item.username
                     let highscore = document.createElement('td')
-                    highscore.textContent = item.score
+                    highscore.textContent = item.highscore
                     let discordexp = document.createElement('td')
                     discordexp.textContent = item.discordexp || 'Not in the discord'
                     entry.appendChild(username)
@@ -277,7 +277,7 @@
                         let username = document.createElement('td')
                         username.textContent = item.username
                         let highscore = document.createElement('td')
-                        highscore.textContent = item.score
+                        highscore.textContent = item.highscore
                         let discordexp = document.createElement('td')
                         discordexp.textContent = item.discordexp || 'Not in the discord'
                         entry.appendChild(username)

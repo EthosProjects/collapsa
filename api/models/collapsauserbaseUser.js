@@ -4,7 +4,6 @@ class collapsauserbaseUser {
         this._id = options.id || genSnowflake(process.reqCount.toString(2), '2', '0')
         this.id = this._id
         this.token = 'Aph_Default'
-        this.password = 'DefaultPassword'
         this.username = 'DefaultUsername'
         this.email = 'Default@email.com'
         this.discordid = false
@@ -14,6 +13,7 @@ class collapsauserbaseUser {
     get public() {
         return {
             id:this.id,
+            discordid:this.discordid ? this.discordid : undefined,
             username:this.username,
             highscore:this.highscore
         }

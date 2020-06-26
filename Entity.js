@@ -508,7 +508,7 @@ module.exports = function (nsp, ns, mLab) {
     }
     class Inventory extends Storage {
         constructor() {
-            super([
+            super([/*
                 ['1', new Slot('Wood Wall', 255, 'woodwall', 255, true)],
                 ['2', new Slot('Stone Wall', 255, 'stonewall', 255, true)],
                 ['3', new Slot('Iron Wall', 255, 'ironwall', 255, true)],
@@ -518,7 +518,7 @@ module.exports = function (nsp, ns, mLab) {
                 ['7', new Slot('Leather', 255, 'leather', 255)],
                 ['8', 'empty'],
                 ['9', 'empty'],
-/*
+*/
                 ['1', 'empty'],
                 ['2', 'empty'],
                 ['3', 'empty'],
@@ -527,7 +527,7 @@ module.exports = function (nsp, ns, mLab) {
                 ['6', 'empty'],
                 ['7', 'empty'],
                 ['8', 'empty'],
-                ['9', 'empty'],*/
+                ['9', 'empty'],
             ]);
         }
         listItems() {

@@ -26,9 +26,14 @@
             <div id="login" class='mainModal'>
                 <button class="accountButton" id='loginButton'><h1>Login</h1></button>
                 <div id="dropdown-content">
-                    <a id="loginwithDiscordWrapper">
-                        <img id="loginwithDiscordIcon" class="loginwithIcon" src="https://discord.com/assets/192cb9459cbc0f9e73e2591b700f1857.svg">
-                    </a>
+                    <div class="dropdown-item">
+                        <div id="loginWithDiscord" class="accountLink accountLinkForLogin accountLinkDiscord">
+                            <div class="accountLinkImageWrapper">
+                                <img class="accountLinkImage" src="./img/brands/Discord-Logo-White.png">
+                            </div>
+                            <div class="accountLinkTextWrapper">Discord</div>
+                        </div>
+                    </div>
                 </div>
                 <button class="accountButton" id='signupButton'><h1>Sign Up</h1></button>
             
@@ -119,6 +124,15 @@
             </div>
         </div>
         <div class="accountModal" id="accountModal">
+            <div id="linkAccount" class="mainModal">
+                <h1>Link account</h1>
+                <div id="linkAccountDiscord" class="accountLink accountLinkForModal accountLinkDiscord">
+                    <div class="accountLinkImageWrapper">
+                        <img class="accountLinkImage" src="./img/brands/Discord-Logo-White.png">
+                    </div>
+                    <div class="accountLinkTextWrapper">Discord</div>
+                </div>
+            </div>
             <div class="accountModalContent" id="accountModalContent">
                 <a href='javascript:void(0)' class='closebtn'>×</a>
                 <button href='javascript:void(0)' id='signout'>×Sign out</button>

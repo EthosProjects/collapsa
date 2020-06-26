@@ -10,7 +10,6 @@ const httpApp = express();
 const { EventEmitter } = require('events');
 const { config } = require('dotenv');
 config()
-//console.log(fs.readFileSync('./httpsServer.csr'))
 var key = fs.readFileSync('encryption/server.key') + '';
 var cert = fs.readFileSync( 'encryption/www_collapsa_io.crt' ) + '';
 var ca = fs.readFileSync( 'encryption/www_collapsa_io.ca-bundle' ) + '';
@@ -95,18 +94,14 @@ webhookreq.write(JSON.stringify({
     content:'@everyone',
     embeds:[
         {
-            title: "CollapsaBot Help commands",
+            title: "New Collapsa.io Login System with account linking",
             type: "rich",
-            description: "There is now a help command with complete descriptions of every command",
+            description: "Haven't you ever wanted to compare your highscore to your friends and keep your username? Well, Now you can!",
             timestamp: new Date().toISOString(),
             color:parseInt('2ecc71', 16),
             thumbnail:{
                 url:'http://www.collapsa.io/img/favicon.png',
             },
-            fields:[{
-                name:'Glitches found',
-                value:'None'
-            }],
             author:{
                 url:'http://www.collapsa.io/img/favicon.png',
                 name:'Logos King'
@@ -131,7 +126,6 @@ mongoDB.on('ready', () => {
     collapsa = mongoDB.databases.get('collapsa')
     collapsauserbase = collapsa.collections.get('collapsauserbase')
 })
-let zeroFill = (s, w) => new Array(w - s.length).fill('0').join('') + s
 const genSnowflake = require('./util/genSnowflake.js')
 Math = require('./math.js')
 let JSONtoString = (obj, currIndent = 1) => {
@@ -146,6 +140,7 @@ let JSONtoString = (obj, currIndent = 1) => {
     return ret + new Array(currIndent - 1).fill('    ').join('') + '}'
 }
 app.use(bodyParser.json())
+app.use(cors())
 let apiRouter = express.Router()
 let v1Router = express.Router()
 apiRouter.use(function timeLog (req, res, next) {
@@ -168,10 +163,10 @@ app.route('/api/leaderboard')
             if(!collapsauserbase.findDocument(doc => doc.data.discordid == document.name)) return false
             return true
         })
-        let users = [...collapsauserbase.documents.values()].map(doc => ({
-            username:doc.data.username,
-            score:doc.data.highscore,
-            discordid:doc.data.discordid ? doc.data.discordid : undefined
+        let users = [...collapsauserbase.documents.values()].map(doc => new collapsauserbaseUser(doc.data)).map(user => ({
+            username:user.username,
+            highscore:user.highscore,
+            discordid:user.discordid ? user.discordid : undefined
         }))
         discordUsers.forEach(document => users.find(doc => document.data.discordid == doc.name).discordexp = document.data.guilds['709240989012721717'].exp.amount)
         res.send(JSON.stringify(users))
@@ -183,7 +178,6 @@ app.route('/api/discordLogin')
         let client_id = '710904657811079258'
         let client_secret = 'ZabZmWdAlMZFPl2O7xGRqtqpZhIar9tE'
         let redirect_uri = process.env.NODE_ENV == 'development' ? 'https://localhost:4000/api/discordLogin' : 'http://www.collapsa.io/api/discordLogin'
-        console.log(redirect_uri)
         let code = req.query.code
         let obj = {
             'code': code,
@@ -211,7 +205,6 @@ app.route('/api/discordLogin')
         })
         if(tokens.error){ 
             res.status(404)
-            console.log(tokens)
             return res.send(JSON.stringify({error: "invalid token"}))
         }
         let access_token = tokens.access_token
@@ -238,7 +231,6 @@ app.route('/api/discordLogin')
             var d = new Date();
             d.setTime(d.getTime() + (30 * 24 * 60 * 60 * 1000));
             var expires = "Expires="+ d.toUTCString();
-            console.log(`token=${userbase.data.token}; ${expires}`)
             res.set('Set-Cookie', `token=${userbase.data.token}; ${expires}; path=/`)
             res.redirect('../../')
         }else {
@@ -265,7 +257,6 @@ const { strict } = require('assert');
 const { stringify } = require('querystring');
 const { nextTick } = require('process');
 // Aliases
-app.use(cors())
 app.get('/.well-known/pki-validation', (req, res) => {
     res.sendFile(path.join(__dirname, '/client/index.html'))
 })
@@ -287,3 +278,17 @@ app.use(function(req, res, next) {
     res.status(404).sendFile(__dirname + '/404.html')
 })
 var adminList = [];
+/*
+let main = [[114, 137, 218], [59, 87, 157], [100, 65, 164]]
+let dark = [[91, 110, 174], [47, 70, 126], [80, 52, 131]]
+let light = [[142, 161, 225], [98, 121, 177], [131, 103, 182]]
+let output = []
+main.forEach((e, i) => {
+    let innerArray = []
+	e.forEach((ee, ie) => {
+    	innerArray.push(dark[i][ie]/light[i][ie])
+    })
+    output.push(innerArray)
+})
+console.log(output)
+console.log([176, 104, 49].map(e => e * 1.25 * 0.6))*/

@@ -24,15 +24,19 @@ function getCookie(cname) {
     }
     return "";
 }
-let loginwithDiscordURL = {
-    client_id:"710904657811079258",
-    redirect_uri:location.origin + '/api/discordLogin',
-    response_type:'code',
-    scope:'identify email'
+let loginWithDiscordFunct = e => {
+    let loginwithDiscordURL = {
+        client_id:"710904657811079258",
+        redirect_uri:location.origin + '/api/v1/users/link?site=discord',
+        response_type:'code',
+        scope:'identify email'
+    }
+    let formFormat = data => Object.keys(data).map(k => `${k}=${encodeURIComponent(data[k])}`).join('&')
+    loginwithDiscordURL = formFormat(loginwithDiscordURL)
+    window.location = `https://discord.com/api/oauth2/authorize?${loginwithDiscordURL}`
 }
-let formFormat = data => Object.keys(data).map(k => `${k}=${encodeURIComponent(data[k])}`).join('&')
-loginwithDiscordURL = formFormat(loginwithDiscordURL)
-loginwithDiscordWrapper.href = `https://discord.com/api/oauth2/authorize?${loginwithDiscordURL}`
+linkAccountDiscord.addEventListener('click', loginWithDiscordFunct)
+loginWithDiscord.addEventListener('click', loginWithDiscordFunct)
 let loginButton = document.getElementById('loginButton')
 let signupButton = document.getElementById('signupButton')
 let accountButton = document.getElementById('accountButton')
@@ -57,57 +61,110 @@ let valid = [0, 0, 0];
 accountButton.addEventListener('click', e => {
     accountModal.style.display = 'block'
 })
-if(getCookie('token') && localStorage.getItem('userid')){
+if(getCookie('token') && localStorage.getItem('userid') != 'undefined'){
     loginButton.style.display = 'none'
     signupButton.style.display = 'none'
     accountButton.style.display = 'block';
     (async () => {
-    let token = getCookie('token')
-    let req = await fetch(`${window.location.href}api/v1/users/${localStorage.getItem('userid')}`, {
-        method:'GET',
-        headers:{
-            'content-type':'application/json',
-            'authorization':`Basic ${token}`
+        let token = getCookie('token')
+        let req = await fetch(`${window.location.href}api/v1/users/${localStorage.getItem('userid')}`, {
+            method:'GET',
+            headers:{
+                'content-type':'application/json',
+                'authorization':`Basic ${token}`
+            }
+        })
+        let res = await req.json()
+        if(res.err){
+            loginButton.style.display = 'block'
+            signupButton.style.display = 'block'
+            accountButton.style.display = 'none'
+            setCookie('token', '', -30)
+        }else {
+            console.log(res)
+            localStorage.setItem('username', res.username)
+            document.getElementById("nameyourself").value = res.username
+            accountUsername.value = res.username
+            localStorage.setItem('email', res.email)
+            accountEmail.value = res.email
+            localStorage.setItem('userid', res.id)
+            accountModalSubmit.disabled = false
         }
-    })
-    let res = await req.json()
-    if(res.err){
-        loginButton.style.display = 'block'
-        signupButton.style.display = 'block'
-        accountButton.style.display = 'none'
-        setCookie('token', '', -30)
-    }else {
-        localStorage.setItem('username', res.username)
-        accountUsername.value = res.username
-        localStorage.setItem('email', res.email)
-        accountEmail.value = res.email
-        document.getElementById("nameyourself").value = res.username
-        accountModalSubmit.disabled = false
-    }
-    req = await fetch(`${window.location.origin}/api/leaderboard`, {
-        method:'GET',
-        headers:{
-            'content-type':'application/json'
-        },
-    })
-    res = await req.json()
-    res.forEach(item => {
-        let entry = document.createElement('tr')
-        let username = document.createElement('td')
+        req = await fetch(`${window.location.origin}/api/v1/users/?sort=true&discord=true`, {
+            method:'GET',
+            headers:{
+                'content-type':'application/json'
+            },
+        })
+        res = await req.json()
+        res.forEach(item => {
+            let entry = document.createElement('tr')
+            let username = document.createElement('td')
             username.textContent = item.username == localStorage.getItem('username') ? `(You)${item.username}` : item.username
-        let highscore = document.createElement('td')
-        highscore.textContent = item.score
-        let discordexp = document.createElement('td')
-        discordexp.textContent = item.discordexp || 'Not in the discord'
-        entry.appendChild(username)
-        entry.appendChild(highscore)
-        entry.appendChild(discordexp)
-        leaderboardBody.appendChild(entry)
-    })
+            let highscore = document.createElement('td')
+            highscore.textContent = item.highscore
+            let discordexp = document.createElement('td')
+            discordexp.textContent = item.discordexp || 'Not in the discord'
+            entry.appendChild(username)
+            entry.appendChild(highscore)
+            entry.appendChild(discordexp)
+            leaderboardBody.appendChild(entry)
+        })
+    })()
+}else if(getCookie('token')){
+    loginButton.style.display = 'none'
+    signupButton.style.display = 'none'
+    accountButton.style.display = 'block';
+    console.log(getCookie('token'));
+    (async () => {
+        let token = getCookie('token')
+        let req = await fetch(`${window.location.href}api/v1/users/login`, {
+            method:'POST',
+            headers:{
+                'content-type':'application/json'
+            },
+            body:JSON.stringify({token})
+        })
+        let res = await req.json()
+        console.log(res)
+        if(res.err){
+            loginButton.style.display = 'block'
+            signupButton.style.display = 'block'
+            accountButton.style.display = 'none'
+            setCookie('token', '', -30)
+        }else {
+            localStorage.setItem('username', res.username)
+            document.getElementById("nameyourself").value = res.username
+            accountUsername.value = res.username
+            localStorage.setItem('email', res.email)
+            accountEmail.value = res.email
+            localStorage.setItem('userid', res.id)
+            accountModalSubmit.disabled = false
+        }
+        req = await fetch(`${window.location.origin}/api/v1/users/?sort=true&discord=true`, {
+            method:'GET',
+            headers:{
+                'content-type':'application/json'
+            },
+        })
+        res = await req.json()
+        res.forEach(item => {
+            let entry = document.createElement('tr')
+            let username = document.createElement('td')
+            username.textContent = item.username == localStorage.getItem('username') ? `(You)${item.username}` : item.username
+            let highscore = document.createElement('td')
+            highscore.textContent = item.highscore
+            let discordexp = document.createElement('td')
+            discordexp.textContent = item.discordexp || 'Not in the discord'
+            entry.appendChild(username)
+            entry.appendChild(highscore)
+            entry.appendChild(discordexp)
+            leaderboardBody.appendChild(entry)
+        })
     })()
 }else {
     (async () => {
-        let req = await fetch(`${window.location.origin}/api/leaderboard`, {
+        let req = await fetch(`${window.location.origin}/api/v1/users/?sort=true&discord=true`, {
             method:'GET',
             headers:{
                 'content-type':'application/json'
@@ -119,7 +176,7 @@ if(getCookie('token') && localStorage.getItem('userid')){
             let username = document.createElement('td')
             username.textContent = item.username
             let highscore = document.createElement('td')
-            highscore.textContent = item.score
+            highscore.textContent = item.highscore
             let discordexp = document.createElement('td')
             discordexp.textContent = item.discordexp || 'Not in the discord'
             entry.appendChild(username)
@@ -343,7 +400,7 @@ signupForm.addEventListener('submit', async e => {
 accountForm.addEventListener('submit', async e => {
     e.preventDefault()
     e.preventDefault()
-    loginModalSubmit.disabled = true
+    accountModalSubmit.disabled = true
     let password = accountPassword.value
     let username = accountUsername.value
     let email = accountEmail.value
@@ -367,7 +424,12 @@ accountForm.addEventListener('submit', async e => {
     console.log(res)
     //loginErr.style.display = 'none'
     if(res.err){
+        alert(res.message)
+        accountModalSubmit.disabled = false
         //location.reload()
+    }else {
+        accountModalSubmit.disabled = false
+        alert(res.message)
     }
 })
 let percentageWidth = window.innerWidth/window.outerWidth
