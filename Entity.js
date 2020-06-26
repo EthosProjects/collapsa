@@ -508,7 +508,8 @@ module.exports = function (nsp, ns, mLab) {
     }
     class Inventory extends Storage {
         constructor() {
-            super([/*
+            super([
+                /*
                 ['1', new Slot('Wood Wall', 255, 'woodwall', 255, true)],
                 ['2', new Slot('Stone Wall', 255, 'stonewall', 255, true)],
                 ['3', new Slot('Iron Wall', 255, 'ironwall', 255, true)],
@@ -518,7 +519,7 @@ module.exports = function (nsp, ns, mLab) {
                 ['7', new Slot('Leather', 255, 'leather', 255)],
                 ['8', 'empty'],
                 ['9', 'empty'],
-*/
+                */
                 ['1', 'empty'],
                 ['2', 'empty'],
                 ['3', 'empty'],
@@ -1881,7 +1882,8 @@ module.exports = function (nsp, ns, mLab) {
 							mvect.y < 50 ||
 							mvect.x > game.map.forest.width ||
 							mvect.y > game.map.forest.height
-						)) this.canPlace = false
+                        )) this.canPlace = false
+                        
 						if(this.canPlace && this.move.att && !this.alusd){
 							console.log(type)
 							let slot = this.inventory.get(this.mainHand);
@@ -1896,105 +1898,74 @@ module.exports = function (nsp, ns, mLab) {
 							}else {
 								this.structures.push(new CraftingTable(game, mvect.x, mvect.y, this.game));
 							}
-							//this.alusd = true;
+							this.alusd = true;
 						}
-                    }
-                    if (/Chest/.test(this.mainHands) && this.move.att && !this.alusd) {
-                        if (
-                            this.game.Entities.find(
-                                e =>
-                                    (e.id != this.id &&
-                                        ((e.body.position.x == mvect.x && e.body.position.y == mvect.y) ||
-                                            ((e instanceof Player ||
-                                                e instanceof Demon ||
-                                                e instanceof Destroyer ||
-                                                e instanceof Rabbit) &&
-                                                RectCircleColliding(
-                                                    e.body.position.x,
-                                                    e.body.position.y,
-                                                    e.rad,
-                                                    mvect.x,
-                                                    mvect.y,
-                                                    95,
-                                                    50
-                                                ))) &&
-                                        !(
-                                            this.structures.find(
-                                                s =>
-                                                    e == s &&
-                                                    (e instanceof Wall ||
-                                                        e instanceof Door ||
-                                                        e instanceof CraftingTable)
-                                            ) ||
-                                            (this.clan &&
-                                                this.clan.members.find(member =>
-                                                    member.structures.find(
-                                                        s =>
-                                                            e == s &&
-                                                            (e instanceof Wall ||
-                                                                e instanceof Door ||
-                                                                e instanceof CraftingTable)
-                                                    )
-                                                ))
-                                        )) ||
-                                    mvect.x < 50 ||
-                                    mvect.y < 50 ||
-                                    mvect.x > game.map.forest.width ||
-                                    mvect.y > game.map.forest.height
-                            )
-                        )
-                            return (this.canPlace = false);
-                        let slot = this.inventory.get(this.mainHand);
-                        slot.count -= 1;
-                        if (slot.count == 0) {
-                            this.inventory.set(this.mainHand, 'empty');
-                            this.mainHand = '-1';
+                    }else if(/Chest/.test(this.mainHands)){
+                        let testBody
+                        if (this.pang == 'left' || this.pang == 'right') {
+                            testBody = Bodies.rectangle(mvect.x, mvect.y, 50, 95, { isStatic: true });
+                        } else {
+                            testBody = Bodies.rectangle(mvect.x, mvect.y, 95, 50, { isStatic: true });
                         }
-                        this.needsSelfUpdate = true;
-                        this.structures.push(new Chest(mvect.x, mvect.y, this.pang, this.game));
-                        this.alusd = true;
-                    }
-                    if (/Campfire/.test(this.mainHands) && this.move.att && !this.alusd) {
-                        if (
-                            this.game.Entities.find(
-                                e =>
-                                    (((e.body.position.x == mvect.x && e.body.position.y == mvect.y) ||
-                                        ((e instanceof Player ||
-                                            e instanceof Demon ||
-                                            e instanceof Destroyer ||
-                                            e instanceof Rabbit) &&
-                                            RectCircleColliding(
-                                                e.body.position.x,
-                                                e.body.position.y,
-                                                e.rad,
-                                                mvect.x,
-                                                mvect.y,
-                                                100,
-                                                100
-                                            ))) &&
-                                        !(
-                                            this.structures.find(s => e == s && e instanceof Floor) ||
-                                            (this.clan &&
-                                                this.clan.members.find(member =>
-                                                    member.structures.find(s => e == s && s instanceof Floor)
-                                                ))
-                                        )) ||
-                                    mvect.x < 50 ||
-                                    mvect.y < 50 ||
-                                    mvect.x > game.map.forest.width ||
-                                    mvect.y > game.map.forest.height
-                            )
-                        )
-                            return (this.canPlace = false);
-                        let slot = this.inventory.get(this.mainHand);
-                        slot.count -= 1;
-                        if (slot.count == 0) {
-                            this.inventory.set(this.mainHand, 'empty');
-                            this.mainHand = '-1';
-                        }
-                        this.needsSelfUpdate = true;
-                        this.structures.push(new Campfire(mvect.x, mvect.y, this.game));
-                        this.alusd = true;
+                        new Bodies.rectangle(mvect.x, mvect.y, 100, 100, { isStatic: true });
+                        if (this.game.Entities.some(e => 
+							Matter.SAT.collides(testBody, e.body).collided && 
+                            !(
+                                (
+                                    this.structures.some(s => e == s && e instanceof Floor) ||
+                                    (this.clan &&
+                                        this.clan.members.some(member =>
+                                            member.structures.some(s => e == s && s instanceof Floor)
+                                        )
+                                    )
+                                )
+							) ||
+							mvect.x < 50 ||
+							mvect.y < 50 ||
+							mvect.x > game.map.forest.width ||
+							mvect.y > game.map.forest.height
+                        )) this.canPlace = false
+                        if(this.canPlace && this.move.att && !this.alusd){
+                            let slot = this.inventory.get(this.mainHand);
+                            slot.count -= 1;
+                            if (slot.count == 0) {
+                                this.inventory.set(this.mainHand, 'empty');
+                                this.mainHand = '-1';
+                            }
+                            this.needsSelfUpdate = true;
+                            this.structures.push(new Chest(mvect.x, mvect.y, this.pang, this.game));
+							this.alusd = true;
+						}
+                    }else if (/Campfire/.test(this.mainHands)) {
+                        let testBody = Bodies.circle(mvect.x, mvect.y, 175 / 12, { isStatic: true });
+                        if (this.game.Entities.some(e => 
+							Matter.SAT.collides(testBody, e.body).collided && 
+                            !(
+                                (
+                                    this.structures.some(s => e == s && e instanceof Floor) ||
+                                    (this.clan &&
+                                        this.clan.members.some(member =>
+                                            member.structures.some(s => e == s && s instanceof Floor)
+                                        )
+                                    )
+                                )
+							) ||
+							mvect.x < 50 ||
+							mvect.y < 50 ||
+							mvect.x > game.map.forest.width ||
+							mvect.y > game.map.forest.height
+                        )) this.canPlace = false
+                        if(this.canPlace && this.move.att && !this.alusd){
+                            let slot = this.inventory.get(this.mainHand);
+                            slot.count -= 1;
+                            if (slot.count == 0) {
+                                this.inventory.set(this.mainHand, 'empty');
+                                this.mainHand = '-1';
+                            }
+                            this.needsSelfUpdate = true;
+                            this.structures.push(new Campfire(mvect.x, mvect.y, this.game));
+							this.alusd = true;
+						}
                     }
                 }
                 if (this.mainHands == 'carrot' && this.carrot.ready && this.move.att) {

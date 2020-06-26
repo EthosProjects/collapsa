@@ -1,6 +1,9 @@
 var changelog = {
     Updates: [
         'Removed ores',
+        'Removed Demons, Destroyers, and Rabbits',
+        'Fully Revamped building system',
+        'Added account system'
     ],
     Plans: [
         'Fix login system',

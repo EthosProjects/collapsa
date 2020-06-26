@@ -103,7 +103,19 @@ a {
 	border-radius: 25px;
     width: calc(20% - 10px); /* Could be more or less, depending on screen size */
   	height:50%;
-    overflow:hidden;
+    overflow:auto;
+}
+#changelog::-webkit-scrollbar {
+  width: 50px;
+}
+#changelog::-webkit-scrollbar-track {
+  border-radius: 25px;
+}
+ 
+/* Handle */
+#changelog::-webkit-scrollbar-thumb {
+  background: #b06831;
+  border-radius: 25px;
 }
 #leaderboard {
 	padding: 1.5%;
