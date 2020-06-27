@@ -21,6 +21,7 @@ module.exports = new Command({
         })
     ],
     description:'Unbans a user',
+    permissions:['BAN_MEMBERS'],
     /**
      * @param {Message} message
      * @param {Array.<string>} args
@@ -61,7 +62,6 @@ module.exports = new Command({
                 })
             return
         }
-        if (!author.hasPermission(['BAN_MEMBERS'])) return message.reply('You can\'t ban this user because you don\'t have sufficient pemissions')
         if (!guild.owner.id == user) return message.reply('You can\'t ban this user because they own the server')
         guild.members.unban(user)
                 .then(res => {

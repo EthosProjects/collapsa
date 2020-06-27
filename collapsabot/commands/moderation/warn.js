@@ -22,6 +22,7 @@ module.exports = new Command({
         })
     ],
     description:'Warns a user',
+    permissions:['MANAGE_MESSAGES'],
     /**
      * @param {Message} message
      * @param {Array.<string>} args
@@ -83,7 +84,6 @@ module.exports = new Command({
             return
         }
         if(authorRolesArr[0] <= memberRolesArr[0]) return message.reply('You can\'t warn this user your role is not high enough')
-        if (!author.hasPermission(['MANAGE_ROLES'])) return message.reply('You can\'t warn this user because you don\'t have sufficient pemissions')
         if (!guild.owner.id == member.id) return message.reply('You can\'t warn this user because they own the server')
         let user = new discorduserbaseUser(discorduserbase.documents.get(member.id).data)
         user.guilds[guild.id].moderation.push({
@@ -99,7 +99,7 @@ module.exports = new Command({
             .setTitle(`Warned ${member.user.username}`)
             .addFields([
                 {name: 'Reason', value :reason ? reason : 'No reason specified', inline:true},
-                {name: 'Current warnings count', value: user.guilds[guild.id].moderation.filter(warning => warning.type == 'Warning').length, inline:true}    
+                {name: 'Current warnings count', value: user.guilds[guild.id].moderation.filter(m => !m.removed).filter(warning => warning.type == 'Warning').length, inline:true}    
             ])
             .setAuthor(message.author.username, message.author.avatarURL())
         message.channel.send(embed)

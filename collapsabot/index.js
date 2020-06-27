@@ -167,9 +167,10 @@ module.exports = (mLab) => {
             class Invalid {constructor(){}}
             let fluidCommands = ['nhentai', 'eval']
             if(!fluidCommands.find(c => c == commandName)) args = command.resolveArguments(message, args, client, mLab, Invalid)
+            if(!member.hasPermission(command.permissions) && member.id != client.owner) return message.reply(`You don't have permission to use this command`)
+            if(!guild.me.hasPermission(command.permissions) && command.permissions != ['ADMINISTRATOR']) return message.reply(`I don't have permission to use this command`)
             command.execute(message, args, client, mLab, Invalid);
-        }
-                
+        }         
     });
     client.on('guildMemberAdd', async (member) => {
         

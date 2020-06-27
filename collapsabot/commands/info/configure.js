@@ -12,12 +12,12 @@ module.exports = new Command({
         })
     ],
     description:'Configure the optional commands',
+    permissions:['ADMINISTRATOR'],
     /**
      * @param {Message} message
      * @param {Array.<string>} args
      */
     execute: async (message, args = [], client, mLab) => {
-        if(!message.member.hasPermission('ADMINISTRATOR')) return message.reply('You need to be an administrator to use this command')
         let collapsa = mLab.databases.get('collapsa')
         let discordguildbase = collapsa.collections.get('discordguildbase')
         let guildbase = discordguildbase.documents.get(message.guild.id)

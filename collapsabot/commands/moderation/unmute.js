@@ -20,6 +20,7 @@ module.exports = new Command({
         })
     ],
     description:'Unmutes a user',
+    permissions:['MANAGE_ROLES'],
     /**
      * @param {Message} message
      * @param {Array.<string>} args
@@ -82,7 +83,6 @@ module.exports = new Command({
             return
         }
         if(authorRolesArr[0] <= memberRolesArr[0]) return message.reply('You can\'t mute this user your role is not high enough')
-        if (!author.hasPermission(['MANAGE_ROLES'])) return message.reply('You can\'t mute this user because you don\'t have sufficient pemissions')
         if (!guild.owner.id == member.id) return message.reply('This user cannot be unmuted')
         let user = new discorduserbaseUser(discorduserbase.documents.get(member.id).data)
             user.guilds[guild.id].muteTimeEnd = false

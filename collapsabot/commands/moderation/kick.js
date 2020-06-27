@@ -20,6 +20,7 @@ module.exports = new Command({
         })
     ],
     description:'Kicks a user',
+    permissions:['KICK_MEMBERS'],
     /**
      * @param {Message} message
      * @param {Array.<string>} args
@@ -77,7 +78,6 @@ module.exports = new Command({
             return
         }
         if(authorRolesArr[0] <= memberRolesArr[0]) return message.reply('You can\'t kick this user your role is not high enough')
-        if (!author.hasPermission(['KICK_MEMBERS'])) return message.reply('You can\'t kick this user because you don\'t have sufficient pemissions')
         // Check if the user is kickable with the bot's permissions
         await member.kick() // Kicks the user
         let user = new discorduserbaseUser( discorduserbase.documents.get(member.id).data)

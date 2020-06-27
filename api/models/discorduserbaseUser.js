@@ -20,7 +20,8 @@ class discorduserbaseUser {
                 type:'DefaultType',
                 by:'DefaultAuthor', 
                 reason:'DefaultReason', 
-                time:new Date().getTime()
+                time:new Date().getTime(),
+                removed:false
             }, w))
             this.guilds[prop] = guild
         }

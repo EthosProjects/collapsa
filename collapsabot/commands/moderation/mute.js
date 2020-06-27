@@ -27,6 +27,7 @@ module.exports = new Command({
             description:'Reason for the mute'
         })
     ],
+    permissions:['MANAGE_ROLES'],
     description:'Mutes a user',
     /**
      * @param {Message} message
@@ -132,7 +133,6 @@ module.exports = new Command({
             return
         }
         if(authorRolesArr[0] <= memberRolesArr[0]) return message.reply('You can\'t mute this user your role is not high enough')
-        if (!author.hasPermission(['MANAGE_ROLES'])) return message.reply('You can\'t mute this user because you don\'t have sufficient pemissions')
         if (!guild.owner.id == member.id) return message.reply('You can\'t mute this user because they own the server')
         let user = new discorduserbaseUser(discorduserbase.documents.get(member.id).data)
         user.guilds[guild.id].muteTimeEnd = endTime
