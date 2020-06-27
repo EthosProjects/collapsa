@@ -18,11 +18,11 @@ module.exports = new Command({
         try {
             
             let code = args.join(" ");
-            console.log(code)
+            console.log(code, 'Joining')
             code = code.replace(/```$/, '')
-            console.log(code)
-            code = code.replace(/^```\w*/, '')
-            console.log(code)
+            console.log(code, 'Removing end')
+            code = code.replace(/^eval(\n| ){1}```\w*/, '')
+            console.log([code], 'finished')
             let evaled = eval(code);
             if (typeof evaled !== "string") evaled = require("util").inspect(evaled);
             message.channel.send(clean(evaled), {code:"xl"});

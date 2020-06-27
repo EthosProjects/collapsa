@@ -28,11 +28,13 @@ if(process.env.NODE_ENV == 'development'){
     })
     rpcClient.login({ clientId:'717959362131263609'})
 }
+let toLiteral = obj => JSON.parse(JSON.stringify(obj))
 //
 let { token, prefix } = require('./config.json');
 prefix = process.env.NODE_ENV == 'production' ? '!' : '?'
 let { mlabInteractor } = require('mlab-promise');
 let youtubeInteractor = require('./youtube.js/Youtube');
+const { discorduserbaseUser, discordguildbaseGuild } = require('../api/models');
 //let yotube = new youtubeInteractor('AIzaSyCeld1vKBcUuZESB7qz_gIJxrTJl5w5e_Y')
 module.exports = (mLab) => {
     const ytdl = require('ytdl-core-discord');
@@ -43,7 +45,6 @@ module.exports = (mLab) => {
             .get('collapsa')
             .collections.get('discorduserbase');
         client.databaseLoaded = true;
-        //console.log(owner)
     });
     
     let antiSpam = new Collection();
@@ -52,7 +53,11 @@ module.exports = (mLab) => {
         let channel = message.channel;
         let content = message.content;
         let author = message.author;
+        let member = message.member;
+        let guild = message.guild;
+        let collapsa = mLab.databases.get('collapsa');
         if(!message.guild) return
+        if(message.guild.id == '264445053596991498' && message.author.id != client.owner) return
         if (
             message.content.startsWith('!joinGuild') &&
             message.author.id == client.owner
@@ -67,40 +72,22 @@ module.exports = (mLab) => {
             }
         }
         if (author.bot || message.webhookID) return;
-        let member = message.member;
-        let guild = message.guild;
-        let collapsa = mLab.databases.get('collapsa');
         let discorduserbase = collapsa.collections.get('discorduserbase');
         if (!discorduserbase.documents.has(member.id)) {
             let doc = {
                 id: member.id,
                 guilds: {},
             };
-            doc.guilds[guild.id] = {
-                muteTimeEnd: false,
-                exp: {
-                    amount: 0,
-                    level: 1,
-                },
-                warnings: [],
-            };
-            await discorduserbase.addDocument(doc);
+            doc.guilds[guild.id] = {};
+            let user = new discorduserbaseUser(doc)
+            await discorduserbase.addDocument(toLiteral(user));
         } else if (
             !discorduserbase.documents.get(member.id).data.guilds[guild.id]
         ) {
-            let doc = Object.assign(
-                {},
-                discorduserbase.documents.get(member.id).data
-            );
-            doc.guilds[guild.id] = {
-                muteTimeEnd: false,
-                exp: {
-                    amount: 0,
-                    level: 1,
-                },
-                warnings: [],
-            };
-            await discorduserbase.updateDocument(doc);
+            let user = new discorduserbaseUser(discorduserbase.documents.get(member.id).data);
+            user.guilds[guild.id] = {};
+            user = new discorduserbaseUser(user)
+            await discorduserbase.updateDocument(toLiteral(user));
         }
         if (expRate.has(author.id + message.guild.id)) {
             let expRated = expRate.get(author.id + message.guild.id);
@@ -109,24 +96,24 @@ module.exports = (mLab) => {
                 count: Date.now(),
             });
             if (Date.now() - expRated.count > 60000) {
-                let userbase = discorduserbase.documents.get(member.id).data;
-                let doc = Object.assign({}, userbase);
-                doc.guilds[guild.id].exp.amount += Math.floor(
+                let user = new discorduserbaseUser(discorduserbase.documents.get(member.id).data);
+                user.guilds[guild.id].exp.amount += Math.floor(
                     Math.random() * 20 + 20
                 );
-                discorduserbase.updateDocument(doc);
+                user = new discorduserbaseUser(user)
+                discorduserbase.updateDocument(toLiteral(user));
             }
         } else {
             expRate.set(author.id + message.guild.id, {
                 author: author.id,
                 count: Date.now(),
             });
-            let userbase = discorduserbase.documents.get(member.id).data;
-            let doc = Object.assign({}, userbase);
-            doc.guilds[guild.id].exp.amount += Math.floor(
+            let user = new discorduserbaseUser(discorduserbase.documents.get(member.id).data);
+            user.guilds[guild.id].exp.amount += Math.floor(
                 Math.random() * 20 + 20
             );
-            discorduserbase.updateDocument(doc);
+            user = new discorduserbaseUser(user)
+            discorduserbase.updateDocument(toLiteral(user));
         }
         if (antiSpam.has(author.id + message.guild.id)) {
             let usr = antiSpam.get(author.id + message.guild.id);
@@ -158,7 +145,6 @@ module.exports = (mLab) => {
         }
         
         let prefixRegex = new RegExp(`^(<@!{0,1}\\d+> |${prefix == '!' ?'!' : '\\' + prefix})`)
-        console.log(prefixRegex)
         if(!content.match(prefixRegex)) return;
         if(content.match(/^d+/) && message.mentions.members.first().id != client.user.id) return
         if (
@@ -175,31 +161,25 @@ module.exports = (mLab) => {
         args = content.replace(prefixRegex, '').split(/ +/);
         const commandName = args.shift().toLowerCase();
         
-        if (client.commands.has(commandName))
-            client.commands
-                .get(commandName)
-                .execute(message, args, client, mLab);
+        if (client.commands.has(commandName)){
+            let command = client.commands
+            .get(commandName)
+            class Invalid {constructor(){}}
+            let fluidCommands = ['nhentai', 'eval']
+            if(!fluidCommands.find(c => c == commandName)) args = command.resolveArguments(message, args, client, mLab, Invalid)
+            command.execute(message, args, client, mLab, Invalid);
+        }
+                
     });
     client.on('guildMemberAdd', async (member) => {
         
     });
     client.on('guildCreate', async (guild) => {
+        let guildBase = new discordguildbaseGuild()
         await mLab.databases
             .get('collapsa')
             .collections.get('discordguildbase')
-            .addDocument({
-                id: guild.id,
-                mute: {
-                    role: false,
-                },
-                moderation: {
-                    channel: false,
-                },
-                welcome: {
-                    channel: false,
-                    role: false,
-                },
-            });
+            .addDocument(toLiteral(guildBase));
         let defaultChannel = '';
         guild.channels.cache.forEach((channel) => {
             if (channel.name.includes('general') || channel.name.includes('lounge') || channel.name.includes('chat')) {

@@ -1,14 +1,22 @@
-const {MessageEmbed, Message} = require('discord.js')
+const {MessageEmbed, Message, GuildMember} = require('discord.js')
 const Command = require('../../Command.js')
 const Argument = require('../../Argument.js')
+const { discorduserbaseUser, discordguildbaseGuild } = require('../../../api/models');
+let toLiteral = obj => JSON.parse(JSON.stringify(obj))
 module.exports = new Command({
     name:'kick',
     arguments:[
         new Argument({
-            _name:'user',
+            _name:'member',
             optional:false,
-            type:'User',
-            description:'User ID, mention, or username of the user whom you want to kick'
+            type:'Member',
+            description:'User ID, mention, or username of the member whom you want to kick'
+        }),
+        new Argument({
+            _name:'reason',
+            optional:true,
+            type:'Reason',
+            description:'Reason for the kick'
         })
     ],
     description:'Kicks a user',
@@ -19,31 +27,48 @@ module.exports = new Command({
      * @param {mlabInteractor} mLab
      */
     execute: async (message, args = [], client, mLab) => {
-        if(!args[0]){
-            return message.reply('No user specified')
-        }
         let guild = message.guild
         let author = guild.members.cache.get(message.author.id)
-        let user = message.mentions.users.first()
-        if(guild.members.cache.has(args[0])) user = guild.members.cache.get(args[0])
-        if(!user) return message.reply('Error getting user')
-        let member = guild.members.cache.get(user.id)
+        let member = args[0]
+        let reason = args[1]
+        if(!(member instanceof GuildMember)) return
+        let collapsa = mLab.databases.get('collapsa')
+        let discorduserbase = collapsa.collections.get('discorduserbase')
+        if (!discorduserbase.documents.has(member.id)) {
+            let doc = {
+                id: member.id,
+                guilds: {},
+            };
+            doc.guilds[guild.id] = {};
+            let user = new discorduserbaseUser(doc)
+            await discorduserbase.addDocument(toLiteral(user));
+        } else if (
+            !discorduserbase.documents.get(member.id).data.guilds[guild.id]
+        ) {
+            let user = new discorduserbaseUser(discorduserbase.documents.get(member.id).data);
+            user.guilds[guild.id] = {};
+            user = new discorduserbaseUser(user)
+            await discorduserbase.updateDocument(toLiteral(user));
+        }
         if (member.id === message.author.id) return message.channel.send('You can\'t kick yourself'); 
-        
-        args.shift()
-        let reason = args.join(' ')
-        // Check if the user mention or the entered userID is the message author himsmelf
-        //if (!reason) return message.reply('You forgot to enter a reason for this ban!'); 
-        // Check if a reason has been given by the message author
         let authorRolesArr = [...author.roles.cache.values()].map(role => role.rawPosition).sort((a, b) => b - a)
-        let memberRolesArr = [...author.roles.cache.values()].map(role => role.rawPosition).sort((a, b) => b - a)
-        if (!guild.member(user).kickable) return message.reply('You can\'t kick this user because the bot does not have sufficient permissions!'); 
-        if (!guild.owner.id == user.id) return message.reply('You can\'t kick this user because they own the server')
+        let memberRolesArr = [...member.roles.cache.values()].map(role => role.rawPosition).sort((a, b) => b - a)
+        if (!member.kickable) return message.reply('You can\'t kick this user because the bot does not have sufficient permissions!'); 
+        if (!guild.owner.id == member.id.id) return message.reply('You can\'t kick this user because they own the server')
         if (guild.owner.Kicked == author.id || author.id == client.owner){
             await member.kick()
+            let user = new discorduserbaseUser( discorduserbase.documents.get(member.id).data)
+            user.guilds[guild.id].moderation.push({
+                type:'Kick',
+                by:message.author.username, 
+                reason, 
+                time:new Date().getTime()
+            })
+            user = new discorduserbaseUser(user)
+            await discorduserbase.updateDocument(toLiteral(user))
             let embed = new MessageEmbed()
                 .setColor('#ff0000')
-                .setTitle(`Kicked ${message.mentions.users.first().username}`)
+                .setTitle(`Kicked ${member.displayName}`)
                 .addField('Reason', reason ? reason : 'No reason specified')
                 .setDescription('Owner force')
                 .setAuthor("CollapsaBot", 'http://www.collapsa.io/client/img/favicon.png')
@@ -55,10 +80,18 @@ module.exports = new Command({
         if (!author.hasPermission(['KICK_MEMBERS'])) return message.reply('You can\'t kick this user because you don\'t have sufficient pemissions')
         // Check if the user is kickable with the bot's permissions
         await member.kick() // Kicks the user
-        console.log('rip')
+        let user = new discorduserbaseUser( discorduserbase.documents.get(member.id).data)
+        user.guilds[guild.id].moderation.push({
+            type:'Kick',
+            by:message.author.username, 
+            reason, 
+            time:new Date().getTime()
+        })
+        user = new discorduserbaseUser(user)
+        await discorduserbase.updateDocument(toLiteral(user))
         let embed = new MessageEmbed()
             .setColor('purple')
-            .setTitle(`Kicked ${message.mentions.users.first().username}`)
+            .setTitle(`Kicked ${member.displayName.username}`)
             .addField('Reason', reason ? reason : 'No reason specified')
             .setAuthor(message.author.username, message.author.avatarURL())
         message.channel.send(embed)

@@ -5,9 +5,9 @@ module.exports = new Command({
     name:'userinfo',
     arguments:[
         new Argument({
-            _name:'user',
+            _name:'member',
             optional:true,
-            type:'User',
+            type:'Member',
             description:'User ID, mention, or username of the user whom you want to get info on',
         })
     ],
@@ -16,9 +16,7 @@ module.exports = new Command({
      * @param {Message} message
      */
     execute: async (message, args = [], client, mLab) => {
-        let member = message.mentions.members.first()
-        if(!member) member = message.guild.members.cache.get(args[0])
-        if(!member) member = message.member
+        let member = args[0] || message.member
         let inline = true
         const status = {
             online: "**Online**",

@@ -56,6 +56,30 @@ if (process.env.NODE_ENV == 'development') {
         }
     });
 };
+function dhm(t){
+    var cd = 24 * 60 * 60 * 1000,
+        ch = 60 * 60 * 1000,
+        d = Math.floor(t / cd),
+        h = Math.floor( (t - d * cd) / ch),
+        m = Math.floor( (t - d * cd - h * ch) / 60000),
+        s = Math.round( (t - d * cd - h * ch - m * 60000) / 1000),
+        pad = function(n){ return n < 10 ? '0' + n : n; };
+        console.log(cd, ch, d, h, m, pad)
+    if( s === 60 ){
+        m++;
+        s = 0;
+    }
+    if( m === 60 ){
+        h++;
+        m = 0;
+    }
+    if( h === 24 ){
+        d++;
+        h = 0;
+    }
+    return (d ? d + ` Day${d > 1 ? 's' : ''} ` : '') + (h ? h + ` Hour${h > 1 ? 's' : ''} ` : '') + (m ?  m + ` Minute${m > 1 ? 's' : ''} ` : '') + s + ` Second${s != 1 ? 's' : ''}`
+}
+console.log( dhm(1000) );
 //var httpsServer = http.Server(app);
 const bodyParser = require('body-parser')
 const bcrypt = require('bcrypt')
@@ -159,6 +183,7 @@ var Vector = require('./Vector.js');
 const { strict } = require('assert');
 const { stringify } = require('querystring');
 const { nextTick } = require('process');
+const { time } = require('console');
 // Aliases
 app.get('/.well-known/pki-validation', (req, res) => {
     res.sendFile(path.join(__dirname, '/client/index.html'))

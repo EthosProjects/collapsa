@@ -57,6 +57,7 @@ class collection {
         })
     }
     updateDocument(document){
+        if(!this.documents.has(document.id)) return this.addDocument(document)
         return new Promise((resolve, reject) => {
             let db = this.client.db(this.databaseName)
             let col = db.collection(this.name)

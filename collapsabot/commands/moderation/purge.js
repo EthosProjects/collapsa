@@ -20,6 +20,7 @@ module.exports = new Command({
      * @param {mlabInteractor} mLab
      */
     execute: async (message, args = [], client, mLab) => {
+        console.log('aaaa')
         args = args.length ? args : ['10']
         if(!message.guild.me.hasPermission(['MANAGE_MESSAGES'])) return message.reply('I don\'t have permission to do that')
         let limit = parseFloat(args[0]) || 10

@@ -3,6 +3,14 @@ const Command = require('../../Command.js')
 const Argument = require('../../Argument.js')
 module.exports = new Command({
     name:'configure',
+    arguments:[
+        new Argument({
+            _name:'mutedRole|moderationChannel',
+            optional:true,
+            type:'Specification',
+            description:`It's complicated`
+        })
+    ],
     description:'Configure the optional commands',
     /**
      * @param {Message} message

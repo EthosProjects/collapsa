@@ -1,14 +1,22 @@
-const {MessageEmbed, Message} = require('discord.js')
+const {MessageEmbed, Message, GuildMember} = require('discord.js')
 const Command = require('../../Command.js')
 const Argument = require('../../Argument.js')
+const { discorduserbaseUser, discordguildbaseGuild } = require('../../../api/models');
+let toLiteral = obj => JSON.parse(JSON.stringify(obj))
 module.exports = new Command({
     name:'ban',
     arguments:[
         new Argument({
-            _name:'user',
+            _name:'member',
             optional:false,
-            type:'User',
-            description:'User ID, mention, or username of the user whom you want ban'
+            type:'Member',
+            description:'User ID, mention, or username of the member whom you want to ban'
+        }),
+        new Argument({
+            _name:'reason',
+            optional:true,
+            type:'Reason',
+            description:'Reason for the ban'
         })
     ],
     description:'Bans a user',
@@ -19,28 +27,48 @@ module.exports = new Command({
      * @param {mlabInteractor} mLab
      */
     execute: async (message, args = [], client, mLab) => {
-        if(!args[0]){
-            return message.reply('No user specified')
-        }
         let guild = message.guild
         let author = guild.members.cache.get(message.author.id)
-        let user = message.mentions.users.first()
-        if(guild.members.cache.has(args[0])) user = guild.members.cache.get(args[0])
-        if(!user) return message.reply('Error getting user')
-        let member = guild.members.cache.get(user.id)
+        let member = args[0]
+        let reason = args[1]
+        if(!(member instanceof GuildMember)) return
+        let collapsa = mLab.databases.get('collapsa')
+        let discorduserbase = collapsa.collections.get('discorduserbase')
+        if (!discorduserbase.documents.has(member.id)) {
+            let doc = {
+                id: member.id,
+                guilds: {},
+            };
+            doc.guilds[guild.id] = {};
+            let user = new discorduserbaseUser(doc)
+            await discorduserbase.addDocument(toLiteral(user));
+        } else if (
+            !discorduserbase.documents.get(member.id).data.guilds[guild.id]
+        ) {
+            let user = new discorduserbaseUser(discorduserbase.documents.get(member.id).data);
+            user.guilds[guild.id] = {};
+            user = new discorduserbaseUser(user)
+            await discorduserbase.updateDocument(toLiteral(user));
+        }
         if (member.id === message.author.id) return message.channel.send('You can\'t ban yourself'); 
-        
-        args.shift()
-        let reason = args.join(' ')
-        //let authorRolesArr = [...author.roles.cache.values()].map(role => role.rawPosition).sort((a, b) => b - a)
-        //let memberRolesArr = [...author.roles.cache.values()].map(role => role.rawPosition).sort((a, b) => b - a)
+        let authorRolesArr = [...author.roles.cache.values()].map(role => role.rawPosition).sort((a, b) => b - a)
+        let memberRolesArr = [...member.roles.cache.values()].map(role => role.rawPosition).sort((a, b) => b - a)
         //if (!guild.member(user).bannable) return message.reply('You can\'t ban this user because the bot does not have sufficient permissions!'); 
         if (!member.bannable) return message.reply('You can\'t ban this user because the bot doesn\'t have sufficient pemissions')
         if (guild.owner.id == author.id || author.id == client.owner){
             await member.ban()
+            let user = new discorduserbaseUser( discorduserbase.documents.get(member.id).data)
+            user.guilds[guild.id].moderation.push({
+                type:'Ban',
+                by:message.author.username, 
+                reason, 
+                time:new Date().getTime()
+            })
+            user = new discorduserbaseUser(user)
+            await discorduserbase.updateDocument(toLiteral(user))
             let embed = new MessageEmbed()
                 .setColor('#ff0000')
-                .setTitle(`Banned ${message.mentions.users.first().username}`)
+                .setTitle(`Banned ${member.displayName}`)
                 .addField('Reason', reason ? reason : 'No reason specified')
                 .setThumbnail('http://www.collapsa.io/client/img/amethysthammer.png')
                 .setDescription('Owner force')
@@ -53,9 +81,18 @@ module.exports = new Command({
         if (!author.hasPermission(['BAN_MEMBERS'])) return message.reply('You can\'t ban this user because you don\'t have sufficient pemissions')
         if (!guild.owner.id == user.id) return message.reply('You can\'t ban this user because they own the server')
         await member.ban()
+        let user = new discorduserbaseUser( discorduserbase.documents.get(member.id).data)
+        user.guilds[guild.id].moderation.push({
+            type:'Ban',
+            by:message.author.username, 
+            reason, 
+            time:new Date().getTime()
+        })
+        user = new discorduserbaseUser(user)
+        await discorduserbase.updateDocument(toLiteral(user))
         let embed = new MessageEmbed()
         setColor('#ff0000')
-            .setTitle(`Banned ${message.mentions.users.first().username}`)
+            .setTitle(`Banned ${member.displayName}`)
             .addField('Reason', reason ? reason : 'No reason specified')
             .setThumbnail('http://www.collapsa.io/client/img/amethysthammer.png')
             .setAuthor("CollapsaBot", 'http://www.collapsa.io/client/img/favicon.png')
