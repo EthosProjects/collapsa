@@ -21,13 +21,13 @@ function CanvasRecorder(canvas, video_bits_per_sec) {
 
     function startRecording() {
         let types = [
-            "video/webm",
+            'video/webm',
             'video/webm,codecs=vp9',
             'video/vp8',
-            "video/webm\;codecs=vp8",
-            "video/webm\;codecs=daala",
-            "video/webm\;codecs=h264",
-            "video/mpeg"
+            'video/webm;codecs=vp8',
+            'video/webm;codecs=daala',
+            'video/webm;codecs=h264',
+            'video/mpeg',
         ];
 
         for (let i in types) {
@@ -37,11 +37,11 @@ function CanvasRecorder(canvas, video_bits_per_sec) {
             }
         }
         if (supportedType == null) {
-            console.log("No supported type found for MediaRecorder");
+            console.log('No supported type found for MediaRecorder');
         }
-        let options = { 
+        let options = {
             mimeType: supportedType,
-            videoBitsPerSecond: video_bits_per_sec || 2500000 // 2.5Mbps
+            videoBitsPerSecond: video_bits_per_sec || 2500000, // 2.5Mbps
         };
 
         recordedBlobs = [];

@@ -1,13 +1,13 @@
 class document {
     /**
-     * 
-     * @param {string} apiKey 
-     * @param {string} name 
-     * @param {Object} data 
+     *
+     * @param {string} apiKey
+     * @param {string} name
+     * @param {Object} data
      */
-    constructor(name, data){
-        this.name = name
-        this.data = data
+    constructor(name, data) {
+        this.name = name;
+        this.data = data;
     }
 }
-module.exports = document
+module.exports = document;

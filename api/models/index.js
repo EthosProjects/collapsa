@@ -1,5 +1,5 @@
 module.exports = {
     collapsauserbaseUser: require('./collapsauserbaseUser'),
     discordguildbaseGuild: require('./discordguildbaseGuild'),
-    discorduserbaseUser: require('./discorduserbaseUser')
-}
+    discorduserbaseUser: require('./discorduserbaseUser'),
+};

@@ -10,12 +10,12 @@ const Day = require('./library/day.js');
 const Mapper = require('discord.js').Collection;
 const Slot = require('./lib/Slot.js');
 const Clan = require('./lib/Clan.js');
-String.prototype.capitalize = function(){
-	let arrayOfThis = this.split('')
-	let fl = arrayOfThis.shift().toUpperCase()
-	arrayOfThis.unshift(fl)
-	return arrayOfThis.join('')
-}
+String.prototype.capitalize = function () {
+    let arrayOfThis = this.split('');
+    let fl = arrayOfThis.shift().toUpperCase();
+    arrayOfThis.unshift(fl);
+    return arrayOfThis.join('');
+};
 Vector.getDistance = function (vectorA, vectorB) {
     return Math.sqrt(Math.pow(vectorA.x - vectorB.x, 2) + Math.pow(vectorA.y - vectorB.y, 2));
 };
@@ -905,9 +905,9 @@ module.exports = function (nsp, ns, mLab) {
             this.hposfr = Vector.create(0, (-35.34119409414458 * this.rad) / 25);
             this.hposfr.x = Math.cos((this.move.ang * Math.PI) / 180) * Vector.magnitude(this.hposfr);
             this.hposfr.y = Math.sin((this.move.ang * Math.PI) / 180) * Vector.magnitude(this.hposfr);
-			Vector.add(this.body.position, this.hposfr, this.hposfr);
-			this.posPlace = null
-			this.canPlace = true
+            Vector.add(this.body.position, this.hposfr, this.hposfr);
+            this.posPlace = null;
+            this.canPlace = true;
             this.next = 'l';
             this.lhit = false;
             this.rhit = false;
@@ -1016,8 +1016,8 @@ module.exports = function (nsp, ns, mLab) {
             this.targets = [];
             this.treetargs = [];
             this.stonetargs = [];
-			this.setHands();
-			this.canPlace = true
+            this.setHands();
+            this.canPlace = true;
             if (this.move.grab) {
                 if (
                     (dropped.length ||
@@ -1849,83 +1849,89 @@ module.exports = function (nsp, ns, mLab) {
                         Vector.add(mvect, this.body.position, mvect);
                     }
                     mvect.y = Math.floor(mvect.y / 100) * 100 + 50;
-					mvect.x = Math.floor(mvect.x / 100) * 100 + 50;
-				
+                    mvect.x = Math.floor(mvect.x / 100) * 100 + 50;
+
                     this.posPlace = mvect;
-					this.needsSelfUpdate = true;
+                    this.needsSelfUpdate = true;
                     if (/Wall|Floor|Door|Crafting Table/.test(this.mainHands)) {
-						let testBody = new Bodies.rectangle(mvect.x, mvect.y, 100, 100, { isStatic: true });
-						let material = this.mainHands.split(' ')[0].toLowerCase()
-						let type = this.mainHands.split(' ')[1]
-                        if (/Wall|Floor|Door|Crafting Table/.test(this.mainHands) && this.game.Entities.some(e => 
-							Matter.SAT.collides(testBody, e.body).collided && 
-							!(
-								type == 'Floor' ?  
-									(
-										this.structures.find(s => e == s && type == 'Floor' && !(e instanceof Floor)) ||
-										(this.clan &&
-											this.clan.members.find(member =>
-												member.structures.find(s => e == s && type == 'Floor' && !(e instanceof Floor))
-											)
-										)
-									) :
-									(
-										this.structures.some(s => e == s && e instanceof Floor) ||
-										(this.clan &&
-											this.clan.members.some(member =>
-												member.structures.some(s => e == s && s instanceof Floor)
-											)
-										)
-									)
-							) ||
-							mvect.x < 50 ||
-							mvect.y < 50 ||
-							mvect.x > game.map.forest.width ||
-							mvect.y > game.map.forest.height
-                        )) this.canPlace = false
-                        
-						if(this.canPlace && this.move.att && !this.alusd){
-							console.log(type)
-							let slot = this.inventory.get(this.mainHand);
-							slot.count -= 1;
-							if (slot.count == 0) {
-								this.inventory.set(this.mainHand, 'empty');
-								this.mainHand = '-1';
-							}
-							this.needsSelfUpdate = true;
-							if (/Wall|Floor|Door/.test(this.mainHands)){
-								eval(`this.structures.push(new ${type}(mvect.x, mvect.y, '${material}',${type == 'Door' ? 'this.pang, ' : ''} this.game))`)
-							}else {
-								this.structures.push(new CraftingTable(game, mvect.x, mvect.y, this.game));
-							}
-							this.alusd = true;
-						}
-                    }else if(/Chest/.test(this.mainHands)){
-                        let testBody
+                        let testBody = new Bodies.rectangle(mvect.x, mvect.y, 100, 100, { isStatic: true });
+                        let material = this.mainHands.split(' ')[0].toLowerCase();
+                        let type = this.mainHands.split(' ')[1];
+                        if (
+                            /Wall|Floor|Door|Crafting Table/.test(this.mainHands) &&
+                            this.game.Entities.some(
+                                e =>
+                                    (Matter.SAT.collides(testBody, e.body).collided &&
+                                        !(type == 'Floor'
+                                            ? this.structures.find(
+                                                  s => e == s && type == 'Floor' && !(e instanceof Floor)
+                                              ) ||
+                                              (this.clan &&
+                                                  this.clan.members.find(member =>
+                                                      member.structures.find(
+                                                          s => e == s && type == 'Floor' && !(e instanceof Floor)
+                                                      )
+                                                  ))
+                                            : this.structures.some(s => e == s && e instanceof Floor) ||
+                                              (this.clan &&
+                                                  this.clan.members.some(member =>
+                                                      member.structures.some(s => e == s && s instanceof Floor)
+                                                  )))) ||
+                                    mvect.x < 50 ||
+                                    mvect.y < 50 ||
+                                    mvect.x > game.map.forest.width ||
+                                    mvect.y > game.map.forest.height
+                            )
+                        )
+                            this.canPlace = false;
+
+                        if (this.canPlace && this.move.att && !this.alusd) {
+                            console.log(type);
+                            let slot = this.inventory.get(this.mainHand);
+                            slot.count -= 1;
+                            if (slot.count == 0) {
+                                this.inventory.set(this.mainHand, 'empty');
+                                this.mainHand = '-1';
+                            }
+                            this.needsSelfUpdate = true;
+                            if (/Wall|Floor|Door/.test(this.mainHands)) {
+                                eval(
+                                    `this.structures.push(new ${type}(mvect.x, mvect.y, '${material}',${
+                                        type == 'Door' ? 'this.pang, ' : ''
+                                    } this.game))`
+                                );
+                            } else {
+                                this.structures.push(new CraftingTable(game, mvect.x, mvect.y, this.game));
+                            }
+                            this.alusd = true;
+                        }
+                    } else if (/Chest/.test(this.mainHands)) {
+                        let testBody;
                         if (this.pang == 'left' || this.pang == 'right') {
                             testBody = Bodies.rectangle(mvect.x, mvect.y, 50, 95, { isStatic: true });
                         } else {
                             testBody = Bodies.rectangle(mvect.x, mvect.y, 95, 50, { isStatic: true });
                         }
                         new Bodies.rectangle(mvect.x, mvect.y, 100, 100, { isStatic: true });
-                        if (this.game.Entities.some(e => 
-							Matter.SAT.collides(testBody, e.body).collided && 
-                            !(
-                                (
-                                    this.structures.some(s => e == s && e instanceof Floor) ||
-                                    (this.clan &&
-                                        this.clan.members.some(member =>
-                                            member.structures.some(s => e == s && s instanceof Floor)
-                                        )
-                                    )
-                                )
-							) ||
-							mvect.x < 50 ||
-							mvect.y < 50 ||
-							mvect.x > game.map.forest.width ||
-							mvect.y > game.map.forest.height
-                        )) this.canPlace = false
-                        if(this.canPlace && this.move.att && !this.alusd){
+                        if (
+                            this.game.Entities.some(
+                                e =>
+                                    (Matter.SAT.collides(testBody, e.body).collided &&
+                                        !(
+                                            this.structures.some(s => e == s && e instanceof Floor) ||
+                                            (this.clan &&
+                                                this.clan.members.some(member =>
+                                                    member.structures.some(s => e == s && s instanceof Floor)
+                                                ))
+                                        )) ||
+                                    mvect.x < 50 ||
+                                    mvect.y < 50 ||
+                                    mvect.x > game.map.forest.width ||
+                                    mvect.y > game.map.forest.height
+                            )
+                        )
+                            this.canPlace = false;
+                        if (this.canPlace && this.move.att && !this.alusd) {
                             let slot = this.inventory.get(this.mainHand);
                             slot.count -= 1;
                             if (slot.count == 0) {
@@ -1934,28 +1940,29 @@ module.exports = function (nsp, ns, mLab) {
                             }
                             this.needsSelfUpdate = true;
                             this.structures.push(new Chest(mvect.x, mvect.y, this.pang, this.game));
-							this.alusd = true;
-						}
-                    }else if (/Campfire/.test(this.mainHands)) {
+                            this.alusd = true;
+                        }
+                    } else if (/Campfire/.test(this.mainHands)) {
                         let testBody = Bodies.circle(mvect.x, mvect.y, 175 / 12, { isStatic: true });
-                        if (this.game.Entities.some(e => 
-							Matter.SAT.collides(testBody, e.body).collided && 
-                            !(
-                                (
-                                    this.structures.some(s => e == s && e instanceof Floor) ||
-                                    (this.clan &&
-                                        this.clan.members.some(member =>
-                                            member.structures.some(s => e == s && s instanceof Floor)
-                                        )
-                                    )
-                                )
-							) ||
-							mvect.x < 50 ||
-							mvect.y < 50 ||
-							mvect.x > game.map.forest.width ||
-							mvect.y > game.map.forest.height
-                        )) this.canPlace = false
-                        if(this.canPlace && this.move.att && !this.alusd){
+                        if (
+                            this.game.Entities.some(
+                                e =>
+                                    (Matter.SAT.collides(testBody, e.body).collided &&
+                                        !(
+                                            this.structures.some(s => e == s && e instanceof Floor) ||
+                                            (this.clan &&
+                                                this.clan.members.some(member =>
+                                                    member.structures.some(s => e == s && s instanceof Floor)
+                                                ))
+                                        )) ||
+                                    mvect.x < 50 ||
+                                    mvect.y < 50 ||
+                                    mvect.x > game.map.forest.width ||
+                                    mvect.y > game.map.forest.height
+                            )
+                        )
+                            this.canPlace = false;
+                        if (this.canPlace && this.move.att && !this.alusd) {
                             let slot = this.inventory.get(this.mainHand);
                             slot.count -= 1;
                             if (slot.count == 0) {
@@ -1964,8 +1971,8 @@ module.exports = function (nsp, ns, mLab) {
                             }
                             this.needsSelfUpdate = true;
                             this.structures.push(new Campfire(mvect.x, mvect.y, this.game));
-							this.alusd = true;
-						}
+                            this.alusd = true;
+                        }
                     }
                 }
                 if (this.mainHands == 'carrot' && this.carrot.ready && this.move.att) {
@@ -2203,8 +2210,8 @@ module.exports = function (nsp, ns, mLab) {
                 maxStamina: this.maxStamina,
                 craftables: this.crafter.checkCraft(this.inventory),
                 crafting: this.crafting,
-				posPlace: this.posPlace,
-				canPlace: this.canPlace,
+                posPlace: this.posPlace,
+                canPlace: this.canPlace,
                 craftablesEx: this.craftablesEx,
                 chestables: this.chestables,
                 clanning: this.clanning,
@@ -5157,9 +5164,9 @@ module.exports = function (nsp, ns, mLab) {
 		if(Amethysts.list.length < 1) {
 			let p = getGoodPosition();
 			new Amethyst(p.x, p.y, game);
-		}*/
+		}
         if (Players.list.some(player => player.score > 700)) {
-            /*
+            
 			if(Demons.list.length < 3 && timeOfDay == 'night') {
 				let p = getGoodPosition();
 				new Demon(p.x, p.y, game);
@@ -5172,7 +5179,7 @@ module.exports = function (nsp, ns, mLab) {
 			) {
 				let p = getGoodPosition();
 				new Destroyer(p.x, p.y, game);
-			}*/
+			}
         }
         if (CarrotFarms.list.length < 3) {
             let p = getGoodPosition('rectangle', 'tempx', 'tempy', 100, 100, { isStatic: true });
@@ -5181,7 +5188,7 @@ module.exports = function (nsp, ns, mLab) {
         if (Rabbits.list.length < 1 && timeOfDay == 'day') {
             let p = getGoodPosition('circle', 'tempx', 'tempy', 25, { isStatic: true });
             //new Rabbit(p.x, p.y, game);
-        }
+        }*/
     }, 10);
     this.nsp.on('connection', function (socket) {
         socket.emit('images', images);
