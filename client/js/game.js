@@ -374,7 +374,7 @@ var init = function (name) {
                 break;
         }
 
-        if (playa && (playa.crafting || playa.clanning || playa.chesting)) {
+        if (playa && (playa.crafting)) {
             movement.up = false;
             movement.down = false;
             movement.left = false;
