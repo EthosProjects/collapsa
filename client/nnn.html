@@ -11,11 +11,17 @@
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
     const ctx = canvas.getContext('2d')
+    let w = [0, 1 ,2]
+    for(let i = 1;i < w.length;i++){
+        console.log(i)
+    }
     let generation = 1
     let goal = {
         x:240,
         y:565
     }
+    let input = 'fucking shit'
+        console.log(new RegExp(`^${input}$`))
     window.addEventListener('mousedown', e => {
         console.log(e)
     })
@@ -169,10 +175,10 @@
                 x:0,
                 y:0
             }*/
-            if(this.brain.layers[2].nodes[0].isActive) this.acc.x += 0.1
-            if(this.brain.layers[2].nodes[1].isActive) this.acc.x -= 0.1
-            if(this.brain.layers[2].nodes[2].isActive) this.acc.y += 0.1
-            if(this.brain.layers[2].nodes[3].isActive) this.acc.y -= 0.1
+            if(this.brain.layers[2].nodes[0].isActive) this.acc.x = 1
+            else if(this.brain.layers[2].nodes[1].isActive) this.acc.x = 1
+            if(this.brain.layers[2].nodes[2].isActive) this.acc.y = 1
+            else if(this.brain.layers[2].nodes[3].isActive) this.acc.y = 1
             
             this.vel.x += this.acc.x
             this.vel.y += this.acc.y
@@ -248,7 +254,7 @@
                 l.nodes.forEach((n, i) => {
                     let weights = n.weights ? n.weights.map(w => {
                         let chance = Math.random()
-                        let newValue = Math.random() * 0.01 - 0.02
+                        let newValue = Math.random() * 1 - 2
                         chance <= mutationRate ? w += newValue : false 
                         return w
                     }) : null
@@ -412,8 +418,21 @@
                 let total = b.brain.layers[1].nodes.length * 55
                 ctx.font = '20px Arial'
                 ctx.textAlign = 'center'
+                let inputLayer = b.brain.layers[0]
+                let outputLayer = b.brain.layers[b.brain.layers.length - 1]
+                inputLayer.nodes.forEach((n, i) => {
+                    ctx.beginPath()
+                    let num = i + 1 
+                    ctx.arc(30, 30 + i * total/(inputLayer.nodes.length + 1) + total/(inputLayer.nodes.length + 1), 20, 0, 2 * Math.PI)
+                    ctx.fillStyle = 'white'
+                    ctx.strokeStyle = 'black'
+                    ctx.fill()
+                    ctx.stroke()
+                    ctx.fillStyle = 'black'
+                    ctx.fillText(num, 30, 30 + i * total/(inputLayer.nodes.length + 1) + total/(inputLayer.nodes.length + 1) + 7.5)
+                })
                 let l = b.brain.layers[0]
-                b.brain.layers[0].nodes.forEach((n, i) => {
+                /*b.brain.layers[0].nodes.forEach((n, i) => {
                     ctx.beginPath()
                     let num = i + 1 
                     ctx.arc(30, 30 + i * total/(l.nodes.length + 1) + total/(l.nodes.length + 1), 20, 0, 2 * Math.PI)
@@ -423,35 +442,79 @@
                     ctx.stroke()
                     ctx.fillStyle = 'black'
                     ctx.fillText(num, 30, 30 + i * total/(l.nodes.length + 1) + total/(l.nodes.length + 1) + 7.5)
-                })
+                })*/
+                let currIndex = inputLayer.nodes.length - 1
                 let currNode = 9
-                l = b.brain.layers[1]
-                b.brain.layers[1].nodes.forEach((n, i) => {
-                    ctx.beginPath()
-                    let num = currNode
-                    
-                    if(b.brain.layers[2].nodes.some(n => n.weights[i] !== 0)){
-                        ctx.arc(430, 30 + i * total/(l.nodes.length) + 0, 20, 0, 2 * Math.PI)
+                for(let i = 1;i < b.brain.layers.length - 1;i++){
+                    let l = b.brain.layers[i]
+                    let pl = b.brain.layers[i - 1]
+                    let nl = b.brain.layers[i + 1]
+                    l.nodes.forEach((n, j) => {
+                        n.showing = false
+                        if(!n.weights.find(w => w) || !nl.nodes.find(n => n.weights[currIndex + j])) return
+                        n.showing = true
+                        n.weights.forEach((w, u) => {
+                            if(u == n.weights.length - 1 || w == 0) return
+                            if(w < 0) ctx.strokeStyle = 'blue'
+                            else ctx.strokeStyle = 'red' 
+                            ctx.beginPath()
+                            ctx.moveTo(30, 30 + u * total/(pl.nodes.length + 1) + total/(pl.nodes.length + 1))
+                            ctx.lineTo(430, 30 + j * total/(l.nodes.length) + 0)
+                            ctx.stroke()
+                            ctx.lineWidth = 1
+                        })
+                        ctx.beginPath()
+                        ctx.arc(430, 30 + j * total/(l.nodes.length) + 0, 20, 0, 2 * Math.PI)
                         ctx.fillStyle = 'white'
                         ctx.strokeStyle = 'black'
                         ctx.fill()
                         ctx.stroke()
                         ctx.fillStyle = 'black'
-                        ctx.fillText(num, 430, 30 + i * total/(l.nodes.length) + 0 + 7.5)
+                        ctx.fillText(currNode, 430, 30 + j * total/(l.nodes.length) + 0 + 7.5)
                         currNode++
-                    }
-                })
+                    })
+                    currIndex += l.nodes.length
+                }
                 l = b.brain.layers[2]
-                b.brain.layers[2].nodes.forEach((n, i) => {
+                outputLayer.nodes.forEach((n, i) => {
+                    let pl = b.brain.layers[b.brain.layers.length - 2]
+
+                    n.weights.forEach((w, u) => {
+                        if(u == n.weights.length - 1 || !w) return
+                        if(w < 0) ctx.strokeStyle = 'blue'
+                        else ctx.strokeStyle = 'red' 
+                        ctx.beginPath()
+                        if(u < 4){
+                            ctx.moveTo(30, 30 + u * total/(inputLayer.nodes.length + 1) + total/(inputLayer.nodes.length + 1))
+                            ctx.lineTo(830, 30 + i * total/(outputLayer.nodes.length + 1) + total/(outputLayer.nodes.length + 1))
+                        }else {
+                            ctx.moveTo(430, 30 + u * total/(pl.nodes.length))
+                            ctx.lineTo(830, 30 + i * total/(outputLayer.nodes.length + 1) + total/(outputLayer.nodes.length + 1))
+                        }
+                        ctx.stroke()
+                        /*
+                        pl.nodes.forEach((pn, j) => {
+
+                        })
+                        ctx.beginPath()
+                        let layer
+                        ctx.moveTo(430, 30 + u * total/(pl.nodes.length + 1) + total/(pl.nodes.length + 1))
+                        ctx.lineTo(830, 30 + i * total/(l.nodes.length) + 0)
+                        ctx.stroke()
+                        ctx.lineWidth = 1*/
+                    })
                     ctx.beginPath()
                     let num = i + 5
-                    ctx.arc(830, 30 + i * total/(l.nodes.length + 1) + total/(l.nodes.length + 1), 20, 0, 2 * Math.PI)
+                    ctx.arc(830, 30 + i * total/(outputLayer.nodes.length + 1) + total/(outputLayer.nodes.length + 1), 20, 0, 2 * Math.PI)
                     ctx.fillStyle = 'white'
                     ctx.strokeStyle = 'black'
                     ctx.fill()
                     ctx.stroke()
                     ctx.fillStyle = 'black'
-                    ctx.fillText(num, 830, 30 + i * total/(l.nodes.length + 1) + total/(l.nodes.length + 1) + 7.5)
+                    ctx.fillText(num, 830, 30 + i * total/(outputLayer.nodes.length + 1) + total/(outputLayer.nodes.length + 1) + 7.5)
+                })
+                b.brain.layers[2].nodes.forEach((n, i) => {
+                    
                 })
                 ctx.restore()
                 await wait(60)

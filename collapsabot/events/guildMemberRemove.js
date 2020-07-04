@@ -1,5 +1,6 @@
 const Event = require('../Event.js');
 const { MessageEmbed } = require('discord.js');
+const { discordguildbaseGuild } = require('../../api/models')
 module.exports = new Event({
     name: 'guildMemberRemove',
     execute: (member, client) => {
@@ -7,7 +8,9 @@ module.exports = new Event({
         let guildSetup = mLab.databases
             .get('collapsa')
             .collections.get('discordguildbase')
-            .documents.get(member.guild.id).data;
+            .documents.get(member.guild.id);
+        if(!guildSetup) return
+        guildSetup = new discordguildbaseGuild(guildSetup.data)
         if (guildSetup.moderation.channel) {
             let channel = member.guild.channels.cache.get(guildSetup.moderation.channel);
             if (!channel) return;

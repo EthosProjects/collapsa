@@ -150,7 +150,10 @@ module.exports = mLab => {
     });
     client.on('guildMemberAdd', async member => {});
     client.on('guildCreate', async guild => {
-        let guildBase = new discordguildbaseGuild();
+        let guildBase = new discordguildbaseGuild({
+            id:guild.id,
+            _id:guild.id
+        });
         await mLab.databases.get('collapsa').collections.get('discordguildbase').addDocument(toLiteral(guildBase));
         let defaultChannel = '';
         guild.channels.cache.forEach(channel => {
