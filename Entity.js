@@ -4549,11 +4549,11 @@ module.exports = function (nsp, ns, mLab) {
 				let p = getGoodPosition();
 				new Destroyer(p.x, p.y, game);
 			}
-        }
+        }*/
         if (CarrotFarms.list.length < 3) {
             let p = getGoodPosition('rectangle', 'tempx', 'tempy', 100, 100, { isStatic: true });
             new CarrotFarm(p.x, p.y, game);
-        }
+        }/*
         if (Rabbits.list.length < 1 && timeOfDay == 'day') {
             let p = getGoodPosition('circle', 'tempx', 'tempy', 25, { isStatic: true });
             //new Rabbit(p.x, p.y, game);
