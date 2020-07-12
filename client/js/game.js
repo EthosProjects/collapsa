@@ -28,7 +28,6 @@ let drawConcave = (sides, size, x, y, angle, color) => {
             y + size * Math.sin((i * 2 * angle * Math.PI) / sides)
         );
     }
-
     ctx.fillStyle = color;
     ctx.lineWidth = 1;
     ctx.fill();
@@ -43,6 +42,15 @@ let drawStone = (x, y, size) => {
     drawPolygon(8, size, x, y, 0, '#73757e');
     drawPolygon(9, size / 2, x, y, 0, '#b3b4bb');
 };
+/*
+setTimeout(() => {
+    const a = document.createElement('a')
+    a.style.display = 'none'
+    document.body.appendChild(a)
+    a.href = background.toDataURL('/image/png')
+    a.download = 'background' +'.png'
+    a.click()
+}, 5000)*/
 let backgroundInterval = setInterval(() => {
     var screenCssPixelRatio = window.outerWidth / window.innerWidth;
     //console.log(zoomLevel, Math.round(screenCssPixelRatio * 100) + '%', window.innerWidth, window.outerWidth)

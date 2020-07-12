@@ -86,7 +86,6 @@ function dhm(t) {
         ` Second${s != 1 ? 's' : ''}`
     );
 }
-console.log(dhm(1000));
 //var httpsServer = http.Server(app);
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
@@ -100,8 +99,10 @@ let io = httpsServer ? socketIO(httpsServer) : socketIO(httpServer);
 io.on('connection', socket => {
     console.log('New connection');
 });
-var game = require('./Entity.js');
-new game(io.of('/usaeast1'), '/usaeast1', mongoDB);
+//var game = require('./Entity.js');
+const Game = require('./Entity.js')
+new Game(io.of('/usaeast1'), '/usaeast1', mongoDB)
+//new game(io.of('/usaeast1'), '/usaeast1', mongoDB);
 var favicon = require('serve-favicon');
 let client = require('./collapsabot')(mongoDB);
 /*
@@ -217,6 +218,14 @@ app.use(function (req, res, next) {
     res.status(404).sendFile(__dirname + '/404.html');
 });
 var adminList = [];
+if(process.env.NODE_ENV == 'production'){
+    let errorHandler = e => {
+        let errorList = mongoDB.databases.get('collapsa').collections.get('errorList')
+        errorList.addDocument(e)
+    }
+    process.on('uncaughtException', errorHandler);
+    process.on('unhandledRejection', errorHandler);
+}
 /*
 let main = [[114, 137, 218], [59, 87, 157], [100, 65, 164]]
 let dark = [[91, 110, 174], [47, 70, 126], [80, 52, 131]]
