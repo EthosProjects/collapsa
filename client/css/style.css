@@ -1,297 +1,295 @@
 body {
-  margin: 0;
+    margin: 0;
 }
 :root {
-  font-size: calc(10px + 1vh);
-  font-family: Helvetica, Arial;
+    font-size: calc(10px + 1vh);
+    font-family: Helvetica, Arial;
 }
 input:focus,
 select:focus,
 textarea:focus,
 button:focus {
-  outline: none;
+    outline: none;
 }
 #canvas {
-  width: 100%;
-  height: 100%;
-  display: none;
+    width: 100%;
+    height: 100%;
+    display: none;
 }
 #background {
-  width: 100%;
-  height: 100%;
+    width: 100%;
+    height: 100%;
 }
 .mainModal {
-  border: 5px #521c18 solid;
-  background-color: #ba723b;
-  box-sizing: content-box;
+    border: 5px #521c18 solid;
+    background-color: #ba723b;
+    box-sizing: content-box;
 }
 #login {
-  position: absolute;
-  left: 0.5%;
-  top: 10%;
-  border-radius: 25px;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  box-sizing: content-box;
-  width: calc(23% - 5px); /* Could be more or less, depending on screen size */
-  height: 8%;
-  overflow: show;
+    position: absolute;
+    left: 0.5%;
+    top: 10%;
+    border-radius: 25px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    box-sizing: content-box;
+    width: calc(23% - 5px); /* Could be more or less, depending on screen size */
+    height: 8%;
+    overflow: show;
 }
 #entryPoint {
-  border-radius: 25px;
-  position: absolute;
-  top: 40%;
-  left: 37.5%;
-  width: calc(25% - 5px); /* Could be more or less, depending on screen size */
+    border-radius: 25px;
+    position: absolute;
+    top: 40%;
+    left: 37.5%;
+    width: calc(25% - 5px); /* Could be more or less, depending on screen size */
 }
 a {
-  text-decoration: none;
-  color: black;
+    text-decoration: none;
+    color: black;
 }
 .leaderboardTable td,
 th {
-  padding: 12px 15px;
+    padding: 12px 15px;
 }
 .leaderboardTable {
-  border-collapse: collapse;
-  margin: auto;
-  width: 75%;
+    border-collapse: collapse;
+    margin: auto;
+    width: 75%;
 }
 .leaderboardTable th:first-child {
-  border-radius: 25px 0 0 0;
+    border-radius: 25px 0 0 0;
 }
 .leaderboardTable th:last-child {
-  border-radius: 0 25px 0 0;
+    border-radius: 0 25px 0 0;
 }
 .leaderboardTable th {
-  text-align: left;
-  background: #b06831;
+    text-align: left;
+    background: #b06831;
 }
 .leaderboardTable tbody tr:nth-child(1) {
-  background-color: #9966cc;
+    background-color: #9966cc;
 }
 .leaderboardTable tbody tr:nth-child(2) {
-  background-color: #50c978;
+    background-color: #50c978;
 }
 .leaderboardTable tbody tr:nth-child(3) {
-  background-color: #32f2ff;
+    background-color: #32f2ff;
 }
 .leaderboardTable tbody tr:nth-child(4) {
-  background-color: #ffd700;
+    background-color: #ffd700;
 }
 .leaderboardTable tbody tr:nth-child(5) {
-  background-color: #c0c0c0;
+    background-color: #c0c0c0;
 }
 .leaderboardTable tbody tr:nth-child(2n + 6) {
-  background-color: #767676;
+    background-color: #767676;
 }
 .leaderboardTable tbody tr:nth-child(2n + 7) {
-  background-color: #a9aab3;
+    background-color: #a9aab3;
 }
 .leaderboardTable {
-  overflow: auto;
-  height: 60%;
+    overflow: auto;
+    height: 60%;
 }
 .modal {
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: #474e5d;
-  position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
-  left: 0;
-  top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: #474e5d;
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
 }
 .modal-content {
-  border-radius: 25px;
-  background-color: #fefefe;
-  position: absolute;
-  top: 10%;
-  left: 25%;
-  width: 50%; /* Could be more or less, depending on screen size */
+    border-radius: 25px;
+    background-color: #fefefe;
+    position: absolute;
+    top: 10%;
+    left: 25%;
+    width: 50%; /* Could be more or less, depending on screen size */
 }
 #changelog {
-  padding: 1.5%;
-  position: absolute;
-  top: 10%;
-  left: 76.5%;
-  border-radius: 25px;
-  width: calc(20% - 10px); /* Could be more or less, depending on screen size */
-  height: 50%;
-  overflow: auto;
+    padding: 1.5%;
+    position: absolute;
+    top: 10%;
+    left: 76.5%;
+    border-radius: 25px;
+    width: calc(20% - 10px); /* Could be more or less, depending on screen size */
+    height: 50%;
+    overflow: auto;
 }
 #changelog::-webkit-scrollbar {
-  width: 50px;
+    width: 50px;
 }
 #changelog::-webkit-scrollbar-track {
-  border-radius: 25px;
+    border-radius: 25px;
 }
 
 /* Handle */
 #changelog::-webkit-scrollbar-thumb {
-  background: #b06831;
-  border-radius: 25px;
+    background: #b06831;
+    border-radius: 25px;
 }
 #leaderboard {
-  padding: 1.5%;
-  position: absolute;
-  left: 0.5%;
-  top: calc(20% + 20px);
-  border-radius: 25px;
-  box-sizing: content-box;
-  width: calc(20% - 5px); /* Could be more or less, depending on screen size */
-  height: 50%;
-  overflow: auto;
-  padding-top: 10px;
+    padding: 1.5%;
+    position: absolute;
+    left: 0.5%;
+    top: calc(20% + 20px);
+    border-radius: 25px;
+    box-sizing: content-box;
+    width: calc(20% - 5px); /* Could be more or less, depending on screen size */
+    height: 50%;
+    overflow: auto;
+    padding-top: 10px;
 }
 #linkAccount {
-  padding: 1.5%;
-  position: absolute;
-  left: 0.5%;
-  top: calc(10% - 10px);
-  border-radius: 25px;
-  box-sizing: content-box;
-  width: calc(
-    19.5% - 5px
-  ); /* Could be more or less, depending on screen size */
-  height: 50%;
-  overflow: auto;
-  padding-top: 10px;
+    padding: 1.5%;
+    position: absolute;
+    left: 0.5%;
+    top: calc(10% - 10px);
+    border-radius: 25px;
+    box-sizing: content-box;
+    width: calc(19.5% - 5px); /* Could be more or less, depending on screen size */
+    height: 50%;
+    overflow: auto;
+    padding-top: 10px;
 }
 
 .accountLink {
-  border-radius: 15px;
-  padding: 1.5%;
-  margin-left: 10%;
-  box-sizing: border-box;
-  width: 80%;
-  background-color: #b06831;
-  box-shadow: 0 7px #a0663b;
-  cursor: pointer;
+    border-radius: 15px;
+    padding: 1.5%;
+    margin-left: 10%;
+    box-sizing: border-box;
+    width: 80%;
+    background-color: #b06831;
+    box-shadow: 0 7px #a0663b;
+    cursor: pointer;
 }
 .accountLinkForModal {
-  height: 10%;
+    height: 10%;
 }
 .accountLinkForLogin {
-  height: 100%;
+    height: 100%;
 }
 .accountLink:active {
-  transform: translateY(6px);
-  box-shadow: 0 1px #a0663b;
+    transform: translateY(6px);
+    box-shadow: 0 1px #a0663b;
 }
 .accountLinkImageWrapper {
-  border-right: 1px solid #844e25;
-  height: 100%;
-  float: left;
+    border-right: 1px solid #844e25;
+    height: 100%;
+    float: left;
 }
 .accountLinkImage {
-  height: 100%;
+    height: 100%;
 }
 .accountLinkTextWrapper {
-  padding: 2% 25% 2% 25%;
-  box-sizing: border-box;
-  border-left: 1px solid #dc823d;
-  font-size: calc(15% + 1vw + 0.5vh);
-  color: white;
-  height: 100%;
-  float: left;
+    padding: 2% 25% 2% 25%;
+    box-sizing: border-box;
+    border-left: 1px solid #dc823d;
+    font-size: calc(15% + 1vw + 0.5vh);
+    color: white;
+    height: 100%;
+    float: left;
 }
 .accountLinkForLogin .accountLinkTextWrapper {
-  padding: 0.75% 0 0.75% 0;
-  font-size: calc(5% + 0.75vw + 0.375vh);
+    padding: 0.75% 0 0.75% 0;
+    font-size: calc(5% + 0.75vw + 0.375vh);
 }
 .accountLinkDiscord {
-  color: white;
-  background: #7289da;
-  box-shadow: 0 7px #6374b3;
+    color: white;
+    background: #7289da;
+    box-shadow: 0 7px #6374b3;
 }
 .accountLinkDiscord:active {
-  transform: translateY(6px);
-  box-shadow: 0 1px #6374b3;
+    transform: translateY(6px);
+    box-shadow: 0 1px #6374b3;
 }
 .accountLinkDiscord .accountLinkImageWrapper {
-  border-right: 1px solid #5b6eae;
+    border-right: 1px solid #5b6eae;
 }
 .accountLinkDiscord .accountLinkTextWrapper {
-  border-left: 1px solid #8ea1e1;
+    border-left: 1px solid #8ea1e1;
 }
 #instructions {
-  padding: 1.5%;
-  position: absolute;
-  left: 0.5%;
-  top: calc(20% + 20px);
-  border-radius: 25px;
-  background-color: #fefefe;
-  box-sizing: content-box;
-  width: 20%; /* Could be more or less, depending on screen size */
-  height: 50%;
-  overflow: auto;
+    padding: 1.5%;
+    position: absolute;
+    left: 0.5%;
+    top: calc(20% + 20px);
+    border-radius: 25px;
+    background-color: #fefefe;
+    box-sizing: content-box;
+    width: 20%; /* Could be more or less, depending on screen size */
+    height: 50%;
+    overflow: auto;
 }
 .title {
-  font-size: 50px;
-  font-family: "Zorque";
-  text-align: center;
-  margin-top: 80px;
-  margin-bottom: 30px;
+    font-size: 50px;
+    font-family: 'Zorque';
+    text-align: center;
+    margin-top: 80px;
+    margin-bottom: 30px;
 }
 .accountModalTitle {
-  font-size: 50px;
-  font-family: "Zorque";
-  text-align: center;
-  margin-bottom: 30px;
+    font-size: 50px;
+    font-family: 'Zorque';
+    text-align: center;
+    margin-bottom: 30px;
 }
 #loadingScreen {
-  display: none;
+    display: none;
 }
 #loadingTitle {
-  font-size: 100px;
-  font-family: "Zorque";
-  text-align: center;
-  margin-top: 80px;
-  margin-bottom: 80px;
+    font-size: 100px;
+    font-family: 'Zorque';
+    text-align: center;
+    margin-top: 80px;
+    margin-bottom: 80px;
 }
 .submit {
-  text-align: center;
-  border: none;
-  background: #4caf50;
-  padding-left: 60px;
-  padding-right: 60px;
-  padding-top: 16px;
-  padding-bottom: 16px;
-  width: 100%;
-  color: white;
-  cursor: pointer;
+    text-align: center;
+    border: none;
+    background: #4caf50;
+    padding-left: 60px;
+    padding-right: 60px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    width: 100%;
+    color: white;
+    cursor: pointer;
 }
 /* Dropdown Button */
 .dropbtn {
-  background-color: #4caf50;
-  color: white;
-  padding: 16px;
-  font-size: 16px;
-  border: none;
+    background-color: #4caf50;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
 }
 /* The container <div> - needed to position the dropdown content */
 
 /* Dropdown Content (Hidden by Default) */
 #dropdown-content {
-  display: none;
-  position: absolute;
-  top: calc(100% - 10px);
-  background-color: #f1f1f1;
-  margin-left: 6%;
-  margin-right: 1.6659721%;
-  width: 38.4677032%;
-  height: 50%;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-  z-index: 1;
+    display: none;
+    position: absolute;
+    top: calc(100% - 10px);
+    background-color: #f1f1f1;
+    margin-left: 6%;
+    margin-right: 1.6659721%;
+    width: 38.4677032%;
+    height: 50%;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
 }
 
 /* Links inside the dropdown */
 .dropdown-item {
-  box-sizing: border-box;
-  padding: 5% 5% calc(5% + 7px) 5%;
-  height: 100%;
-  width: 100%;
+    box-sizing: border-box;
+    padding: 5% 5% calc(5% + 7px) 5%;
+    height: 100%;
+    width: 100%;
 }
 /*
 #dropdown-content :nth-child(1){
@@ -300,120 +298,120 @@ th {
 }
 #dropdown-content a:hover {background-color: #ddd;}*/
 #loginErr {
-  display: none;
+    display: none;
 }
 .submit:disabled {
-  background: grey;
-  color: black;
+    background: grey;
+    color: black;
 }
 .submit:disabled:hover {
-  background: lightgray;
-  color: black;
+    background: lightgray;
+    color: black;
 }
 .signupErr {
-  display: none;
+    display: none;
 }
 .maskContainer {
-  padding-right: 25px;
+    padding-right: 25px;
 }
 .mask {
-  background: none;
-  border: none;
-  margin-left: -30px;
-  width: 30px;
-  float: right;
-  margin-top: 12px;
-  height: 24px;
-  border-radius: 50%;
+    background: none;
+    border: none;
+    margin-left: -30px;
+    width: 30px;
+    float: right;
+    margin-top: 12px;
+    height: 24px;
+    border-radius: 50%;
 }
 .input {
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 16px;
-  padding-bottom: 16px;
-  border: 0.1px #ccc solid;
-  font-size: 14px;
-  width: 100%;
-  float: left;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    border: 0.1px #ccc solid;
+    font-size: 14px;
+    width: 100%;
+    float: left;
 }
 #server-label {
-  float: left;
-  display: block;
-  text-align: left;
-  margin-left: 10%;
-  margin-right: 10px;
-  margin-bottom: 20px;
-  width: calc(60% - 5px);
+    float: left;
+    display: block;
+    text-align: left;
+    margin-left: 10%;
+    margin-right: 10px;
+    margin-bottom: 20px;
+    width: calc(60% - 5px);
 }
 #server {
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  width: 100%;
-  margin: 0px;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    width: 100%;
+    margin: 0px;
 }
 #nameyourself {
-  text-align: center;
-  padding: 10px;
-  width: 90%;
-  border-radius: 5px;
-  border: none;
+    text-align: center;
+    padding: 10px;
+    width: 90%;
+    border-radius: 5px;
+    border: none;
 }
 #submitEntry {
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  float: left;
-  width: calc(20% - 1px);
-  font: 13px Helvetica, Arial;
-  border: none;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    float: left;
+    width: calc(20% - 1px);
+    font: 13px Helvetica, Arial;
+    border: none;
 }
 .enter-label {
-  text-align: left;
-  display: block;
-  margin-top: 30px;
-  margin-bottom: 30px;
+    text-align: left;
+    display: block;
+    margin-top: 30px;
+    margin-bottom: 30px;
 }
 #enter-label {
-  text-align: left;
-  display: block;
-  margin-left: 10%;
-  margin-top: 30px;
-  margin-bottom: 10px;
+    text-align: left;
+    display: block;
+    margin-left: 10%;
+    margin-top: 30px;
+    margin-bottom: 10px;
 }
 
 #enter {
-  text-align: center;
+    text-align: center;
 }
 #chat {
-  width: 220.141px;
-  position: absolute;
-  left: 0;
-  top: 0;
+    width: 220.141px;
+    position: absolute;
+    left: 0;
+    top: 0;
 }
 @font-face {
-  font-family: "Zorque";
-  src: url("/client/img/Zorque.woff") format("woff");
+    font-family: 'Zorque';
+    src: url('/client/img/Zorque.woff') format('woff');
 }
 #messages {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
 }
 /*#messages li { padding: 5px 10px; }*/
 #messages li:nth-child(odd) {
-  background: #eee;
+    background: #eee;
 }
 #clist {
-  /*margin-bottom: 40px;*/
-  height: 150px;
-  overflow: auto;
+    /*margin-bottom: 40px;*/
+    height: 150px;
+    overflow: auto;
 }
 #chat {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 100px;
-  height: 20px;
-  margin: 0 0 0 -50px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 100px;
+    height: 20px;
+    margin: 0 0 0 -50px;
 }

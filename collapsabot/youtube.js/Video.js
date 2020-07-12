@@ -10,16 +10,16 @@
  * @property {string} url - URL of video
  */
 class Video {
-  constructor(details, apiKey) {
-    if (details.kind == "youtube#searchResult") {
-      this.type = "video";
-      this.id = details.id.videoId;
-      this.title = details.snippet.title;
-      this._description = details.snippet.description;
-      this.thumbnails = details.snippet.thumbnails;
-      this.channel = details.snippet.channelTitle;
-      this.url = `https://youtube.com/watch?v=${this.id}`;
+    constructor(details, apiKey) {
+        if (details.kind == 'youtube#searchResult') {
+            this.type = 'video';
+            this.id = details.id.videoId;
+            this.title = details.snippet.title;
+            this._description = details.snippet.description;
+            this.thumbnails = details.snippet.thumbnails;
+            this.channel = details.snippet.channelTitle;
+            this.url = `https://youtube.com/watch?v=${this.id}`;
+        }
     }
-  }
 }
 module.exports = Video;

@@ -1,835 +1,729 @@
 <head>
-  <style>
-    body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-    }
-    #ctx {
-      width: 300px;
-      height: 300px;
-      border: 1px solid black;
-    }
+    <style>
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+        #ctx {
+            width: 300px;
+            height: 300px;
+            border: 1px solid black;
+        }
 
-    #video {
-      border: 1px solid black;
-      width: 40%;
-      height: 40%;
-      display: none;
-    }
-    input[type="range"] {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-    }
-    button {
-      position: absolute;
-      left: 50%;
-      top: 60%;
-      font-family: "Zorque";
-    }
-    @font-face {
-      font-family: "Zorque";
-      src: url("/client/img/Zorque.woff") format("woff");
-    }
-  </style>
+        #video {
+            border: 1px solid black;
+            width: 40%;
+            height: 40%;
+            display: none;
+        }
+        input[type='range'] {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+        }
+        button {
+            position: absolute;
+            left: 50%;
+            top: 60%;
+            font-family: 'Zorque';
+        }
+        @font-face {
+            font-family: 'Zorque';
+            src: url('/client/img/Zorque.woff') format('woff');
+        }
+    </style>
 </head>
 <body>
-  <canvas id="ctx"></canvas>
-  <input type="range" min="1" max="1080" value="540" id="quality" />
-  <button id="locked">Lock</button>
-  <script>
-    if (localStorage.getItem("locked") == "true") {
-      console.log(localStorage.getItem("locked"));
-      locked.textContent = "Unlock";
-    }
-    locked.addEventListener("click", (e) => {
-      if (localStorage.getItem("locked") == "false") {
-        locked.textContent = "Unlock";
-        localStorage.setItem("locked", "true");
-      } else {
-        locked.textContent = "Lock";
-        localStorage.setItem("locked", "false");
-      }
-    });
-    let pixel = "1080";
-    let pixelNum = parseInt(pixel);
-    console.log(pixelNum);
-    let ctx = document.getElementById("ctx").getContext("2d");
-    /**
-     * @type {HTMLCanvasElement}
-     */
-    let canvas = document.getElementById("ctx");
-    canvas.style.width = pixelNum + "px";
-    canvas.style.height = pixelNum + "px";
-    canvas.width = parseInt(pixel);
-    canvas.height = parseInt(pixel);
-    let Img = {};
-
-    let createImage = (src, extention) => {
-      Img[`${src}`] = new Image();
-      Img[`${src}`].src = `/client/img/${src}.${extention}`;
-    };
-    createImage("amethystsword", "png");
-    createImage("hand", "png");
-    createImage("stonesword", "png");
-
-    createImage("stoneaxe", "png");
-
-    createImage("stonepickaxe", "png");
-
-    createImage("stonehammer", "png");
-    createImage("favicon", "png");
-    createImage("favicon2", "png");
-    let firstColor = "#CECECE";
-    let secondColor = "#bababa";
-    let thirdColor = "#999999";
-    let fourthColor = "grey";
-    let drawFourWay = (x, y, size) => {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.scale(size / 150, size / 150);
-      ctx.fillStyle = firstColor;
-      ctx.fillRect(0, 0, 150, 150);
-      ctx.fillStyle = secondColor;
-      ctx.fillRect(10, 0, 130, 150);
-      ctx.fillStyle = secondColor;
-      ctx.fillRect(0, 10, 150, 130);
-      ctx.fillStyle = thirdColor;
-      ctx.fillRect(30, 0, 90, 150);
-      ctx.fillStyle = thirdColor;
-      ctx.fillRect(0, 30, 150, 90);
-      ctx.fillStyle = fourthColor;
-      ctx.fillRect(50, 0, 50, 150);
-      ctx.fillStyle = fourthColor;
-      ctx.fillRect(0, 50, 150, 50);
-      ctx.restore();
-    };
-    let drawThreeWay = (x, y) => {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.fillStyle = firstColor;
-      ctx.fillRect(0, 0, 150, 150);
-      ctx.fillStyle = secondColor;
-      ctx.fillRect(10, 10, 130, 140);
-      ctx.fillStyle = secondColor;
-      ctx.fillRect(0, 10, 150, 130);
-      ctx.fillStyle = thirdColor;
-      ctx.fillRect(30, 30, 90, 120);
-      ctx.fillStyle = thirdColor;
-      ctx.fillRect(0, 30, 150, 90);
-      ctx.fillStyle = fourthColor;
-      ctx.fillRect(50, 50, 50, 100);
-      ctx.fillStyle = fourthColor;
-      ctx.fillRect(0, 50, 150, 50);
-      ctx.restore();
-    };
-    let drawTwoWay = (x, y) => {
-      ctx.fillStyle = firstColor;
-      ctx.fillRect(0, 0, 150, 150);
-      ctx.fillStyle = secondColor;
-      ctx.fillRect(0, 10, 150, 130);
-      ctx.fillStyle = thirdColor;
-      ctx.fillRect(0, 30, 150, 90);
-      ctx.fillStyle = fourthColor;
-      ctx.fillRect(0, 50, 150, 50);
-    };
-    let drawCorner = (x, y) => {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.fillStyle = firstColor;
-      ctx.fillRect(0, 0, 150, 150);
-      ctx.fillStyle = secondColor;
-      ctx.fillRect(10, 10, 130, 140);
-      ctx.fillStyle = secondColor;
-      ctx.fillRect(10, 10, 140, 130);
-      ctx.fillStyle = thirdColor;
-      ctx.fillRect(30, 30, 90, 120);
-      ctx.fillStyle = thirdColor;
-      ctx.fillRect(30, 30, 120, 90);
-      ctx.fillStyle = fourthColor;
-      ctx.fillRect(50, 50, 50, 100);
-      ctx.fillStyle = fourthColor;
-      ctx.fillRect(50, 50, 100, 50);
-      ctx.restore();
-    };
-    let drawOneWay = (x, y) => {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.fillStyle = firstColor;
-      ctx.fillRect(0, 0, 150, 150);
-      ctx.fillStyle = secondColor;
-      ctx.fillRect(10, 10, 140, 130);
-      ctx.fillStyle = thirdColor;
-      ctx.fillRect(30, 30, 120, 90);
-      ctx.fillStyle = fourthColor;
-      ctx.fillRect(50, 50, 100, 50);
-    };
-
-    let drawWall = (x, y) => {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.fillStyle = firstColor;
-      ctx.fillRect(0, 0, 150, 150);
-      ctx.fillStyle = secondColor;
-      ctx.fillRect(10, 10, 130, 130);
-      ctx.fillStyle = thirdColor;
-      ctx.fillRect(30, 30, 90, 90);
-      ctx.fillStyle = fourthColor;
-      ctx.fillRect(50, 50, 50, 50);
-    };
-    let drawCraftingTable = (x, y) => {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.fillStyle = "#808080";
-      ctx.fillRect(0, 0, 200, 200);
-      ctx.fillStyle = "#4E2D05";
-      ctx.fillRect(10, 10, 180, 180);
-      ctx.fillStyle = "#8D5010";
-      ctx.fillRect(10, 100 - 8.5, 180, 17);
-      ctx.fillRect(100 - 8.5, 10, 17, 180);
-      ctx.save();
-      ctx.translate(10 + 35, 10 + 35);
-      ctx.rotate((45 * Math.PI) / 180);
-      ctx.drawImage(Img.stonesword, -25, -35, 70, 70);
-      ctx.restore();
-      ctx.save();
-      ctx.translate(110 + 35, 10 + 35);
-      ctx.rotate((45 * Math.PI) / 180);
-      ctx.drawImage(Img.stoneaxe, -30, -30, 70, 70);
-      ctx.restore();
-      ctx.save();
-      ctx.translate(10 + 35, 110 + 35);
-      ctx.rotate((45 * Math.PI) / 180);
-      ctx.drawImage(Img.stonepickaxe, -30, -30, 70, 70);
-      ctx.restore();
-      ctx.save();
-      ctx.translate(110 + 35, 110 + 35);
-      ctx.rotate((45 * Math.PI) / 180);
-      ctx.drawImage(Img.stonehammer, -30, -30, 70, 70);
-      ctx.restore();
-      ctx.restore();
-    };
-    let c = {
-      x: 50,
-      y: 50,
-    };
-    class miniPlayer {
-      constructor(initPack) {
-        this.usr = initPack.usr || "";
-        this.x = initPack.x;
-        this.y = initPack.y;
-        this.hp = initPack.health || 20;
-        this.maxHp = initPack.maxHp || 20;
-        this.food = initPack.food || 20;
-        this.maxFood = initPack.maxFood || 20;
-        this.mainHand = initPack.mainHand || "hand";
-        this.id = initPack.id || Math.random();
-        this.angle = initPack.angle || 0;
-        this.lhit = initPack.lhit || false;
-        this.rhit = initPack.rhit || false;
-        this.rad = initPack.rad || 28;
-        this.msg = [];
-        this.clan = initPack.clan || null;
-      }
-      drawPerf(opt) {
-        if (!opt) opt = {};
-        ctx.restore();
-        ctx.save();
-        ctx.scale(this.rad / 25, this.rad / 25);
-        var currx = this.x / (this.rad / 25);
-        var curry = this.y / (this.rad / 25);
-        if (currx < -this.rad || currx > canvas.width + this.rad) return;
-        if (curry < -this.rad || curry > canvas.height + this.rad) return;
-        ctx.save();
-
-        //ctx.drawImage(Img.player, currx - this.rad, curry - this.rad, this.rad * 2, this.rad * 2)
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.fillStyle = "red";
-        if (opt.drawHp)
-          var hpBar = (((80 * this.rad) / 25) * this.hp) / this.maxHp;
-        ctx.fillRect(
-          currx - (40 * this.rad) / 25,
-          curry - (50 * this.rad) / 25,
-          hpBar,
-          10
-        );
-        ctx.fillStyle = "blue";
-        if (opt.drawStamina)
-          var staminaBar =
-            (((80 * this.rad) / 25) * this.stamina) / this.maxStamina;
-        ctx.fillRect(
-          currx - (40 * this.rad) / 25,
-          curry - 2 * this.rad + 10,
-          staminaBar,
-          10
-        );
-        ctx.fillStyle = "orange";
-        if (opt.drawFood)
-          var foodBar = (((80 * this.rad) / 25) * this.food) / this.maxFood;
-        ctx.fillRect(
-          currx - (40 * this.rad) / 25,
-          curry - (50 * this.rad) / 25 - 10,
-          foodBar,
-          10
-        );
-        if (this.clan) {
-          ctx.textAlign = "center";
-          ctx.font = "18px Zorque";
-          ctx.strokeStyle = "black";
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.strokeText(
-            `[${this.clan}]${this.usr}`,
-            currx,
-            curry + (55 * this.rad) / 25
-          );
-          ctx.fillStyle = "white";
-          ctx.fillText(
-            `[${this.clan}]${this.usr}`,
-            currx,
-            curry + (55 * this.rad) / 25
-          );
-        } else {
-          ctx.textAlign = "center";
-          ctx.font = "18px Zorque";
-          ctx.strokeStyle = "black";
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.strokeText(this.usr, currx, curry + (55 * this.rad) / 25);
-          ctx.fillStyle = "white";
-          ctx.fillText(this.usr, currx, curry + (55 * this.rad) / 25);
+    <canvas id="ctx"></canvas>
+    <input type="range" min="1" max="1080" value="540" id="quality" />
+    <button id="locked">Lock</button>
+    <script>
+        if (localStorage.getItem('locked') == 'true') {
+            console.log(localStorage.getItem('locked'));
+            locked.textContent = 'Unlock';
         }
-        this.msg.forEach((msgObj, i) => {
-          if (this.msg.length == 1 && i == 0) {
-            ctx.globalAlpha = Math.abs(msgObj.per - 1);
-            ctx.textAlign = "center";
-            ctx.font = "12px Arial";
-            ctx.strokeStyle = "black";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.strokeText(msgObj.msg, currx, curry - (60 * this.rad) / 25);
-            ctx.fillStyle = "white";
-            ctx.fillText(msgObj.msg, currx, curry - (60 * this.rad) / 25);
-          } else if (this.msg.length == 2 && i == 1) {
-            ctx.globalAlpha = Math.abs(msgObj.per - 1);
-            ctx.textAlign = "center";
-            ctx.font = "12px Arial";
-            ctx.strokeStyle = "black";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.strokeText(msgObj.msg, currx, curry - (60 * this.rad) / 25);
-            ctx.fillStyle = "white";
-            ctx.fillText(msgObj.msg, currx, curry - (60 * this.rad) / 25);
-          } else if (this.msg.length == 2 && i == 0) {
-            ctx.globalAlpha = Math.abs(msgObj.per - 1);
-            ctx.textAlign = "center";
-            ctx.font = "12px Arial";
-            ctx.strokeStyle = "black";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.strokeText(
-              msgObj.msg,
-              currx,
-              curry - 20 - (60 * this.rad) / 25
-            );
-            ctx.fillStyle = "white";
-            ctx.fillText(msgObj.msg, currx, curry - 20 - (60 * this.rad) / 25);
-          }
-        });
-        ctx.globalAlpha = 1;
-        ctx.translate(currx, curry);
-
-        ctx.rotate((Math.PI / 180) * this.angle);
-        ctx.scale(this.rad / 25, this.rad / 25);
-        if (this.mainHand == "hand") {
-          if (!this.rhit) {
-            ctx.beginPath();
-            ctx.fillStyle = "black";
-            ctx.arc(32, 15, 7.5, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.fillStyle = "#7F7F7F";
-            ctx.arc(32, 15, 7.5 - 2, 0, 2 * Math.PI);
-            ctx.fill();
-            //ctx.drawImage(Img.hand, 32 - 7.5, 15 - 7.5, 15, 15)
-          } else {
-            ctx.save();
-            ctx.translate(32 - 7.5, 15 - 7.5);
-            ctx.rotate(
-              (Math.PI / 180) *
-                (360 - (-Math.abs(-160 * this.punchper + 80) + 80))
-            );
-            ctx.beginPath();
-            ctx.fillStyle = "black";
-            ctx.arc(7.5, 7.5, 7.5, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.fillStyle = "#7F7F7F";
-            ctx.arc(7.5, 7.5, 7.5 - 2, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.restore();
-          }
-          if (!this.lhit) {
-            ctx.beginPath();
-            ctx.fillStyle = "black";
-            ctx.arc(32, -15, 7.5, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.fillStyle = "#7F7F7F";
-            ctx.arc(32, -15, 7.5 - 2, 0, 2 * Math.PI);
-            ctx.fill();
-          } else {
-            ctx.save();
-            ctx.translate(32 - 7.5, -(15 - 7.5));
-            ctx.rotate(
-              (Math.PI / 180) *
-                (0 + (-Math.abs(-160 * this.punchper + 80) + 80))
-            );
-            ctx.beginPath();
-            ctx.fillStyle = "black";
-            ctx.arc(7.5, -7.5, 7.5, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.fillStyle = "#7F7F7F";
-            ctx.arc(7.5, -7.5, 7.5 - 2, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.restore();
-          }
-        } else {
-          if (/Axe|Pickaxe|Sword|Hammer/.test(this.mainHand)) {
-            if (/Axe/.test(this.mainHand)) {
-              let img = this.mainHand.toLowerCase().replace(/\s/, "");
-              ctx.save();
-              ctx.translate(32 - 7.5 + 5, 0);
-              if (this.hitting)
-                ctx.rotate(
-                  (Math.PI / 180) *
-                    (360 - (-Math.abs(-120 * this.per + 60) + 60))
-                );
-              ctx.save();
-              ctx.translate(-2.5 + 75 / 2 - 32 - 7.5 + 10, -30 + 75 / 2);
-              ctx.rotate((Math.PI / 180) * 180);
-              ctx.drawImage(Img[img], 0 - 75 / 2, 0 - 75 / 2, 75, 75);
-              ctx.restore();
-              ctx.drawImage(Img.hand, 0, 15 - 7.5 - 5, 15, 15);
-              ctx.drawImage(Img.hand, 0, 15 - 2 - 7.5 - 30, 15, 15);
-              ctx.restore();
-            } else if (/Pickaxe/.test(this.mainHand)) {
-              let img = this.mainHand.toLowerCase().replace(/\s/, "");
-              ctx.save();
-              ctx.translate(32 - 7.5 + 5, 0);
-
-              if (this.hitting)
-                ctx.rotate(
-                  (Math.PI / 180) *
-                    (360 - (-Math.abs(-120 * this.per + 60) + 60))
-                );
-              ctx.save();
-              ctx.translate(-2.5 + 75 / 2 - 32 - 7.5 + 10, -30 + 75 / 2);
-              ctx.rotate((Math.PI / 180) * 180);
-              ctx.drawImage(Img[img], 0 - 75 / 2, 0 - 75 / 2, 75, 75);
-              ctx.restore();
-              ctx.drawImage(Img.hand, 0, 15 - 7.5 - 5, 15, 15);
-              ctx.drawImage(Img.hand, 0, 15 - 2 - 7.5 - 30, 15, 15);
-              ctx.restore();
-            } else if (/Sword/.test(this.mainHand)) {
-              let img = this.mainHand.toLowerCase().replace(/\s/, "");
-              ctx.save();
-              ctx.translate(32 - 7.5 + 5, 0);
-              ctx.strokeStyle = "black";
-              ctx.lineWidth = "20px";
-              ctx.drawImage(Img.hand, -15, 15 - 7.5 - 5 + 25, 15, 15);
-              if (this.hitting)
-                ctx.rotate(
-                  (Math.PI / 180) *
-                    (360 - (-Math.abs(-120 * this.per + 60) + 60))
-                );
-              ctx.save();
-              ctx.translate(-2.5 + 75 / 2 - 32 - 7.5 + 10, -30 + 75 / 2);
-              ctx.rotate((Math.PI / 180) * 180);
-              ctx.drawImage(Img[img], 0 - 75 / 2, 0 - 75 / 2, 75, 75);
-              ctx.restore();
-
-              ctx.drawImage(Img.hand, 0, 15 - 2 - 7.5 - 30, 15, 15);
-              ctx.restore();
-            } else if (/Hammer/.test(this.mainHand)) {
-              let img = this.mainHand.toLowerCase().replace(/\s/, "");
-              ctx.save();
-              ctx.translate(32 - 7.5 + 5, 0);
-              if (this.hitting)
-                ctx.rotate(
-                  (Math.PI / 180) *
-                    (360 - (-Math.abs(-120 * this.per + 60) + 60))
-                );
-              ctx.save();
-              ctx.translate(-2.5 + 75 / 2 - 32 - 7.5 + 10, -30 + 75 / 2);
-              ctx.rotate((Math.PI / 180) * 180);
-              ctx.drawImage(Img[img], 0 - 75 / 2, 0 - 75 / 2, 75, 75);
-              ctx.restore();
-              ctx.drawImage(Img.hand, 0, 15 - 7.5 - 5, 15, 15);
-              ctx.drawImage(Img.hand, 0, 15 - 2 - 7.5 - 30, 15, 15);
-              ctx.restore();
+        locked.addEventListener('click', (e) => {
+            if (localStorage.getItem('locked') == 'false') {
+                locked.textContent = 'Unlock';
+                localStorage.setItem('locked', 'true');
+            } else {
+                locked.textContent = 'Lock';
+                localStorage.setItem('locked', 'false');
             }
-          }
-          if (/Wall|Door|Floor|Crafting Table|Chest/.test(this.mainHand)) {
-            let img = this.mainHand.toLowerCase().replace(/\s/, "");
-            ctx.drawImage(Img.hand, 32 - 7.5, -15 - 7.5, 15, 15);
-            ctx.save();
-            ctx.translate(32 - 7.5 + 5, 0);
-            ctx.drawImage(Img.hand, -15, 15 - 7.5 - 5 + 25, 15, 15);
-            ctx.restore();
-          }
-          if (this.mainHand == "carrot") {
-            ctx.save();
-            ctx.translate(32, 15);
-            let r;
-            if (this.per)
-              r =
-                (Math.PI / 180) *
-                (360 - (-Math.abs(-160 * this.per + 80) + 80));
-            else r = 0;
-            if (r < 180) r += 180;
-            else r -= 180;
-            ctx.rotate(r);
-            ctx.beginPath();
-            ctx.fillStyle = "black";
-            ctx.arc(0, 0, 7.5, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.fillStyle = "#7F7F7F";
-            ctx.arc(0, 0, 7.5 - 2, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.drawImage(Img.carrot, 0 - 15, 0 - 15, 30, 30);
-            ctx.restore();
+        });
+        let pixel = '1080';
+        let pixelNum = parseInt(pixel);
+        console.log(pixelNum);
+        let ctx = document.getElementById('ctx').getContext('2d');
+        /**
+         * @type {HTMLCanvasElement}
+         */
+        let canvas = document.getElementById('ctx');
+        canvas.style.width = 1600 + 'px';
+        canvas.style.height = 400 + 'px';
+        canvas.width = 1600
+        canvas.height = 400
+        let Img = {};
 
-            ctx.beginPath();
-            ctx.fillStyle = "black";
-            ctx.arc(32, -15, 7.5, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.fillStyle = "#7F7F7F";
-            ctx.arc(32, -15, 7.5 - 2, 0, 2 * Math.PI);
-            ctx.fill();
-          }
-          //ctx.drawImage(Img[this.mainHand], 32 - 7.5, 15 - 7.5, 15, 15)
+        let createImage = (src, extention) => {
+            Img[`${src}`] = new Image();
+            Img[`${src}`].src = `/client/img/${src}.${extention}`;
+        };
+        createImage('amethystsword', 'png');
+        createImage('hand', 'png');
+        createImage('stonesword', 'png');
+
+        createImage('stoneaxe', 'png');
+
+        createImage('stonepickaxe', 'png');
+
+        createImage('stonehammer', 'png');
+        createImage('favicon', 'png');
+        createImage('favicon2', 'png');
+        let firstColor = '#CECECE';
+        let secondColor = '#bababa';
+        let thirdColor = '#999999';
+        let fourthColor = 'grey';
+        let drawFourWay = (x, y, size) => {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(size / 150, size / 150);
+            ctx.fillStyle = firstColor;
+            ctx.fillRect(0, 0, 150, 150);
+            ctx.fillStyle = secondColor;
+            ctx.fillRect(10, 0, 130, 150);
+            ctx.fillStyle = secondColor;
+            ctx.fillRect(0, 10, 150, 130);
+            ctx.fillStyle = thirdColor;
+            ctx.fillRect(30, 0, 90, 150);
+            ctx.fillStyle = thirdColor;
+            ctx.fillRect(0, 30, 150, 90);
+            ctx.fillStyle = fourthColor;
+            ctx.fillRect(50, 0, 50, 150);
+            ctx.fillStyle = fourthColor;
+            ctx.fillRect(0, 50, 150, 50);
+            ctx.restore();
+        };
+        let drawThreeWay = (x, y) => {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.fillStyle = firstColor;
+            ctx.fillRect(0, 0, 150, 150);
+            ctx.fillStyle = secondColor;
+            ctx.fillRect(10, 10, 130, 140);
+            ctx.fillStyle = secondColor;
+            ctx.fillRect(0, 10, 150, 130);
+            ctx.fillStyle = thirdColor;
+            ctx.fillRect(30, 30, 90, 120);
+            ctx.fillStyle = thirdColor;
+            ctx.fillRect(0, 30, 150, 90);
+            ctx.fillStyle = fourthColor;
+            ctx.fillRect(50, 50, 50, 100);
+            ctx.fillStyle = fourthColor;
+            ctx.fillRect(0, 50, 150, 50);
+            ctx.restore();
+        };
+        let drawTwoWay = (x, y) => {
+            ctx.fillStyle = firstColor;
+            ctx.fillRect(0, 0, 150, 150);
+            ctx.fillStyle = secondColor;
+            ctx.fillRect(0, 10, 150, 130);
+            ctx.fillStyle = thirdColor;
+            ctx.fillRect(0, 30, 150, 90);
+            ctx.fillStyle = fourthColor;
+            ctx.fillRect(0, 50, 150, 50);
+        };
+        let drawCorner = (x, y) => {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.fillStyle = firstColor;
+            ctx.fillRect(0, 0, 150, 150);
+            ctx.fillStyle = secondColor;
+            ctx.fillRect(10, 10, 130, 140);
+            ctx.fillStyle = secondColor;
+            ctx.fillRect(10, 10, 140, 130);
+            ctx.fillStyle = thirdColor;
+            ctx.fillRect(30, 30, 90, 120);
+            ctx.fillStyle = thirdColor;
+            ctx.fillRect(30, 30, 120, 90);
+            ctx.fillStyle = fourthColor;
+            ctx.fillRect(50, 50, 50, 100);
+            ctx.fillStyle = fourthColor;
+            ctx.fillRect(50, 50, 100, 50);
+            ctx.restore();
+        };
+        let drawOneWay = (x, y) => {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.fillStyle = firstColor;
+            ctx.fillRect(0, 0, 150, 150);
+            ctx.fillStyle = secondColor;
+            ctx.fillRect(10, 10, 140, 130);
+            ctx.fillStyle = thirdColor;
+            ctx.fillRect(30, 30, 120, 90);
+            ctx.fillStyle = fourthColor;
+            ctx.fillRect(50, 50, 100, 50);
+        };
+
+        let drawWall = (x, y) => {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.fillStyle = firstColor;
+            ctx.fillRect(0, 0, 150, 150);
+            ctx.fillStyle = secondColor;
+            ctx.fillRect(10, 10, 130, 130);
+            ctx.fillStyle = thirdColor;
+            ctx.fillRect(30, 30, 90, 90);
+            ctx.fillStyle = fourthColor;
+            ctx.fillRect(50, 50, 50, 50);
+        };
+        let drawCraftingTable = (x, y) => {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.fillStyle = '#808080';
+            ctx.fillRect(0, 0, 200, 200);
+            ctx.fillStyle = '#4E2D05';
+            ctx.fillRect(10, 10, 180, 180);
+            ctx.fillStyle = '#8D5010';
+            ctx.fillRect(10, 100 - 8.5, 180, 17);
+            ctx.fillRect(100 - 8.5, 10, 17, 180);
+            ctx.save();
+            ctx.translate(10 + 35, 10 + 35);
+            ctx.rotate((45 * Math.PI) / 180);
+            ctx.drawImage(Img.stonesword, -25, -35, 70, 70);
+            ctx.restore();
+            ctx.save();
+            ctx.translate(110 + 35, 10 + 35);
+            ctx.rotate((45 * Math.PI) / 180);
+            ctx.drawImage(Img.stoneaxe, -30, -30, 70, 70);
+            ctx.restore();
+            ctx.save();
+            ctx.translate(10 + 35, 110 + 35);
+            ctx.rotate((45 * Math.PI) / 180);
+            ctx.drawImage(Img.stonepickaxe, -30, -30, 70, 70);
+            ctx.restore();
+            ctx.save();
+            ctx.translate(110 + 35, 110 + 35);
+            ctx.rotate((45 * Math.PI) / 180);
+            ctx.drawImage(Img.stonehammer, -30, -30, 70, 70);
+            ctx.restore();
+            ctx.restore();
+        };
+        let c = {
+            x: 50,
+            y: 50,
+        };
+        class miniPlayer {
+            constructor(initPack) {
+                this.usr = initPack.usr || '';
+                this.x = initPack.x;
+                this.y = initPack.y;
+                this.hp = initPack.health || 20;
+                this.maxHp = initPack.maxHp || 20;
+                this.food = initPack.food || 20;
+                this.maxFood = initPack.maxFood || 20;
+                this.mainHand = initPack.mainHand || 'hand';
+                this.id = initPack.id || Math.random();
+                this.angle = initPack.angle || 0;
+                this.lhit = initPack.lhit || false;
+                this.rhit = initPack.rhit || false;
+                this.rad = initPack.rad || 28;
+                this.msg = [];
+                this.clan = initPack.clan || null;
+            }
+            drawPerf(opt) {
+                if (!opt) opt = {};
+                ctx.restore();
+                ctx.save();
+                ctx.scale(this.rad / 25, this.rad / 25);
+                var currx = this.x / (this.rad / 25);
+                var curry = this.y / (this.rad / 25);
+                if (currx < -this.rad || currx > canvas.width + this.rad) return;
+                if (curry < -this.rad || curry > canvas.height + this.rad) return;
+                ctx.save();
+
+                //ctx.drawImage(Img.player, currx - this.rad, curry - this.rad, this.rad * 2, this.rad * 2)
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.fillStyle = 'red';
+                if (opt.drawHp) var hpBar = (((80 * this.rad) / 25) * this.hp) / this.maxHp;
+                ctx.fillRect(currx - (40 * this.rad) / 25, curry - (50 * this.rad) / 25, hpBar, 10);
+                ctx.fillStyle = 'blue';
+                if (opt.drawStamina) var staminaBar = (((80 * this.rad) / 25) * this.stamina) / this.maxStamina;
+                ctx.fillRect(currx - (40 * this.rad) / 25, curry - 2 * this.rad + 10, staminaBar, 10);
+                ctx.fillStyle = 'orange';
+                if (opt.drawFood) var foodBar = (((80 * this.rad) / 25) * this.food) / this.maxFood;
+                ctx.fillRect(currx - (40 * this.rad) / 25, curry - (50 * this.rad) / 25 - 10, foodBar, 10);
+                if (this.clan) {
+                    ctx.textAlign = 'center';
+                    ctx.font = '18px Zorque';
+                    ctx.strokeStyle = 'black';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.strokeText(`[${this.clan}]${this.usr}`, currx, curry + (55 * this.rad) / 25);
+                    ctx.fillStyle = 'white';
+                    ctx.fillText(`[${this.clan}]${this.usr}`, currx, curry + (55 * this.rad) / 25);
+                } else {
+                    ctx.textAlign = 'center';
+                    ctx.font = '18px Zorque';
+                    ctx.strokeStyle = 'black';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.strokeText(this.usr, currx, curry + (55 * this.rad) / 25);
+                    ctx.fillStyle = 'white';
+                    ctx.fillText(this.usr, currx, curry + (55 * this.rad) / 25);
+                }
+                this.msg.forEach((msgObj, i) => {
+                    if (this.msg.length == 1 && i == 0) {
+                        ctx.globalAlpha = Math.abs(msgObj.per - 1);
+                        ctx.textAlign = 'center';
+                        ctx.font = '12px Arial';
+                        ctx.strokeStyle = 'black';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.strokeText(msgObj.msg, currx, curry - (60 * this.rad) / 25);
+                        ctx.fillStyle = 'white';
+                        ctx.fillText(msgObj.msg, currx, curry - (60 * this.rad) / 25);
+                    } else if (this.msg.length == 2 && i == 1) {
+                        ctx.globalAlpha = Math.abs(msgObj.per - 1);
+                        ctx.textAlign = 'center';
+                        ctx.font = '12px Arial';
+                        ctx.strokeStyle = 'black';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.strokeText(msgObj.msg, currx, curry - (60 * this.rad) / 25);
+                        ctx.fillStyle = 'white';
+                        ctx.fillText(msgObj.msg, currx, curry - (60 * this.rad) / 25);
+                    } else if (this.msg.length == 2 && i == 0) {
+                        ctx.globalAlpha = Math.abs(msgObj.per - 1);
+                        ctx.textAlign = 'center';
+                        ctx.font = '12px Arial';
+                        ctx.strokeStyle = 'black';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.strokeText(msgObj.msg, currx, curry - 20 - (60 * this.rad) / 25);
+                        ctx.fillStyle = 'white';
+                        ctx.fillText(msgObj.msg, currx, curry - 20 - (60 * this.rad) / 25);
+                    }
+                });
+                ctx.globalAlpha = 1;
+                ctx.translate(currx, curry);
+
+                ctx.rotate((Math.PI / 180) * this.angle);
+                ctx.scale(this.rad / 25, this.rad / 25);
+                if (this.mainHand == 'hand') {
+                    if (!this.rhit) {
+                        ctx.beginPath();
+                        ctx.fillStyle = 'black';
+                        ctx.arc(32, 15, 7.5, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.fillStyle = '#7F7F7F';
+                        ctx.arc(32, 15, 7.5 - 2, 0, 2 * Math.PI);
+                        ctx.fill();
+                        //ctx.drawImage(Img.hand, 32 - 7.5, 15 - 7.5, 15, 15)
+                    } else {
+                        ctx.save();
+                        ctx.translate(32 - 7.5, 15 - 7.5);
+                        ctx.rotate((Math.PI / 180) * (360 - (-Math.abs(-160 * this.punchper + 80) + 80)));
+                        ctx.beginPath();
+                        ctx.fillStyle = 'black';
+                        ctx.arc(7.5, 7.5, 7.5, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.fillStyle = '#7F7F7F';
+                        ctx.arc(7.5, 7.5, 7.5 - 2, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.restore();
+                    }
+                    if (!this.lhit) {
+                        ctx.beginPath();
+                        ctx.fillStyle = 'black';
+                        ctx.arc(32, -15, 7.5, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.fillStyle = '#7F7F7F';
+                        ctx.arc(32, -15, 7.5 - 2, 0, 2 * Math.PI);
+                        ctx.fill();
+                    } else {
+                        ctx.save();
+                        ctx.translate(32 - 7.5, -(15 - 7.5));
+                        ctx.rotate((Math.PI / 180) * (0 + (-Math.abs(-160 * this.punchper + 80) + 80)));
+                        ctx.beginPath();
+                        ctx.fillStyle = 'black';
+                        ctx.arc(7.5, -7.5, 7.5, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.fillStyle = '#7F7F7F';
+                        ctx.arc(7.5, -7.5, 7.5 - 2, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.restore();
+                    }
+                } else {
+                    if (/Axe|Pickaxe|Sword|Hammer/.test(this.mainHand)) {
+                        if (/Axe/.test(this.mainHand)) {
+                            let img = this.mainHand.toLowerCase().replace(/\s/, '');
+                            ctx.save();
+                            ctx.translate(32 - 7.5 + 5, 0);
+                            if (this.hitting)
+                                ctx.rotate((Math.PI / 180) * (360 - (-Math.abs(-120 * this.per + 60) + 60)));
+                            ctx.save();
+                            ctx.translate(-2.5 + 75 / 2 - 32 - 7.5 + 10, -30 + 75 / 2);
+                            ctx.rotate((Math.PI / 180) * 180);
+                            ctx.drawImage(Img[img], 0 - 75 / 2, 0 - 75 / 2, 75, 75);
+                            ctx.restore();
+                            ctx.drawImage(Img.hand, 0, 15 - 7.5 - 5, 15, 15);
+                            ctx.drawImage(Img.hand, 0, 15 - 2 - 7.5 - 30, 15, 15);
+                            ctx.restore();
+                        } else if (/Pickaxe/.test(this.mainHand)) {
+                            let img = this.mainHand.toLowerCase().replace(/\s/, '');
+                            ctx.save();
+                            ctx.translate(32 - 7.5 + 5, 0);
+
+                            if (this.hitting)
+                                ctx.rotate((Math.PI / 180) * (360 - (-Math.abs(-120 * this.per + 60) + 60)));
+                            ctx.save();
+                            ctx.translate(-2.5 + 75 / 2 - 32 - 7.5 + 10, -30 + 75 / 2);
+                            ctx.rotate((Math.PI / 180) * 180);
+                            ctx.drawImage(Img[img], 0 - 75 / 2, 0 - 75 / 2, 75, 75);
+                            ctx.restore();
+                            ctx.drawImage(Img.hand, 0, 15 - 7.5 - 5, 15, 15);
+                            ctx.drawImage(Img.hand, 0, 15 - 2 - 7.5 - 30, 15, 15);
+                            ctx.restore();
+                        } else if (/Sword/.test(this.mainHand)) {
+                            let img = this.mainHand.toLowerCase().replace(/\s/, '');
+                            ctx.save();
+                            ctx.translate(32 - 7.5 + 5, 0);
+                            ctx.strokeStyle = 'black';
+                            ctx.lineWidth = '20px';
+                            ctx.drawImage(Img.hand, -15, 15 - 7.5 - 5 + 25, 15, 15);
+                            if (this.hitting)
+                                ctx.rotate((Math.PI / 180) * (360 - (-Math.abs(-120 * this.per + 60) + 60)));
+                            ctx.save();
+                            ctx.translate(-2.5 + 75 / 2 - 32 - 7.5 + 10, -30 + 75 / 2);
+                            ctx.rotate((Math.PI / 180) * 180);
+                            ctx.drawImage(Img[img], 0 - 75 / 2, 0 - 75 / 2, 75, 75);
+                            ctx.restore();
+
+                            ctx.drawImage(Img.hand, 0, 15 - 2 - 7.5 - 30, 15, 15);
+                            ctx.restore();
+                        } else if (/Hammer/.test(this.mainHand)) {
+                            let img = this.mainHand.toLowerCase().replace(/\s/, '');
+                            ctx.save();
+                            ctx.translate(32 - 7.5 + 5, 0);
+                            if (this.hitting)
+                                ctx.rotate((Math.PI / 180) * (360 - (-Math.abs(-120 * this.per + 60) + 60)));
+                            ctx.save();
+                            ctx.translate(-2.5 + 75 / 2 - 32 - 7.5 + 10, -30 + 75 / 2);
+                            ctx.rotate((Math.PI / 180) * 180);
+                            ctx.drawImage(Img[img], 0 - 75 / 2, 0 - 75 / 2, 75, 75);
+                            ctx.restore();
+                            ctx.drawImage(Img.hand, 0, 15 - 7.5 - 5, 15, 15);
+                            ctx.drawImage(Img.hand, 0, 15 - 2 - 7.5 - 30, 15, 15);
+                            ctx.restore();
+                        }
+                    }
+                    if (/Wall|Door|Floor|Crafting Table|Chest/.test(this.mainHand)) {
+                        let img = this.mainHand.toLowerCase().replace(/\s/, '');
+                        ctx.drawImage(Img.hand, 32 - 7.5, -15 - 7.5, 15, 15);
+                        ctx.save();
+                        ctx.translate(32 - 7.5 + 5, 0);
+                        ctx.drawImage(Img.hand, -15, 15 - 7.5 - 5 + 25, 15, 15);
+                        ctx.restore();
+                    }
+                    if (this.mainHand == 'carrot') {
+                        ctx.save();
+                        ctx.translate(32, 15);
+                        let r;
+                        if (this.per) r = (Math.PI / 180) * (360 - (-Math.abs(-160 * this.per + 80) + 80));
+                        else r = 0;
+                        if (r < 180) r += 180;
+                        else r -= 180;
+                        ctx.rotate(r);
+                        ctx.beginPath();
+                        ctx.fillStyle = 'black';
+                        ctx.arc(0, 0, 7.5, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.fillStyle = '#7F7F7F';
+                        ctx.arc(0, 0, 7.5 - 2, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.drawImage(Img.carrot, 0 - 15, 0 - 15, 30, 30);
+                        ctx.restore();
+
+                        ctx.beginPath();
+                        ctx.fillStyle = 'black';
+                        ctx.arc(32, -15, 7.5, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.fillStyle = '#7F7F7F';
+                        ctx.arc(32, -15, 7.5 - 2, 0, 2 * Math.PI);
+                        ctx.fill();
+                    }
+                    //ctx.drawImage(Img[this.mainHand], 32 - 7.5, 15 - 7.5, 15, 15)
+                }
+                ctx.restore();
+                ctx.beginPath();
+                ctx.fillStyle = '#000010';
+                ctx.arc(currx, curry, this.rad, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.fillStyle = '#C3C3C3';
+                ctx.arc(currx, curry, this.rad - 2, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.translate(currx, curry);
+                ctx.rotate((Math.PI / 180) * this.angle);
+                ctx.fillStyle = 'black';
+                ctx.beginPath();
+                ctx.arc(0 + (9 * this.rad) / 28, 0 + (8 * this.rad) / 28, (6 * this.rad) / 28, 0, 2 * Math.PI);
+                ctx.arc(0 + (9 * this.rad) / 28, 0 - (8 * this.rad) / 28, (6 * this.rad) / 28, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(0 + (6.5 * this.rad) / 28, 0 + (7 * this.rad) / 28, (2.5 * this.rad) / 28, 0, 2 * Math.PI);
+                ctx.arc(0 + (6.5 * this.rad) / 28, 0 - (7 * this.rad) / 28, (2.5 * this.rad) / 28, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.restore();
+                ctx.restore();
+            }
         }
-        ctx.restore();
-        ctx.beginPath();
-        ctx.fillStyle = "#000010";
-        ctx.arc(currx, curry, this.rad, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.fillStyle = "#C3C3C3";
-        ctx.arc(currx, curry, this.rad - 2, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.translate(currx, curry);
-        ctx.rotate((Math.PI / 180) * this.angle);
-        ctx.fillStyle = "black";
-        ctx.beginPath();
-        ctx.arc(
-          0 + (9 * this.rad) / 28,
-          0 + (8 * this.rad) / 28,
-          (6 * this.rad) / 28,
-          0,
-          2 * Math.PI
-        );
-        ctx.arc(
-          0 + (9 * this.rad) / 28,
-          0 - (8 * this.rad) / 28,
-          (6 * this.rad) / 28,
-          0,
-          2 * Math.PI
-        );
-        ctx.fill();
-        ctx.fillStyle = "white";
-        ctx.beginPath();
-        ctx.arc(
-          0 + (6.5 * this.rad) / 28,
-          0 + (7 * this.rad) / 28,
-          (2.5 * this.rad) / 28,
-          0,
-          2 * Math.PI
-        );
-        ctx.arc(
-          0 + (6.5 * this.rad) / 28,
-          0 - (7 * this.rad) / 28,
-          (2.5 * this.rad) / 28,
-          0,
-          2 * Math.PI
-        );
-        ctx.fill();
-        ctx.restore();
-        ctx.restore();
-      }
-    }
-    let p = new miniPlayer({
-      usr: "",
-      x: 480 / 2 - 50,
-      y: 480 / 2 + 23,
-      lhit: true,
-      rhit: false,
-      rad: 60,
-      angle: 315,
-      //mainHand:'Amethyst Sword'
-    });
-    let drawFavicon = (txt) => {
-      p.rad = ((60 * pixelNum) / 480) * Math.pow(pixelNum / 480, -0.500655);
-      Object.assign(p, {
-        x:
-          pixelNum / 2 -
-          ((50 * pixelNum) / 480) * Math.pow(pixelNum / 480, -0.500655),
-        y:
-          pixelNum / 2 +
-          ((23 * pixelNum) / 480) * Math.pow(pixelNum / 480, -0.500655),
-      });
-      p.drawPerf();
-      ctx.restore();
-      let ctxdl = document.createElement("a");
-      ctx.textAlign = "center";
-      ctx.font = `${(70 * pixelNum) / 480}px Zorque`;
-      ctx.strokeStyle = "black";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.strokeText(txt, pixelNum / 2, pixelNum - (58 * pixelNum) / 480);
-      ctx.fillStyle = "#800000";
-      ctx.fillText(txt, pixelNum / 2, pixelNum - (58 * pixelNum) / 480);
-    };
-    //p.hitting = true
-    //p.per = Math.random()
-    console.log(p.per);
-    p.per = 0.3;
-    p.hittin = true;
-    //p.drawPerf()
-    let href = document.createElement("a");
-    href.href = canvas.toDataURL("image/png");
-    href.style.display = "none";
-    href.download = "favicon.png";
-    document.body.appendChild(href);
-    //href.click()
-    var video = document.getElementById("video");
-    let supportedType;
-    let types = [
-      "video/webm",
-      "video/webm,codecs=vp9",
-      "video/vp8",
-      "video/webm\;codecs=vp8",
-      "video/webm\;codecs=daala",
-      "video/webm\;codecs=h264",
-      "video/mpeg",
-    ];
-    let supportedTypes = types.filter((t) => MediaRecorder.isTypeSupported);
-    var mimeCodec = supportedTypes[4];
-    console.log(supportedTypes);
-    let stream = canvas.captureStream();
-    //video.srcObject = stream
-    let recorder = new MediaRecorder(stream);
-    let chunks = [];
-    recorder.addEventListener("dataavailable", (e) => {
-      //   a.href = URL.createObjectURL(new Blob([e.data]))
-      //a.click()
-    });
-    recorder.start();
-    //a.href = URL.createObjectURL('ee')
-    //a.download = 'favicon.mp4'
-    setTimeout(() => recorder.stop(), 1000);
-    let drawPolygon = (sides, size, x, y, angle, color) => {
-      ctx.beginPath();
-      ctx.moveTo(x + size * Math.cos(0), y + size * Math.sin(0));
+        let p = new miniPlayer({
+            usr: '',
+            x: 480 / 2 - 50,
+            y: 480 / 2 + 23,
+            lhit: true,
+            rhit: false,
+            rad: 60,
+            angle: 315,
+            //mainHand:'Amethyst Sword'
+        });
+        let drawFavicon = (txt) => {
+            p.rad = ((60 * pixelNum) / 480) * Math.pow(pixelNum / 480, -0.500655);
+            Object.assign(p, {
+                x: pixelNum / 2 - ((50 * pixelNum) / 480) * Math.pow(pixelNum / 480, -0.500655),
+                y: pixelNum / 2 + ((23 * pixelNum) / 480) * Math.pow(pixelNum / 480, -0.500655),
+            });
+            p.drawPerf();
+            ctx.restore();
+            let ctxdl = document.createElement('a');
+            ctx.textAlign = 'center';
+            ctx.font = `${(70 * pixelNum) / 480}px Zorque`;
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.strokeText(txt, pixelNum / 2, pixelNum - (58 * pixelNum) / 480);
+            ctx.fillStyle = '#800000';
+            ctx.fillText(txt, pixelNum / 2, pixelNum - (58 * pixelNum) / 480);
+        };
+        //p.hitting = true
+        //p.per = Math.random()
+        console.log(p.per);
+        p.per = 0.3;
+        p.hittin = true;
+        //p.drawPerf()
+        let href = document.createElement('a');
+        href.href = canvas.toDataURL('image/png');
+        href.style.display = 'none';
+        href.download = 'favicon.png';
+        document.body.appendChild(href);
+        //href.click()
+        var video = document.getElementById('video');
+        let supportedType;
+        let types = [
+            'video/webm',
+            'video/webm,codecs=vp9',
+            'video/vp8',
+            'video/webm\;codecs=vp8',
+            'video/webm\;codecs=daala',
+            'video/webm\;codecs=h264',
+            'video/mpeg',
+        ];
+        let supportedTypes = types.filter((t) => MediaRecorder.isTypeSupported);
+        var mimeCodec = supportedTypes[4];
+        console.log(supportedTypes);
+        let stream = canvas.captureStream();
+        //video.srcObject = stream
+        let recorder = new MediaRecorder(stream);
+        let chunks = [];
+        recorder.addEventListener('dataavailable', (e) => {
+            //   a.href = URL.createObjectURL(new Blob([e.data]))
+            //a.click()
+        });
+        recorder.start();
+        //a.href = URL.createObjectURL('ee')
+        //a.download = 'favicon.mp4'
+        setTimeout(() => recorder.stop(), 1000);
+        let drawPolygon = (sides, size, x, y, angle, color) => {
+            ctx.beginPath();
+            ctx.moveTo(x + size * Math.cos(0), y + size * Math.sin(0));
 
-      for (var i = 1; i <= sides; i += 1) {
-        ctx.lineTo(
-          x + size * Math.cos((i * 2 * Math.PI) / sides),
-          y + size * Math.sin((i * 2 * Math.PI) / sides)
-        );
-      }
+            for (var i = 1; i <= sides; i += 1) {
+                ctx.lineTo(
+                    x + size * Math.cos((i * 2 * Math.PI) / sides),
+                    y + size * Math.sin((i * 2 * Math.PI) / sides),
+                );
+            }
 
-      ctx.fillStyle = color;
-      ctx.lineWidth = 1;
-      ctx.fill();
-      ctx.restore();
-    };
-    let drawConcave = (sides, size, x, y, angle, color) => {
-      ctx.beginPath();
-      ctx.moveTo(x + size * Math.cos(0), y + size * Math.sin(0));
+            ctx.fillStyle = color;
+            ctx.lineWidth = 1;
+            ctx.fill();
+            ctx.restore();
+        };
+        let drawConcave = (sides, size, x, y, angle, color) => {
+            ctx.beginPath();
+            ctx.moveTo(x + size * Math.cos(0), y + size * Math.sin(0));
 
-      for (var i = 1; i <= sides; i += 1) {
-        ctx.lineTo(
-          x + size * Math.cos((i * 2 * angle * Math.PI) / sides),
-          y + size * Math.sin((i * 2 * angle * Math.PI) / sides)
-        );
-      }
+            for (var i = 1; i <= sides; i += 1) {
+                ctx.lineTo(
+                    x + size * Math.cos((i * 2 * angle * Math.PI) / sides),
+                    y + size * Math.sin((i * 2 * angle * Math.PI) / sides),
+                );
+            }
 
-      ctx.fillStyle = color;
-      ctx.lineWidth = 1;
-      ctx.fill();
-      ctx.restore();
-    };
-    let pixels = [1, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150];
-    let drawTree = (x, y, size) => {
-      drawConcave(8, size, x, y, 45, "#50c878");
-      drawPolygon(13, (size * 350) / 900, x, y, 0, "#b06831");
-    };
-    const drawWood = (x, y, scale = 1) => {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.scale((scale * pixelNum) / 90, (scale * pixelNum) / 90);
-      ctx.beginPath();
-      ctx.lineJoin = ctx.lineCap = "round";
-      ctx.lineWidth = 10;
-      ctx.strokeStyle = "maroon";
-      ctx.moveTo(0 - 45 + 75, 0 - 45 + 27.857);
-      ctx.lineTo(0 - 45 + 15, 0 - 45 + 62.143);
-      ctx.stroke();
-      ctx.lineJoin = ctx.lineCap = "round";
-      ctx.lineWidth = 7;
-      ctx.strokeStyle = "saddlebrown";
-      ctx.moveTo(0 - 45 + 75, 0 - 45 + 27.857);
-      ctx.lineTo(0 - 45 + 15, 0 - 45 + 62.143);
-      ctx.stroke();
+            ctx.fillStyle = color;
+            ctx.lineWidth = 1;
+            ctx.fill();
+            ctx.restore();
+        };
+        let pixels = [1, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150];
+        let drawTree = (x, y, size) => {
+            drawConcave(8, size, x, y, 45, '#50c878');
+            drawPolygon(13, (size * 350) / 900, x, y, 0, '#b06831');
+        };
+        const drawWood = (x, y, scale = 1) => {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale((scale * pixelNum) / 90, (scale * pixelNum) / 90);
+            ctx.beginPath();
+            ctx.lineJoin = ctx.lineCap = 'round';
+            ctx.lineWidth = 10;
+            ctx.strokeStyle = 'maroon';
+            ctx.moveTo(0 - 45 + 75, 0 - 45 + 27.857);
+            ctx.lineTo(0 - 45 + 15, 0 - 45 + 62.143);
+            ctx.stroke();
+            ctx.lineJoin = ctx.lineCap = 'round';
+            ctx.lineWidth = 7;
+            ctx.strokeStyle = 'saddlebrown';
+            ctx.moveTo(0 - 45 + 75, 0 - 45 + 27.857);
+            ctx.lineTo(0 - 45 + 15, 0 - 45 + 62.143);
+            ctx.stroke();
 
-      ctx.beginPath();
-      ctx.lineJoin = ctx.lineCap = "round";
-      ctx.lineWidth = 10;
-      ctx.strokeStyle = "maroon";
-      ctx.moveTo(0 - 45 + 15, 0 - 45 + 27.857);
-      ctx.lineTo(0 - 45 + 75, 0 - 45 + 62.143);
-      ctx.stroke();
+            ctx.beginPath();
+            ctx.lineJoin = ctx.lineCap = 'round';
+            ctx.lineWidth = 10;
+            ctx.strokeStyle = 'maroon';
+            ctx.moveTo(0 - 45 + 15, 0 - 45 + 27.857);
+            ctx.lineTo(0 - 45 + 75, 0 - 45 + 62.143);
+            ctx.stroke();
 
-      ctx.lineJoin = ctx.lineCap = "round";
-      ctx.lineWidth = 7;
-      ctx.strokeStyle = "saddlebrown";
-      ctx.moveTo(0 - 45 + 15, 0 - 45 + 27.857);
-      ctx.lineTo(0 - 45 + 75, 0 - 45 + 62.143);
-      ctx.stroke();
+            ctx.lineJoin = ctx.lineCap = 'round';
+            ctx.lineWidth = 7;
+            ctx.strokeStyle = 'saddlebrown';
+            ctx.moveTo(0 - 45 + 15, 0 - 45 + 27.857);
+            ctx.lineTo(0 - 45 + 75, 0 - 45 + 62.143);
+            ctx.stroke();
 
-      ctx.beginPath();
-      ctx.lineWidth = 1.5;
-      ctx.strokeStyle = "black";
-      ctx.fillStyle = "white";
-      ctx.restore();
-    };
+            ctx.beginPath();
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = 'black';
+            ctx.fillStyle = 'white';
+            ctx.restore();
+        };
 
-    let drawStone = (x, y, size) => {
-      drawPolygon(8, size, x, y, 0, "#73757e");
-      drawPolygon(9, size / 2, x, y, 0, "#b3b4bb");
-    };
-    let drawIron = (x, y, size) => {
-      drawPolygon(8, size, x, y, 0, "#c0c0c0");
-      drawPolygon(9, size / 2, x, y, 0, "#767676");
-    };
-    let drawGold = (x, y, size) => {
-      drawPolygon(8, size, x, y, 0, "#f4de64");
-      drawPolygon(9, size / 2, x, y, 0, "#c0c0c0");
-    };
-    let drawDiamond = (x, y, size) => {
-      drawPolygon(8, size, x, y, 0, "#32f2ff");
-      drawPolygon(9, size / 2, x, y, 0, "#c0c0c0");
-    };
-    let drawEmerald = (x, y, size) => {
-      drawPolygon(8, size, x, y, 0, "#50c978");
-      drawPolygon(9, size / 2, x, y, 0, "#c0c0c0");
-    };
-    let drawAmethyst = (x, y, size) => {
-      drawPolygon(8, size, x, y, 0, "#9966cc");
-      drawPolygon(9, size / 2, x, y, 0, "#c0c0c0");
-    };
-    let drawShovel = (
-      handleColor,
-      mainColor,
-      tintColor,
-      pNum = 480,
-      rotate
-    ) => {
-      ctx.save();
-      ctx.translate(pixelNum / 2, pixelNum / 2);
-      ctx.rotate((rotate * Math.PI) / 180);
-      ctx.scale(pNum / 480, pNum / 480);
-      ctx.translate(-pixelNum / 2, -pixelNum / 2);
-      let leftControlPointX = pixelNum / 2 - 80;
-      let leftControlPointY = pixelNum / 2 - 80 - 80;
-      let rightControlPointX = pixelNum / 2 + 80;
-      let rightControlPointY = pixelNum / 2 - 80 - 80;
-      let leftStartPointX = pixelNum / 2 - 60;
-      let leftStartPointY = pixelNum / 2 - 50;
-      let rightStartPointX = pixelNum / 2 + 60;
-      let rightStartPointY = pixelNum / 2 - 50;
+        let drawStone = (x, y, size) => {
+            drawPolygon(8, size, x, y, 0, '#73757e');
+            drawPolygon(9, size / 2, x, y, 0, '#b3b4bb');
+        };
+        let drawIron = (x, y, size) => {
+            drawPolygon(8, size, x, y, 0, '#c0c0c0');
+            drawPolygon(9, size / 2, x, y, 0, '#767676');
+        };
+        let drawGold = (x, y, size) => {
+            drawPolygon(8, size, x, y, 0, '#f4de64');
+            drawPolygon(9, size / 2, x, y, 0, '#c0c0c0');
+        };
+        let drawDiamond = (x, y, size) => {
+            drawPolygon(8, size, x, y, 0, '#32f2ff');
+            drawPolygon(9, size / 2, x, y, 0, '#c0c0c0');
+        };
+        let drawEmerald = (x, y, size) => {
+            drawPolygon(8, size, x, y, 0, '#50c978');
+            drawPolygon(9, size / 2, x, y, 0, '#c0c0c0');
+        };
+        let drawAmethyst = (x, y, size) => {
+            drawPolygon(8, size, x, y, 0, '#9966cc');
+            drawPolygon(9, size / 2, x, y, 0, '#c0c0c0');
+        };
+        let drawShovel = (handleColor, mainColor, tintColor, pNum = 480, rotate) => {
+            ctx.save();
+            ctx.translate(pixelNum / 2, pixelNum / 2);
+            ctx.rotate((rotate * Math.PI) / 180);
+            ctx.scale(pNum / 480, pNum / 480);
+            ctx.translate(-pixelNum / 2, -pixelNum / 2);
+            let leftControlPointX = pixelNum / 2 - 80;
+            let leftControlPointY = pixelNum / 2 - 80 - 80;
+            let rightControlPointX = pixelNum / 2 + 80;
+            let rightControlPointY = pixelNum / 2 - 80 - 80;
+            let leftStartPointX = pixelNum / 2 - 60;
+            let leftStartPointY = pixelNum / 2 - 50;
+            let rightStartPointX = pixelNum / 2 + 60;
+            let rightStartPointY = pixelNum / 2 - 50;
 
-      let tipX = pixelNum / 2;
-      let tipY = pixelNum / 2 - 140 - 80;
-      ctx.beginPath();
-      ctx.moveTo(tipX + 25, rightStartPointY);
-      ctx.lineTo(tipX + 25, rightStartPointY + 283 - 25);
-      ctx.quadraticCurveTo(
-        tipX + 25,
-        rightStartPointY + 283,
-        tipX,
-        rightStartPointY + 283
-      );
-      ctx.quadraticCurveTo(
-        tipX - 25,
-        rightStartPointY + 283,
-        tipX - 25,
-        rightStartPointY + 283 - 25
-      );
-      ctx.lineTo(tipX - 25, rightStartPointY);
-      ctx.fillStyle = handleColor;
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(rightStartPointX, rightStartPointY);
-      ctx.lineTo(leftStartPointX, leftStartPointY);
+            let tipX = pixelNum / 2;
+            let tipY = pixelNum / 2 - 140 - 80;
+            ctx.beginPath();
+            ctx.moveTo(tipX + 25, rightStartPointY);
+            ctx.lineTo(tipX + 25, rightStartPointY + 283 - 25);
+            ctx.quadraticCurveTo(tipX + 25, rightStartPointY + 283, tipX, rightStartPointY + 283);
+            ctx.quadraticCurveTo(tipX - 25, rightStartPointY + 283, tipX - 25, rightStartPointY + 283 - 25);
+            ctx.lineTo(tipX - 25, rightStartPointY);
+            ctx.fillStyle = handleColor;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(rightStartPointX, rightStartPointY);
+            ctx.lineTo(leftStartPointX, leftStartPointY);
 
-      ctx.fillStyle = mainColor;
-      ctx.beginPath();
-      ctx.moveTo(leftStartPointX, leftStartPointY);
-      ctx.quadraticCurveTo(leftControlPointX, leftControlPointY, tipX, tipY);
-      ctx.lineTo(tipX, rightStartPointY);
-      ctx.fill();
+            ctx.fillStyle = mainColor;
+            ctx.beginPath();
+            ctx.moveTo(leftStartPointX, leftStartPointY);
+            ctx.quadraticCurveTo(leftControlPointX, leftControlPointY, tipX, tipY);
+            ctx.lineTo(tipX, rightStartPointY);
+            ctx.fill();
 
-      ctx.fillStyle = tintColor;
-      ctx.beginPath();
-      ctx.moveTo(rightStartPointX, rightStartPointY);
-      ctx.quadraticCurveTo(rightControlPointX, rightControlPointY, tipX, tipY);
-      ctx.lineTo(tipX, rightStartPointY);
-      ctx.fill();
-      ctx.restore();
-    };
-    let drawSword = (handleColor, mainColor, tintColor, pixelNum = 480) => {
-      let leftControlPointX = pixelNum / 2 - 80;
-      let leftControlPointY = pixelNum / 2 - 80 - 80;
-      let rightControlPointX = pixelNum / 2 + 80;
-      let rightControlPointY = pixelNum / 2 - 80 - 80;
-      let leftStartPointX = pixelNum / 2 - 60;
-      let leftStartPointY = pixelNum / 2 - 50;
-      let rightStartPointX = pixelNum / 2 + 60;
-      let rightStartPointY = pixelNum / 2 - 50;
+            ctx.fillStyle = tintColor;
+            ctx.beginPath();
+            ctx.moveTo(rightStartPointX, rightStartPointY);
+            ctx.quadraticCurveTo(rightControlPointX, rightControlPointY, tipX, tipY);
+            ctx.lineTo(tipX, rightStartPointY);
+            ctx.fill();
+            ctx.restore();
+        };
+        let drawSword = (handleColor, mainColor, tintColor, pixelNum = 480) => {
+            let leftControlPointX = pixelNum / 2 - 80;
+            let leftControlPointY = pixelNum / 2 - 80 - 80;
+            let rightControlPointX = pixelNum / 2 + 80;
+            let rightControlPointY = pixelNum / 2 - 80 - 80;
+            let leftStartPointX = pixelNum / 2 - 60;
+            let leftStartPointY = pixelNum / 2 - 50;
+            let rightStartPointX = pixelNum / 2 + 60;
+            let rightStartPointY = pixelNum / 2 - 50;
 
-      let tipX = pixelNum / 2;
-      let tipY = pixelNum / 2 - 140 - 80;
-      ctx.beginPath();
-      ctx.moveTo(tipX + 25, rightStartPointY);
-      ctx.lineTo(tipX + 25, rightStartPointY + 283 - 25);
-      ctx.quadraticCurveTo(
-        tipX + 25,
-        rightStartPointY + 283,
-        tipX,
-        rightStartPointY + 283
-      );
-      ctx.quadraticCurveTo(
-        tipX - 25,
-        rightStartPointY + 283,
-        tipX - 25,
-        rightStartPointY + 283 - 25
-      );
-      ctx.lineTo(tipX - 25, rightStartPointY);
-      ctx.fillStyle = handleColor;
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(rightStartPointX, rightStartPointY);
-      ctx.lineTo(leftStartPointX, leftStartPointY);
-      /*
+            let tipX = pixelNum / 2;
+            let tipY = pixelNum / 2 - 140 - 80;
+            ctx.beginPath();
+            ctx.moveTo(tipX + 25, rightStartPointY);
+            ctx.lineTo(tipX + 25, rightStartPointY + 283 - 25);
+            ctx.quadraticCurveTo(tipX + 25, rightStartPointY + 283, tipX, rightStartPointY + 283);
+            ctx.quadraticCurveTo(tipX - 25, rightStartPointY + 283, tipX - 25, rightStartPointY + 283 - 25);
+            ctx.lineTo(tipX - 25, rightStartPointY);
+            ctx.fillStyle = handleColor;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(rightStartPointX, rightStartPointY);
+            ctx.lineTo(leftStartPointX, leftStartPointY);
+            /*
         ctx.fillStyle = mainColor
         ctx.beginPath()
         ctx.moveTo(leftStartPointX, leftStartPointY);
@@ -843,117 +737,110 @@
         ctx.quadraticCurveTo(rightControlPointX, rightControlPointY, tipX, tipY);
         ctx.lineTo(tipX, rightStartPointY)
         ctx.fill()*/
-    };
-    let leftToDraw = [];
-    let sorted = [1, 3, 5, 10, 7, 9].sort((a, b) => a - b);
-    console.log(sorted);
-    const findClosest = (array, target) => {
-      let n = array.length;
-      if (target <= array[0]) return array[0];
-      if (target >= array[array.lastIndexOf]) return array[array.lastIndexOf];
-      let i = 0,
-        j = array.length,
-        mid = 0;
-      while (i < j) {
-        mid = (i + j) / 2;
-        if (array[parseInt(mid)] == target) return array[parseInt(mid)];
-        if (target < array[parseInt(mid)]) {
-          // If target is greater than previous
-          // to mid, return closest of two
-          if (mid > 0 && target > array[parseInt(mid) - 1])
-            return getClosest(
-              array[parseInt(mid) - 1],
-              array[parseInt(mid)],
-              target
-            );
-          j = mid;
-        } else {
-          if (mid < n - 1 && target < array[parseInt(mid) + 1])
-            return getClosest(
-              array[parseInt(mid)],
-              array[parseInt(mid) + 1],
-              target
-            );
-          i = mid + 1;
+        };
+        let leftToDraw = [];
+        let sorted = [1, 3, 5, 10, 7, 9].sort((a, b) => a - b);
+        console.log(sorted);
+        const findClosest = (array, target) => {
+            let n = array.length;
+            if (target <= array[0]) return array[0];
+            if (target >= array[array.lastIndexOf]) return array[array.lastIndexOf];
+            let i = 0,
+                j = array.length,
+                mid = 0;
+            while (i < j) {
+                mid = (i + j) / 2;
+                if (array[parseInt(mid)] == target) return array[parseInt(mid)];
+                if (target < array[parseInt(mid)]) {
+                    // If target is greater than previous
+                    // to mid, return closest of two
+                    if (mid > 0 && target > array[parseInt(mid) - 1])
+                        return getClosest(array[parseInt(mid) - 1], array[parseInt(mid)], target);
+                    j = mid;
+                } else {
+                    if (mid < n - 1 && target < array[parseInt(mid) + 1])
+                        return getClosest(array[parseInt(mid)], array[parseInt(mid) + 1], target);
+                    i = mid + 1;
+                }
+            }
+            return array[parseInt(mid)];
+        };
+        function getClosest($val1, $val2, $target) {
+            if ($target - $val1 >= $val2 - $target) return $val2;
+            else return $val1;
         }
-      }
-      return array[parseInt(mid)];
-    };
-    function getClosest($val1, $val2, $target) {
-      if ($target - $val1 >= $val2 - $target) return $val2;
-      else return $val1;
-    }
-    console.log(findClosest(sorted, 4));
-    let pixelTotal = [
-      1,
-      5,
-      10,
-      20,
-      30,
-      40,
-      50,
-      60,
-      70,
-      80,
-      90,
-      100,
-      150,
-      240,
-      360,
-      480,
-      720,
-      1080,
-    ];
-    let draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      //let pixel = localStorage.getItem('locked') == 'true' ? (findClosest(pixelTotal, quality.value) + 'px') : (quality.value + 'px')
-      console.log(localStorage.getItem("locked") == "true", pixel);
-      pixelNum = parseInt(pixel);
-      console.log("working", pixelNum);
-      canvas.style.width = pixelNum + "px";
-      canvas.style.height = pixelNum + "px";
-      canvas.width = parseInt(pixel);
-      canvas.height = parseInt(pixel);
-      let drawSand = () => {
-        ctx.beginPath();
-        ctx.moveTo(pixelNum / 2 - 180, pixelNum / 2 - 180 + 250);
-        ctx.quadraticCurveTo(
-          pixelNum / 2,
-          pixelNum / 2 - 60 + 250,
-          pixelNum / 2 + 180,
-          pixelNum / 2 - 180 + 250
-        );
-        ctx.lineTo(pixelNum / 2, pixelNum / 2 - 420 + 250);
-        ctx.lineTo(pixelNum / 2 - 180, pixelNum / 2 - 180 + 250);
-        ctx.fillStyle = "#d7c393";
-        ctx.fill();
-      };
-      let a = document.createElement("a");
-      console.log(pixelNum / 90);
-      let drawCampfire = (x, y) => {
-        drawWood(pixelNum / 2, pixelNum / 2, 1);
-        drawStone(pixelNum / 2, pixelNum / 2 + 70, 40);
-        drawStone(pixelNum / 2, pixelNum / 2 - 70, 40);
-        drawStone(pixelNum / 2 + 70, pixelNum / 2, 40);
-        drawStone(pixelNum / 2 - 70, pixelNum / 2, 40);
-        for (let i = 0; i < 10; i++) {
-          let ang = (360 / 10) * i + (Math.random() * 20 - 30);
-          console.log(ang);
-          //Math.random() * 360
-          let x = pixelNum / 2 + Math.cos((ang * Math.PI) / 180) * 70;
-          let y = pixelNum / 2 + Math.sin((ang * Math.PI) / 180) * 70;
-          drawStone(x, y, 40);
-        }
-      };
-      drawShovel("red", "orange", "yellow", pixelNum, 45);
-      //ctx.drawImage(Img.amethystsword, 0, 0, pixelNum, pixelNum)
-      //drawSword('green', 'blue', 'violet')
-      //drawGold(pixelNum/2, pixelNum/2, pixelNum/2)
-      a.href = canvas.toDataURL("/image/png");
-      a.download = "devshovel" + ".png";
-      //a.click()
-    };
-    quality.addEventListener("input", draw);
-    setTimeout(draw, 1000);
-  </script>
+        console.log(findClosest(sorted, 4));
+        let pixelTotal = [1, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150, 240, 360, 480, 720, 1080];
+        let draw = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            //let pixel = localStorage.getItem('locked') == 'true' ? (findClosest(pixelTotal, quality.value) + 'px') : (quality.value + 'px')
+            /*console.log(localStorage.getItem('locked') == 'true', pixel);
+            pixelNum = parseInt(pixel);
+            console.log('working', pixelNum);
+            canvas.style.width = pixelNum + 'px';
+            canvas.style.height = pixelNum + 'px';
+            canvas.width = parseInt(pixel);
+            canvas.height = parseInt(pixel);*/
+            let drawSand = () => {
+                ctx.beginPath();
+                ctx.moveTo(pixelNum / 2 - 180, pixelNum / 2 - 180 + 250);
+                ctx.quadraticCurveTo(
+                    pixelNum / 2,
+                    pixelNum / 2 - 60 + 250,
+                    pixelNum / 2 + 180,
+                    pixelNum / 2 - 180 + 250,
+                );
+                ctx.lineTo(pixelNum / 2, pixelNum / 2 - 420 + 250);
+                ctx.lineTo(pixelNum / 2 - 180, pixelNum / 2 - 180 + 250);
+                ctx.fillStyle = '#d7c393';
+                ctx.fill();
+            };
+            let a = document.createElement('a');
+            console.log(pixelNum / 90);
+            let drawCampfire = (x, y) => {
+                drawWood(pixelNum / 2, pixelNum / 2, 1);
+                drawStone(pixelNum / 2, pixelNum / 2 + 70, 40);
+                drawStone(pixelNum / 2, pixelNum / 2 - 70, 40);
+                drawStone(pixelNum / 2 + 70, pixelNum / 2, 40);
+                drawStone(pixelNum / 2 - 70, pixelNum / 2, 40);
+                for (let i = 0; i < 10; i++) {
+                    let ang = (360 / 10) * i + (Math.random() * 20 - 30);
+                    console.log(ang);
+                    //Math.random() * 360
+                    let x = pixelNum / 2 + Math.cos((ang * Math.PI) / 180) * 70;
+                    let y = pixelNum / 2 + Math.sin((ang * Math.PI) / 180) * 70;
+                    drawStone(x, y, 40);
+                }
+            };
+            ctx.fillStyle = '#01571b';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            drawTree(265, 302, 60)
+            drawTree(740, 73, 60)
+            drawTree(1206, 353, 60)
+            drawStone(578, 280, 90/110 * 60)
+            drawStone(142, 108, 90/110 * 60)
+            drawStone(1118, 96, 50/110 * 60)
+            drawTree(1401, 105, 60)
+            drawTree(484, 103, 60)
+            ctx.font = '100px Zorque';
+            ctx.textAlign = 'center';
+            ctx.lineWidth = 50;
+            ctx.beginPath();
+            ctx.strokeText('Collapsa.io', canvas.width / 2, 200);
+            window.addEventListener('click', e => {
+                console.log(e.clientX, e.clientY)
+            })
+            ctx.fillStyle = 'white';
+            ctx.fillText('Collapsa.io', canvas.width / 2, 200);
+            //drawShovel('red', 'orange', 'yellow', pixelNum, 45);
+            //ctx.drawImage(Img.amethystsword, 0, 0, pixelNum, pixelNum)
+            //drawSword('green', 'blue', 'violet')
+            //drawGold(pixelNum/2, pixelNum/2, pixelNum/2)
+            a.href = canvas.toDataURL('/image/png');
+            a.download = 'patreon' + '.png';
+            a.click()
+        };
+        quality.addEventListener('input', draw);
+        setTimeout(draw, 1000);
+    </script>
 </body>
