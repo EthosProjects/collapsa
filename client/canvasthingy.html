@@ -1,24 +1,23 @@
-<canvas id='ctx'></canvas>
+<canvas id="ctx"></canvas>
 <script src="/client/canvasrecorder.js" type="application/javascript"></script>
 <script src="/client/js/CanvasInput.js"></script>
 <script>
-    const canvas = document.getElementById('ctx')
-    const ctx = canvas.getContext('2d')
-    let c = {
-        x:10,
-        y:10
-    }
-    setInterval(() => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        ctx.beginPath()
-        ctx.arc(c.x, c.y, 4, 0, 2 * Math.PI, false)
-        ctx.fill
-    }, 1000/60)
-    let recorder = new CanvasRecorder(canvas)
-    recorder.start()
-    setTimeout(() => {
-    recorder.stop()
-    recorder.save()
-
-    }, 6000)
+  const canvas = document.getElementById("ctx");
+  const ctx = canvas.getContext("2d");
+  let c = {
+    x: 10,
+    y: 10,
+  };
+  setInterval(() => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, 4, 0, 2 * Math.PI, false);
+    ctx.fill;
+  }, 1000 / 60);
+  let recorder = new CanvasRecorder(canvas);
+  recorder.start();
+  setTimeout(() => {
+    recorder.stop();
+    recorder.save();
+  }, 6000);
 </script>

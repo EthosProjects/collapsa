@@ -1,438 +1,471 @@
 <style>
-    html, body, canvas {
-        width:100%;
-        height:100%;
-        margin:0;
-    }
+  html,
+  body,
+  canvas {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+  }
 </style>
 <canvas></canvas>
 <script>
-    const canvas = document.querySelector('canvas')
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
-    const ctx = canvas.getContext('2d')
-    let w = [0, 1 ,2]
-    for(let i = 1;i < w.length;i++){
-        console.log(i)
+  const canvas = document.querySelector("canvas");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext("2d");
+  let w = [0, 1, 2];
+  for (let i = 1; i < w.length; i++) {
+    console.log(i);
+  }
+  let generation = 1;
+  let goal = {
+    x: 240,
+    y: 565,
+  };
+  let input = "fucking shit";
+  console.log(new RegExp(`^${input}$`));
+  window.addEventListener("mousedown", (e) => {
+    console.log(e);
+  });
+  class Node {
+    constructor(weights, layer) {
+      this.value = 0;
+      this.active = false;
+      this.weights = weights;
+      this.layer = layer;
     }
-    let generation = 1
-    let goal = {
-        x:240,
-        y:565
+    get isActive() {
+      return this.active;
     }
-    let input = 'fucking shit'
-        console.log(new RegExp(`^${input}$`))
-    window.addEventListener('mousedown', e => {
-        console.log(e)
-    })
-    class Node {
-        constructor(weights, layer){
-            this.value = 0
-            this.active = false
-            this.weights = weights
-            this.layer = layer
-        }
-        get isActive(){
-            return this.active
-        }
-    }
-    let generationBest = []
-    let wholePop = []
-    class Rabbit {
-        constructor(brain, x =  canvas.width/2, y = 100){
-            this.rad = 30
-            this.x = x
-            this.y = y
-            /*
+  }
+  let generationBest = [];
+  let wholePop = [];
+  class Rabbit {
+    constructor(brain, x = canvas.width / 2, y = 100) {
+      this.rad = 30;
+      this.x = x;
+      this.y = y;
+      /*
             this.x = Math.random() * canvas.width
             this.y = Math.random() * canvas.height
             */
-            this.steps = [
-
-            ]
-            this.vel = {
-                x:0,
-                y:0
-            }
-            this.acc = {
-                x:0,
-                y:0
-            }
-            this.maxSpd = 1
-            this.food = 20
-            this.maxFood = 20
-            this.score = 0
-            let self = this
-            if(!brain) this.brain = {
-                layers:[{
-                    nodes:[
-                        new Node(null, 0),
-                        new Node(null, 0),
-                        new Node(null, 0),
-                        new Node(null, 0),
-                    ]
-                },
-                {
-                    nodes:[
-                        new Node(new Array(5).fill(0), 1),
-                        new Node(new Array(5).fill(0), 1),
-                        new Node(new Array(5).fill(0), 1),
-                        new Node(new Array(5).fill(0), 1),
-                        new Node(new Array(5).fill(0), 1),
-                        new Node(new Array(5).fill(0), 1),
-                        new Node(new Array(5).fill(0), 1),
-                        new Node(new Array(5).fill(0), 1),
-                        new Node(new Array(5).fill(0), 1),
-                        new Node(new Array(5).fill(0), 1),
-                    ],
-                    activate(parent){
-                        this.nodes.forEach(
-                            (node, i) => {
-                                if(!node.weights) return
-                                function sigmoid(t) {
-                                    return 1/(1+Math.pow(Math.E, -t));
-                                }
-                                let activation = parent.brain.layers[0].nodes.reduce(
-                                    (a, b, i) => {
-                                        return a + (b.isActive? b.value * node.weights[i] : 0)
-                                    }, 1 * node.weights[node.weights.length - 1])
-                                if(activation > 0){
-                                    node.active = true
-                                    node.value = sigmoid(activation)
-                                }else {
-                                    node.active = false
-                                    node.value = 0
-                                }
-                            }
-                        )
-                    }
-                },
-                {
-                    nodes:[
-                        new Node(new Array(15).fill(0), 2),
-                        new Node(new Array(15).fill(0), 2),
-                        new Node(new Array(15).fill(0), 2),
-                        new Node(new Array(15).fill(0), 2),
-                    ],
-                    activate(parent){
-                        this.nodes.forEach(
-                            (node, i) => {
-                                if(!node.weights) return
-                                //console.log(node.weights, i)
-                                function sigmoid(t) {
-                                    return 1/(1+Math.pow(Math.E, -t));
-                                }
-                                let activation = parent.brain.layers[1].nodes.reduce(
-                                    (a, b, i) => {
-                                        return a + (b.isActive? b.value * node.weights[i + 4] : 0)
-                                    }, parent.brain.layers[0].nodes.reduce(
-                                    (a, b, i) => {
-                                        return a + (b.isActive? b.value * node.weights[i] : 0)
-                                    }, 1 * node.weights[node.weights.length - 1]))
-                                if(activation > 0){
-                                    node.active = true
-                                    node.value = sigmoid(activation)
-                                }else {
-                                    node.active = false
-                                    node.value = 0
-                                }
-                            }
-                        )
-                    }
-                }],
-                bias:1
-            }
-            else this.brain = brain
-            this.dead = false
-            this.reachedGoal = false
-            Population.push(this)
-        }
-        show(){
-            ctx.beginPath()
-            ctx.arc(this.x, this.y, this.rad, 0, 2 * Math.PI)
-            ctx.fill()
-        }
-        update(){
-            if(this.x > canvas.width - this.rad || 
-            this.x < this.rad || 
-            this.y > canvas.height - this.rad || 
-            this.y < this.rad
-            ){
-                this.dead = true
-            }
-            if(this.dead || this.reachedGoal) return
-            if(Math.sqrt(Math.pow(this.y - goal.y, 2) + Math.pow(this.x - goal.x, 2)) < this.rad + 10){
-                this.reachedGoal = true
-            }
-            this.brain.layers[0].nodes[0].value = this.x/canvas.width
-            this.brain.layers[0].nodes[1].value = goal.x/canvas.width
-            this.brain.layers[0].nodes[2].value = this.y/canvas.height
-            this.brain.layers[0].nodes[3].value = goal.y/canvas.height
-            this.brain.layers[0].nodes.forEach(node => node.active = true)
-            this.brain.layers[1].activate(this)
-            this.brain.layers[2].activate(this)
-            /*this.acc = {
+      this.steps = [];
+      this.vel = {
+        x: 0,
+        y: 0,
+      };
+      this.acc = {
+        x: 0,
+        y: 0,
+      };
+      this.maxSpd = 1;
+      this.food = 20;
+      this.maxFood = 20;
+      this.score = 0;
+      let self = this;
+      if (!brain)
+        this.brain = {
+          layers: [
+            {
+              nodes: [
+                new Node(null, 0),
+                new Node(null, 0),
+                new Node(null, 0),
+                new Node(null, 0),
+              ],
+            },
+            {
+              nodes: [
+                new Node(new Array(5).fill(0), 1),
+                new Node(new Array(5).fill(0), 1),
+                new Node(new Array(5).fill(0), 1),
+                new Node(new Array(5).fill(0), 1),
+                new Node(new Array(5).fill(0), 1),
+                new Node(new Array(5).fill(0), 1),
+                new Node(new Array(5).fill(0), 1),
+                new Node(new Array(5).fill(0), 1),
+                new Node(new Array(5).fill(0), 1),
+                new Node(new Array(5).fill(0), 1),
+              ],
+              activate(parent) {
+                this.nodes.forEach((node, i) => {
+                  if (!node.weights) return;
+                  function sigmoid(t) {
+                    return 1 / (1 + Math.pow(Math.E, -t));
+                  }
+                  let activation = parent.brain.layers[0].nodes.reduce(
+                    (a, b, i) => {
+                      return a + (b.isActive ? b.value * node.weights[i] : 0);
+                    },
+                    1 * node.weights[node.weights.length - 1]
+                  );
+                  if (activation > 0) {
+                    node.active = true;
+                    node.value = sigmoid(activation);
+                  } else {
+                    node.active = false;
+                    node.value = 0;
+                  }
+                });
+              },
+            },
+            {
+              nodes: [
+                new Node(new Array(15).fill(0), 2),
+                new Node(new Array(15).fill(0), 2),
+                new Node(new Array(15).fill(0), 2),
+                new Node(new Array(15).fill(0), 2),
+              ],
+              activate(parent) {
+                this.nodes.forEach((node, i) => {
+                  if (!node.weights) return;
+                  //console.log(node.weights, i)
+                  function sigmoid(t) {
+                    return 1 / (1 + Math.pow(Math.E, -t));
+                  }
+                  let activation = parent.brain.layers[1].nodes.reduce(
+                    (a, b, i) => {
+                      return (
+                        a + (b.isActive ? b.value * node.weights[i + 4] : 0)
+                      );
+                    },
+                    parent.brain.layers[0].nodes.reduce((a, b, i) => {
+                      return a + (b.isActive ? b.value * node.weights[i] : 0);
+                    }, 1 * node.weights[node.weights.length - 1])
+                  );
+                  if (activation > 0) {
+                    node.active = true;
+                    node.value = sigmoid(activation);
+                  } else {
+                    node.active = false;
+                    node.value = 0;
+                  }
+                });
+              },
+            },
+          ],
+          bias: 1,
+        };
+      else this.brain = brain;
+      this.dead = false;
+      this.reachedGoal = false;
+      Population.push(this);
+    }
+    show() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.rad, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+    update() {
+      if (
+        this.x > canvas.width - this.rad ||
+        this.x < this.rad ||
+        this.y > canvas.height - this.rad ||
+        this.y < this.rad
+      ) {
+        this.dead = true;
+      }
+      if (this.dead || this.reachedGoal) return;
+      if (
+        Math.sqrt(Math.pow(this.y - goal.y, 2) + Math.pow(this.x - goal.x, 2)) <
+        this.rad + 10
+      ) {
+        this.reachedGoal = true;
+      }
+      this.brain.layers[0].nodes[0].value = this.x / canvas.width;
+      this.brain.layers[0].nodes[1].value = goal.x / canvas.width;
+      this.brain.layers[0].nodes[2].value = this.y / canvas.height;
+      this.brain.layers[0].nodes[3].value = goal.y / canvas.height;
+      this.brain.layers[0].nodes.forEach((node) => (node.active = true));
+      this.brain.layers[1].activate(this);
+      this.brain.layers[2].activate(this);
+      /*this.acc = {
                 x:0,
                 y:0
             }*/
-            if(this.brain.layers[2].nodes[0].isActive) this.acc.x = 1
-            else if(this.brain.layers[2].nodes[1].isActive) this.acc.x = 1
-            if(this.brain.layers[2].nodes[2].isActive) this.acc.y = 1
-            else if(this.brain.layers[2].nodes[3].isActive) this.acc.y = 1
-            
-            this.vel.x += this.acc.x
-            this.vel.y += this.acc.y
-            this.x += this.vel.x
-            this.y += this.vel.y
-            this.steps.push({
-                x:this.x,
-                y:this.y
-            })
-        }
-        get baby(){
-            let brain = {
-                layers:[
-                    {
-                        nodes:[]
-                    },
-                    {
-                        nodes:[],
-                        activate(parent){
-                            this.nodes.forEach(
-                                (node, i) => {
-                                    if(!node.weights) return
-                                    function sigmoid(t) {
-                                        return 1/(1+Math.pow(Math.E, -t));
-                                    }
-                                    let activation = parent.brain.layers[0].nodes.reduce(
-                                        (a, b, i) => {
-                                            return a + (b.isActive? b.value * node.weights[i] : 0)
-                                        }, 1 * node.weights[node.weights.length - 1])
-                                    if(activation > 0){
-                                        node.active = true
-                                        node.value = sigmoid(activation)
-                                    }else {
-                                        node.active = false
-                                        node.value = 0
-                                    }
-                                }
-                            )
-                        }
-                    },
-                    {
-                        nodes:[],
-                        activate(parent){
-                            this.nodes.forEach(
-                                (node, i) => {
-                                    if(!node.weights) return
-                                    function sigmoid(t) {
-                                        return 1/(1+Math.pow(Math.E, -t));
-                                    }
-                                    let activation = parent.brain.layers[1].nodes.reduce(
-                                        (a, b, i) => {
-                                            return a + (b.isActive? b.value * node.weights[i + 4] : 0)
-                                        }, parent.brain.layers[0].nodes.reduce(
-                                        (a, b, i) => {
-                                            return a + (b.isActive? b.value * node.weights[i] : 0)
-                                        }, 1 * node.weights[node.weights.length - 1]))
-                                    if(activation > 0){
-                                        node.active = true
-                                        node.value = sigmoid(activation)
-                                    }else {
-                                        node.active = false
-                                        node.value = 0
-                                    }
-                                }
-                            )
-                        }
-                    }
-                ],
-                bias:1
-            }
-            this.brain.layers.forEach((l, j) => {
-                let layer = brain.layers[j]
-                l.nodes.forEach((n, i) => {
-                    let weights = n.weights ? n.weights.map(w => {
-                        let chance = Math.random()
-                        let newValue = Math.random() * 1 - 2
-                        chance <= mutationRate ? w += newValue : false 
-                        return w
-                    }) : null
-                    layer.nodes.push(new Node(weights, n.layer))
-                })
-            })
-            let baby = new Rabbit(brain)
-            return baby
-        }
+      if (this.brain.layers[2].nodes[0].isActive) this.acc.x = 1;
+      else if (this.brain.layers[2].nodes[1].isActive) this.acc.x = 1;
+      if (this.brain.layers[2].nodes[2].isActive) this.acc.y = 1;
+      else if (this.brain.layers[2].nodes[3].isActive) this.acc.y = 1;
+
+      this.vel.x += this.acc.x;
+      this.vel.y += this.acc.y;
+      this.x += this.vel.x;
+      this.y += this.vel.y;
+      this.steps.push({
+        x: this.x,
+        y: this.y,
+      });
     }
-    let mutationRate = 0.02
-    let Population = []
-    let PopulationArchive = []
-    for(let i = 0;i < 50;i++){
-        let r = new Rabbit()
-        r.brain.layers.forEach((l, i) => {
-            if(i == 0) return
-            l.nodes.forEach(n => {
-                n.weights = n.weights.map(w => {
-                    let chance = Math.random()
-                    let newValue = Math.random() * 2 - 1
-                    chance <= mutationRate ? w = newValue: false 
-                    return w
-                })
-            })
-        })
+    get baby() {
+      let brain = {
+        layers: [
+          {
+            nodes: [],
+          },
+          {
+            nodes: [],
+            activate(parent) {
+              this.nodes.forEach((node, i) => {
+                if (!node.weights) return;
+                function sigmoid(t) {
+                  return 1 / (1 + Math.pow(Math.E, -t));
+                }
+                let activation = parent.brain.layers[0].nodes.reduce(
+                  (a, b, i) => {
+                    return a + (b.isActive ? b.value * node.weights[i] : 0);
+                  },
+                  1 * node.weights[node.weights.length - 1]
+                );
+                if (activation > 0) {
+                  node.active = true;
+                  node.value = sigmoid(activation);
+                } else {
+                  node.active = false;
+                  node.value = 0;
+                }
+              });
+            },
+          },
+          {
+            nodes: [],
+            activate(parent) {
+              this.nodes.forEach((node, i) => {
+                if (!node.weights) return;
+                function sigmoid(t) {
+                  return 1 / (1 + Math.pow(Math.E, -t));
+                }
+                let activation = parent.brain.layers[1].nodes.reduce(
+                  (a, b, i) => {
+                    return a + (b.isActive ? b.value * node.weights[i + 4] : 0);
+                  },
+                  parent.brain.layers[0].nodes.reduce((a, b, i) => {
+                    return a + (b.isActive ? b.value * node.weights[i] : 0);
+                  }, 1 * node.weights[node.weights.length - 1])
+                );
+                if (activation > 0) {
+                  node.active = true;
+                  node.value = sigmoid(activation);
+                } else {
+                  node.active = false;
+                  node.value = 0;
+                }
+              });
+            },
+          },
+        ],
+        bias: 1,
+      };
+      this.brain.layers.forEach((l, j) => {
+        let layer = brain.layers[j];
+        l.nodes.forEach((n, i) => {
+          let weights = n.weights
+            ? n.weights.map((w) => {
+                let chance = Math.random();
+                let newValue = Math.random() * 1 - 2;
+                chance <= mutationRate ? (w += newValue) : false;
+                return w;
+              })
+            : null;
+          layer.nodes.push(new Node(weights, n.layer));
+        });
+      });
+      let baby = new Rabbit(brain);
+      return baby;
     }
-    
-    let stepsCount = 20
-    for(let j = 0;j < 100; j++){
-        for(let i = 0; i < stepsCount; i++){
-            Population.forEach(rabbit => {
-                rabbit.update()
-            })
-        }
-        Population.forEach(r => {
-            let dis = Math.sqrt(Math.pow(r.y - goal.y, 2) + Math.pow(r.x - goal.x, 2))
-            if(r.dead) r.score = dis + 100
-            else if(r.reachedGoal) r.score = dis - 100
-            else r.score = dis
-        })
-        let best = Population.shift()
-        Population.sort((a, b) => (a.score - b.score))
-        //console.log(Population.map(r => r.score), j)
-        generationBest.push(best)
-        PopulationArchive.push([...Population])
-        Population = Population.slice(0, 8)
-        Population = Population.map(rabbit => [rabbit.baby, rabbit.baby, rabbit.baby, rabbit.baby, rabbit.baby]).flat(Infinity)
-        for(let i = 0;i < 5;i++){
-            let brain = {
-                layers:[
-                    {
-                        nodes:[]
-                    },
-                    {
-                        nodes:[],
-                        activate(parent){
-                            this.nodes.forEach(
-                                (node, i) => {
-                                    //if(!i) console.log(node.parent.brain.layers[0].nodes, 'Before')
-                                    if(!node.weights) return
-                                    function sigmoid(t) {
-                                        return 1/(1+Math.pow(Math.E, -t));
-                                    }
-                                    let activation = parent.brain.layers[0].nodes.reduce(
-                                        (a, b, i) => {
-                                            return a + (b.isActive? b.value * node.weights[i] : 0)
-                                        }, 1 * node.weights[node.weights.length - 1])
-                                    //if(!i) console.log(node.parent.brain.layers[0].nodes, 'After')
-                                        //console.log(activation)
-                                    if(activation > 0){
-                                        node.active = true
-                                        node.value = sigmoid(activation)
-                                    }else {
-                                        node.active = false
-                                        node.value = 0
-                                    }
-                                }
-                            )
-                                    //console.log('End of Data')
-                        }
-                    },
-                    {
-                        nodes:[],
-                        activate(parent){
-                            this.nodes.forEach(
-                                (node, i) => {
-                                    if(!node.weights) return
-                                    //console.log(node.weights, i)
-                                    function sigmoid(t) {
-                                        return 1/(1+Math.pow(Math.E, -t));
-                                    }
-                                    let activation = parent.brain.layers[1].nodes.reduce(
-                                        (a, b, i) => {
-                                            return a + (b.isActive? b.value * node.weights[i + 4] : 0)
-                                        }, parent.brain.layers[0].nodes.reduce(
-                                        (a, b, i) => {
-                                            return a + (b.isActive? b.value * node.weights[i] : 0)
-                                        }, 1 * node.weights[node.weights.length - 1]))
-                                    if(activation > 0){
-                                        node.active = true
-                                        node.value = sigmoid(activation)
-                                    }else {
-                                        node.active = false
-                                        node.value = 0
-                                    }
-                                }
-                            )
-                        }
-                    }
-                ],
-                bias:1
-            }
-            best.brain.layers.forEach((l, j) => {
-                let layer = brain.layers[j]
-                l.nodes.forEach((n, i) => {
-                    let weights = n.weights ? n.weights.map(w => {
-                        let chance = Math.random()
-                        let newValue = Math.random() * 0.01 - 0.02
-                        //if(chance <= mutationRate) console.log('Mutating', n, newValue)
-                        //chance <= mutationRate ? w += newValue : false 
-                        return w
-                    }) : null
-                    layer.nodes.push(new Node(weights, n.layer))
-                })
-            })
-            let baby = new Rabbit(brain)
-        }
-        stepsCount += 0.5
+  }
+  let mutationRate = 0.02;
+  let Population = [];
+  let PopulationArchive = [];
+  for (let i = 0; i < 50; i++) {
+    let r = new Rabbit();
+    r.brain.layers.forEach((l, i) => {
+      if (i == 0) return;
+      l.nodes.forEach((n) => {
+        n.weights = n.weights.map((w) => {
+          let chance = Math.random();
+          let newValue = Math.random() * 2 - 1;
+          chance <= mutationRate ? (w = newValue) : false;
+          return w;
+        });
+      });
+    });
+  }
+
+  let stepsCount = 20;
+  for (let j = 0; j < 100; j++) {
+    for (let i = 0; i < stepsCount; i++) {
+      Population.forEach((rabbit) => {
+        rabbit.update();
+      });
     }
-    const wait = t => new Promise((res) => setTimeout(() => res(), t));
-    (async () => {
-        for(let j = 0;j < generationBest.length;j++){
-            let b = generationBest[j]
-            for(let i = 0;i < b.steps.length;i++){
-                let s = b.steps[i]
-                ctx.clearRect(0, 0, canvas.width, canvas.height)
-                canvas.width = window.innerWidth
-                canvas.height = window.innerHeight
-                PopulationArchive[j].forEach(r => {
-                    let s = r.steps[i]
-                    if(!s) return
-                    ctx.fillStyle = 'black'
-                    ctx.beginPath()
-                    ctx.arc(s.x, s.y, b.rad, 0, 2 * Math.PI)
-                    ctx.fill()
-                })
-                ctx.fillStyle = 'red'
-                ctx.beginPath()
-                ctx.arc(s.x, s.y, b.rad, 0, 2 * Math.PI)
-                ctx.fill()
-                ctx.fillStyle = 'green'
-                ctx.beginPath()
-                ctx.arc(goal.x, goal.y, 10, 0, 2 * Math.PI)
-                ctx.fill()
-                ctx.font = '50px Arial'
-                ctx.textAlign = 'right'
-                ctx.fillText(`Generation ${j + 1}`, canvas.width - 50, 50)
-                ctx.save()
-                ctx.scale(0.5, 0.5)
-                let total = b.brain.layers[1].nodes.length * 55
-                ctx.font = '20px Arial'
-                ctx.textAlign = 'center'
-                let inputLayer = b.brain.layers[0]
-                let outputLayer = b.brain.layers[b.brain.layers.length - 1]
-                inputLayer.nodes.forEach((n, i) => {
-                    ctx.beginPath()
-                    let num = i + 1 
-                    ctx.arc(30, 30 + i * total/(inputLayer.nodes.length + 1) + total/(inputLayer.nodes.length + 1), 20, 0, 2 * Math.PI)
-                    ctx.fillStyle = 'white'
-                    ctx.strokeStyle = 'black'
-                    ctx.fill()
-                    ctx.stroke()
-                    ctx.fillStyle = 'black'
-                    ctx.fillText(num, 30, 30 + i * total/(inputLayer.nodes.length + 1) + total/(inputLayer.nodes.length + 1) + 7.5)
-                })
-                let l = b.brain.layers[0]
-                /*b.brain.layers[0].nodes.forEach((n, i) => {
+    Population.forEach((r) => {
+      let dis = Math.sqrt(
+        Math.pow(r.y - goal.y, 2) + Math.pow(r.x - goal.x, 2)
+      );
+      if (r.dead) r.score = dis + 100;
+      else if (r.reachedGoal) r.score = dis - 100;
+      else r.score = dis;
+    });
+    let best = Population.shift();
+    Population.sort((a, b) => a.score - b.score);
+    //console.log(Population.map(r => r.score), j)
+    generationBest.push(best);
+    PopulationArchive.push([...Population]);
+    Population = Population.slice(0, 8);
+    Population = Population.map((rabbit) => [
+      rabbit.baby,
+      rabbit.baby,
+      rabbit.baby,
+      rabbit.baby,
+      rabbit.baby,
+    ]).flat(Infinity);
+    for (let i = 0; i < 5; i++) {
+      let brain = {
+        layers: [
+          {
+            nodes: [],
+          },
+          {
+            nodes: [],
+            activate(parent) {
+              this.nodes.forEach((node, i) => {
+                //if(!i) console.log(node.parent.brain.layers[0].nodes, 'Before')
+                if (!node.weights) return;
+                function sigmoid(t) {
+                  return 1 / (1 + Math.pow(Math.E, -t));
+                }
+                let activation = parent.brain.layers[0].nodes.reduce(
+                  (a, b, i) => {
+                    return a + (b.isActive ? b.value * node.weights[i] : 0);
+                  },
+                  1 * node.weights[node.weights.length - 1]
+                );
+                //if(!i) console.log(node.parent.brain.layers[0].nodes, 'After')
+                //console.log(activation)
+                if (activation > 0) {
+                  node.active = true;
+                  node.value = sigmoid(activation);
+                } else {
+                  node.active = false;
+                  node.value = 0;
+                }
+              });
+              //console.log('End of Data')
+            },
+          },
+          {
+            nodes: [],
+            activate(parent) {
+              this.nodes.forEach((node, i) => {
+                if (!node.weights) return;
+                //console.log(node.weights, i)
+                function sigmoid(t) {
+                  return 1 / (1 + Math.pow(Math.E, -t));
+                }
+                let activation = parent.brain.layers[1].nodes.reduce(
+                  (a, b, i) => {
+                    return a + (b.isActive ? b.value * node.weights[i + 4] : 0);
+                  },
+                  parent.brain.layers[0].nodes.reduce((a, b, i) => {
+                    return a + (b.isActive ? b.value * node.weights[i] : 0);
+                  }, 1 * node.weights[node.weights.length - 1])
+                );
+                if (activation > 0) {
+                  node.active = true;
+                  node.value = sigmoid(activation);
+                } else {
+                  node.active = false;
+                  node.value = 0;
+                }
+              });
+            },
+          },
+        ],
+        bias: 1,
+      };
+      best.brain.layers.forEach((l, j) => {
+        let layer = brain.layers[j];
+        l.nodes.forEach((n, i) => {
+          let weights = n.weights
+            ? n.weights.map((w) => {
+                let chance = Math.random();
+                let newValue = Math.random() * 0.01 - 0.02;
+                //if(chance <= mutationRate) console.log('Mutating', n, newValue)
+                //chance <= mutationRate ? w += newValue : false
+                return w;
+              })
+            : null;
+          layer.nodes.push(new Node(weights, n.layer));
+        });
+      });
+      let baby = new Rabbit(brain);
+    }
+    stepsCount += 0.5;
+  }
+  const wait = (t) => new Promise((res) => setTimeout(() => res(), t));
+  (async () => {
+    for (let j = 0; j < generationBest.length; j++) {
+      let b = generationBest[j];
+      for (let i = 0; i < b.steps.length; i++) {
+        let s = b.steps[i];
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        PopulationArchive[j].forEach((r) => {
+          let s = r.steps[i];
+          if (!s) return;
+          ctx.fillStyle = "black";
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, b.rad, 0, 2 * Math.PI);
+          ctx.fill();
+        });
+        ctx.fillStyle = "red";
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, b.rad, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.fillStyle = "green";
+        ctx.beginPath();
+        ctx.arc(goal.x, goal.y, 10, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.font = "50px Arial";
+        ctx.textAlign = "right";
+        ctx.fillText(`Generation ${j + 1}`, canvas.width - 50, 50);
+        ctx.save();
+        ctx.scale(0.5, 0.5);
+        let total = b.brain.layers[1].nodes.length * 55;
+        ctx.font = "20px Arial";
+        ctx.textAlign = "center";
+        let inputLayer = b.brain.layers[0];
+        let outputLayer = b.brain.layers[b.brain.layers.length - 1];
+        inputLayer.nodes.forEach((n, i) => {
+          ctx.beginPath();
+          let num = i + 1;
+          ctx.arc(
+            30,
+            30 +
+              (i * total) / (inputLayer.nodes.length + 1) +
+              total / (inputLayer.nodes.length + 1),
+            20,
+            0,
+            2 * Math.PI
+          );
+          ctx.fillStyle = "white";
+          ctx.strokeStyle = "black";
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = "black";
+          ctx.fillText(
+            num,
+            30,
+            30 +
+              (i * total) / (inputLayer.nodes.length + 1) +
+              total / (inputLayer.nodes.length + 1) +
+              7.5
+          );
+        });
+        let l = b.brain.layers[0];
+        /*b.brain.layers[0].nodes.forEach((n, i) => {
                     ctx.beginPath()
                     let num = i + 1 
                     ctx.arc(30, 30 + i * total/(l.nodes.length + 1) + total/(l.nodes.length + 1), 20, 0, 2 * Math.PI)
@@ -443,56 +476,90 @@
                     ctx.fillStyle = 'black'
                     ctx.fillText(num, 30, 30 + i * total/(l.nodes.length + 1) + total/(l.nodes.length + 1) + 7.5)
                 })*/
-                let currIndex = inputLayer.nodes.length - 1
-                let currNode = 9
-                for(let i = 1;i < b.brain.layers.length - 1;i++){
-                    let l = b.brain.layers[i]
-                    let pl = b.brain.layers[i - 1]
-                    let nl = b.brain.layers[i + 1]
-                    l.nodes.forEach((n, j) => {
-                        n.showing = false
-                        if(!n.weights.find(w => w) || !nl.nodes.find(n => n.weights[currIndex + j])) return
-                        n.showing = true
-                        n.weights.forEach((w, u) => {
-                            if(u == n.weights.length - 1 || w == 0) return
-                            if(w < 0) ctx.strokeStyle = 'blue'
-                            else ctx.strokeStyle = 'red' 
-                            ctx.beginPath()
-                            ctx.moveTo(30, 30 + u * total/(pl.nodes.length + 1) + total/(pl.nodes.length + 1))
-                            ctx.lineTo(430, 30 + j * total/(l.nodes.length) + 0)
-                            ctx.stroke()
-                            ctx.lineWidth = 1
-                        })
-                        ctx.beginPath()
-                        ctx.arc(430, 30 + j * total/(l.nodes.length) + 0, 20, 0, 2 * Math.PI)
-                        ctx.fillStyle = 'white'
-                        ctx.strokeStyle = 'black'
-                        ctx.fill()
-                        ctx.stroke()
-                        ctx.fillStyle = 'black'
-                        ctx.fillText(currNode, 430, 30 + j * total/(l.nodes.length) + 0 + 7.5)
-                        currNode++
-                    })
-                    currIndex += l.nodes.length
-                }
-                l = b.brain.layers[2]
-                outputLayer.nodes.forEach((n, i) => {
-                    let pl = b.brain.layers[b.brain.layers.length - 2]
+        let currIndex = inputLayer.nodes.length - 1;
+        let currNode = 9;
+        for (let i = 1; i < b.brain.layers.length - 1; i++) {
+          let l = b.brain.layers[i];
+          let pl = b.brain.layers[i - 1];
+          let nl = b.brain.layers[i + 1];
+          l.nodes.forEach((n, j) => {
+            n.showing = false;
+            if (
+              !n.weights.find((w) => w) ||
+              !nl.nodes.find((n) => n.weights[currIndex + j])
+            )
+              return;
+            n.showing = true;
+            n.weights.forEach((w, u) => {
+              if (u == n.weights.length - 1 || w == 0) return;
+              if (w < 0) ctx.strokeStyle = "blue";
+              else ctx.strokeStyle = "red";
+              ctx.beginPath();
+              ctx.moveTo(
+                30,
+                30 +
+                  (u * total) / (pl.nodes.length + 1) +
+                  total / (pl.nodes.length + 1)
+              );
+              ctx.lineTo(430, 30 + (j * total) / l.nodes.length + 0);
+              ctx.stroke();
+              ctx.lineWidth = 1;
+            });
+            ctx.beginPath();
+            ctx.arc(
+              430,
+              30 + (j * total) / l.nodes.length + 0,
+              20,
+              0,
+              2 * Math.PI
+            );
+            ctx.fillStyle = "white";
+            ctx.strokeStyle = "black";
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = "black";
+            ctx.fillText(
+              currNode,
+              430,
+              30 + (j * total) / l.nodes.length + 0 + 7.5
+            );
+            currNode++;
+          });
+          currIndex += l.nodes.length;
+        }
+        l = b.brain.layers[2];
+        outputLayer.nodes.forEach((n, i) => {
+          let pl = b.brain.layers[b.brain.layers.length - 2];
 
-                    n.weights.forEach((w, u) => {
-                        if(u == n.weights.length - 1 || !w) return
-                        if(w < 0) ctx.strokeStyle = 'blue'
-                        else ctx.strokeStyle = 'red' 
-                        ctx.beginPath()
-                        if(u < 4){
-                            ctx.moveTo(30, 30 + u * total/(inputLayer.nodes.length + 1) + total/(inputLayer.nodes.length + 1))
-                            ctx.lineTo(830, 30 + i * total/(outputLayer.nodes.length + 1) + total/(outputLayer.nodes.length + 1))
-                        }else {
-                            ctx.moveTo(430, 30 + u * total/(pl.nodes.length))
-                            ctx.lineTo(830, 30 + i * total/(outputLayer.nodes.length + 1) + total/(outputLayer.nodes.length + 1))
-                        }
-                        ctx.stroke()
-                        /*
+          n.weights.forEach((w, u) => {
+            if (u == n.weights.length - 1 || !w) return;
+            if (w < 0) ctx.strokeStyle = "blue";
+            else ctx.strokeStyle = "red";
+            ctx.beginPath();
+            if (u < 4) {
+              ctx.moveTo(
+                30,
+                30 +
+                  (u * total) / (inputLayer.nodes.length + 1) +
+                  total / (inputLayer.nodes.length + 1)
+              );
+              ctx.lineTo(
+                830,
+                30 +
+                  (i * total) / (outputLayer.nodes.length + 1) +
+                  total / (outputLayer.nodes.length + 1)
+              );
+            } else {
+              ctx.moveTo(430, 30 + (u * total) / pl.nodes.length);
+              ctx.lineTo(
+                830,
+                30 +
+                  (i * total) / (outputLayer.nodes.length + 1) +
+                  total / (outputLayer.nodes.length + 1)
+              );
+            }
+            ctx.stroke();
+            /*
                         pl.nodes.forEach((pn, j) => {
 
                         })
@@ -502,27 +569,40 @@
                         ctx.lineTo(830, 30 + i * total/(l.nodes.length) + 0)
                         ctx.stroke()
                         ctx.lineWidth = 1*/
-                    })
-                    ctx.beginPath()
-                    let num = i + 5
-                    ctx.arc(830, 30 + i * total/(outputLayer.nodes.length + 1) + total/(outputLayer.nodes.length + 1), 20, 0, 2 * Math.PI)
-                    ctx.fillStyle = 'white'
-                    ctx.strokeStyle = 'black'
-                    ctx.fill()
-                    ctx.stroke()
-                    ctx.fillStyle = 'black'
-                    ctx.fillText(num, 830, 30 + i * total/(outputLayer.nodes.length + 1) + total/(outputLayer.nodes.length + 1) + 7.5)
-                })
-                b.brain.layers[2].nodes.forEach((n, i) => {
-                    
-                })
-                ctx.restore()
-                await wait(60)
-            }
-        }
-        await wait(1000)
-    })()
-    /*
+          });
+          ctx.beginPath();
+          let num = i + 5;
+          ctx.arc(
+            830,
+            30 +
+              (i * total) / (outputLayer.nodes.length + 1) +
+              total / (outputLayer.nodes.length + 1),
+            20,
+            0,
+            2 * Math.PI
+          );
+          ctx.fillStyle = "white";
+          ctx.strokeStyle = "black";
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = "black";
+          ctx.fillText(
+            num,
+            830,
+            30 +
+              (i * total) / (outputLayer.nodes.length + 1) +
+              total / (outputLayer.nodes.length + 1) +
+              7.5
+          );
+        });
+        b.brain.layers[2].nodes.forEach((n, i) => {});
+        ctx.restore();
+        await wait(60);
+      }
+    }
+    await wait(1000);
+  })();
+  /*
     let newPopulation = () => {
         clearInterval(populationInterval)
         clearTimeout(populationTimeout)

@@ -10,16 +10,16 @@
  * @property {string} url - URL of playlist
  */
 class Playlist {
-    constructor(details, apiKey) {
-        if (details.kind == 'youtube#searchResult') {
-            this.type = 'playlist';
-            this.id = details.id.playlistId;
-            this.title = details.snippet.title;
-            this._description = details.snippet.description;
-            this.thumbnails = details.snippet.thumbnails;
-            this.channel = details.snippet.channelTitle;
-            this.url = `https://youtube.com/playlist?list=${this.id}`;
-        }
+  constructor(details, apiKey) {
+    if (details.kind == "youtube#searchResult") {
+      this.type = "playlist";
+      this.id = details.id.playlistId;
+      this.title = details.snippet.title;
+      this._description = details.snippet.description;
+      this.thumbnails = details.snippet.thumbnails;
+      this.channel = details.snippet.channelTitle;
+      this.url = `https://youtube.com/playlist?list=${this.id}`;
     }
+  }
 }
 module.exports = Playlist;

@@ -1,73 +1,72 @@
 <head>
-    <style>
-      body {
-          width:100%;
-          height:100%;
-          margin:0
-      }
-      #ctx {
-          width:20%;
-          height:20%
-      }
-      #video {
-          border:1px solid black;
-          width:20%;
-          height:20%;
-      }
-    </style>
-  </head>
-  <body>
-    <canvas id="ctx"></canvas>
-      <video autoplay id="video"></video>
+  <style>
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+    #ctx {
+      width: 20%;
+      height: 20%;
+    }
+    #video {
+      border: 1px solid black;
+      width: 20%;
+      height: 20%;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="ctx"></canvas>
+  <video autoplay id="video"></video>
   <script>
-      let ctx = document.getElementById('ctx').getContext('2d')
-      /** 
-      * @type {HTMLCanvasElement}
-      */
-      let canvas = document.getElementById('ctx')
-      canvas.width = window.innerWidth/5
-      canvas.height = window.innerHeight/5
-      let c = {
-          x:50,
-          y:50
-      }
-      var video = document.getElementById('video');
-      let supportedType
-      let types = [
-          "video/webm",
-          'video/webm,codecs=vp9',
-          'video/vp8',
-          "video/webm\;codecs=vp8",
-          "video/webm\;codecs=daala",
-          "video/webm\;codecs=h264",
-          "video/mpeg"
-      ];
-      let supportedTypes = types.filter(t => MediaRecorder.isTypeSupported)
-      var mimeCodec = supportedTypes[4];
-      console.log(supportedTypes)
-      let stream = canvas.captureStream(20)
-      //video.srcObject = stream
-      let recorder = new MediaRecorder(stream)
-      recorder.addEventListener('dataavailable', e => {
-          console.log('almost')
-          video.src = URL.createObjectURL(e.data);
-                video.play()
-          
-      })
-      recorder.start()
-      let draw = setInterval(() => {
-          ctx.clearRect(0, 0, 1000, 1000)
-          c.x += 3
-          ctx.beginPath()
-          ctx.arc(c.x, c.y, 10, 0, 2 * Math.PI, false)
-          ctx.fill()
-      }, 60)
-  
-      setTimeout(() => {
-          recorder.stop()
-          //drawCraftingTable(0, 400)
-          //drawOneWay(0, 0)
-          //drawWall(160, 0)
-      }, 6000)
+    let ctx = document.getElementById("ctx").getContext("2d");
+    /**
+     * @type {HTMLCanvasElement}
+     */
+    let canvas = document.getElementById("ctx");
+    canvas.width = window.innerWidth / 5;
+    canvas.height = window.innerHeight / 5;
+    let c = {
+      x: 50,
+      y: 50,
+    };
+    var video = document.getElementById("video");
+    let supportedType;
+    let types = [
+      "video/webm",
+      "video/webm,codecs=vp9",
+      "video/vp8",
+      "video/webm\;codecs=vp8",
+      "video/webm\;codecs=daala",
+      "video/webm\;codecs=h264",
+      "video/mpeg",
+    ];
+    let supportedTypes = types.filter((t) => MediaRecorder.isTypeSupported);
+    var mimeCodec = supportedTypes[4];
+    console.log(supportedTypes);
+    let stream = canvas.captureStream(20);
+    //video.srcObject = stream
+    let recorder = new MediaRecorder(stream);
+    recorder.addEventListener("dataavailable", (e) => {
+      console.log("almost");
+      video.src = URL.createObjectURL(e.data);
+      video.play();
+    });
+    recorder.start();
+    let draw = setInterval(() => {
+      ctx.clearRect(0, 0, 1000, 1000);
+      c.x += 3;
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, 10, 0, 2 * Math.PI, false);
+      ctx.fill();
+    }, 60);
+
+    setTimeout(() => {
+      recorder.stop();
+      //drawCraftingTable(0, 400)
+      //drawOneWay(0, 0)
+      //drawWall(160, 0)
+    }, 6000);
   </script>
-  </body>
+</body>
