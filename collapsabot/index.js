@@ -117,7 +117,7 @@ module.exports = (mLab) => {
             }, 2000);
         }
 
-        let prefixRegex = new RegExp(`^(<@!{0,1}\\d+> |${prefix == '!' ? '!' : '\\' + prefix})`);
+        let prefixRegex = new RegExp(`^(<@!{0,1}${client.id}> |${prefix == '!' ? '!' : '\\' + prefix})`);
         if (!content.match(prefixRegex)) return;
         if (content.match(/^d+/) && message.mentions.members.first().id != client.user.id) return;
         if (message.content.match(`\\${prefix}eval`) && message.author.id == client.owner) {

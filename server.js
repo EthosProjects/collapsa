@@ -101,7 +101,7 @@ io.on('connection', (socket) => {
 });
 //var game = require('./Entity.js');
 const Game = require('./Entity.js');
-//new Game(io.of('/usaeast1'), '/usaeast1', mongoDB);
+new Game(io.of('/usaeast1'), '/usaeast1', mongoDB);
 //new game(io.of('/usaeast1'), '/usaeast1', mongoDB);
 var favicon = require('serve-favicon');
 let client = require('./collapsabot')(mongoDB);
