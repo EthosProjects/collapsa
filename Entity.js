@@ -196,6 +196,14 @@ module.exports = function (nsp, ns, mLab) {
     const Emeralds = new ResourceManager('emerald')
     const Amethysts = new ResourceManager('amethyst')
     const CarrotFarms = new ResourceManager('cfarm')
+    this.STrees = STrees
+    this.Stones = Stones
+    this.Irons = Irons
+    this.Golds = Golds
+    this.Diamonds = Diamonds
+    this.Emeralds = Emeralds
+    this.Amethysts = Amethysts
+    this.CarrotFarms = CarrotFarms
     var Walls = {
         list: [],
         update: function () {
@@ -1132,13 +1140,7 @@ module.exports = function (nsp, ns, mLab) {
         framesPerSecond = frameCount;
         frameCount = 0;
     }, 1000);
-    this.STrees = STrees;
-    this.Stones = Stones;
-    this.CarrotFarms = CarrotFarms;
-    this.Irons = Irons;
-    this.Golds = Golds;
     this.Walls = Walls;
-    this.Diamonds = Diamonds;
     this.Player = Player;
 
     this.Players = Players;

@@ -60,10 +60,10 @@
          * @type {HTMLCanvasElement}
          */
         let canvas = document.getElementById('ctx');
-        canvas.style.width = 1600 + 'px';
-        canvas.style.height = 400 + 'px';
-        canvas.width = 1600
-        canvas.height = 400
+        canvas.style.width = pixelNum + 'px';
+        canvas.style.height = pixelNum + 'px';
+        canvas.width = pixelNum
+        canvas.height = pixelNum
         let Img = {};
 
         let createImage = (src, extention) => {
@@ -493,10 +493,11 @@
             usr: '',
             x: 480 / 2 - 50,
             y: 480 / 2 + 23,
-            lhit: true,
+            lhit: false,
             rhit: false,
             rad: 60,
             angle: 315,
+            hitting:true
             //mainHand:'Amethyst Sword'
         });
         let drawFavicon = (txt) => {
@@ -517,12 +518,6 @@
             ctx.fillStyle = '#800000';
             ctx.fillText(txt, pixelNum / 2, pixelNum - (58 * pixelNum) / 480);
         };
-        //p.hitting = true
-        //p.per = Math.random()
-        console.log(p.per);
-        p.per = 0.3;
-        p.hittin = true;
-        //p.drawPerf()
         let href = document.createElement('a');
         href.href = canvas.toDataURL('image/png');
         href.style.display = 'none';
@@ -812,35 +807,83 @@
                     drawStone(x, y, 40);
                 }
             };
-            ctx.fillStyle = '#01571b';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            drawTree(265, 302, 60)
-            drawTree(740, 73, 60)
-            drawTree(1206, 353, 60)
-            drawStone(578, 280, 90/110 * 60)
-            drawStone(142, 108, 90/110 * 60)
-            drawStone(1118, 96, 50/110 * 60)
-            drawTree(1401, 105, 60)
-            drawTree(484, 103, 60)
-            ctx.font = '100px Zorque';
-            ctx.textAlign = 'center';
-            ctx.lineWidth = 50;
-            ctx.beginPath();
-            ctx.strokeText('Collapsa.io', canvas.width / 2, 200);
-            window.addEventListener('click', e => {
-                console.log(e.clientX, e.clientY)
-            })
-            ctx.fillStyle = 'white';
-            ctx.fillText('Collapsa.io', canvas.width / 2, 200);
+            const drawPatreonBanner = () => {
+                ctx.fillStyle = '#01571b';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                drawTree(265, 302, 60)
+                drawTree(740, 73, 60)
+                drawTree(1206, 353, 60)
+                drawStone(578, 280, 90/110 * 60)
+                drawStone(142, 108, 90/110 * 60)
+                drawStone(1118, 96, 50/110 * 60)
+                drawTree(1401, 105, 60)
+                drawTree(484, 103, 60)
+                ctx.font = '100px Zorque';
+                ctx.textAlign = 'center';
+                ctx.lineWidth = 50;
+                ctx.beginPath();
+                ctx.strokeText('Collapsa.io', canvas.width / 2, 200);
+                ctx.fillStyle = 'white';
+                ctx.fillText('Collapsa.io', canvas.width / 2, 200);
+            }
+            p.rad = ((60 * pixelNum) / 480) * Math.pow(pixelNum / 480, -0.500655);
+            Object.assign(p, {
+                x: pixelNum / 2 - ((50 * pixelNum) / 480) * Math.pow(pixelNum / 480, -0.500655),
+                y: pixelNum / 2 + ((23 * pixelNum) / 480) * Math.pow(pixelNum / 480, -0.500655),
+            });
+            p.drawPerf();
             //drawShovel('red', 'orange', 'yellow', pixelNum, 45);
             //ctx.drawImage(Img.amethystsword, 0, 0, pixelNum, pixelNum)
             //drawSword('green', 'blue', 'violet')
             //drawGold(pixelNum/2, pixelNum/2, pixelNum/2)
             a.href = canvas.toDataURL('/image/png');
             a.download = 'patreon' + '.png';
-            a.click()
+            //a.click()
         };
+        
         quality.addEventListener('input', draw);
-        setTimeout(draw, 1000);
+        p.rad = ((60 * pixelNum) / 480) * Math.pow(pixelNum / 480, -0.500655);
+        Object.assign(p, {
+            x: pixelNum / 2 - ((50 * pixelNum) / 480) * Math.pow(pixelNum / 480, -0.500655),
+            y: pixelNum / 2 + ((23 * pixelNum) / 480) * Math.pow(pixelNum / 480, -0.500655),
+        });
+        p.lhit = true
+        p.hitting = true
+        p.punchper = 0
+        let frame = 0
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.style.width = pixelNum + 'px';
+        canvas.style.height = pixelNum + 'px';
+        canvas.width = pixelNum
+        canvas.height = pixelNum
+        p.drawPerf()
+        let a = document.createElement('a');
+        a.href = canvas.toDataURL('/image/png');
+        a.download = 'punchgif0.png';
+        a.click()
+
+        let gifInterval = setInterval(() => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvas.style.width = pixelNum + 'px';
+            canvas.style.height = pixelNum + 'px';
+            canvas.width = pixelNum
+            canvas.height = pixelNum
+            p.punchper += 1/24
+            frame ++
+            console.log(p.punchper, frame)
+            p.drawPerf()
+            let a = document.createElement('a');
+            a.href = canvas.toDataURL('/image/png');
+            a.download = 'punchgif' + (frame)+ '.png';
+            a.click()
+            if(frame == 24 && p.lhit ){
+                p.punchper = 0
+                p.lhit = false
+                p.rhit = true
+            }else if(frame == 48 && p.rhit){
+                clearInterval(gifInterval)
+            }
+        }, 500)
+        //setTimeout(draw, 1000);
     </script>
 </body>
