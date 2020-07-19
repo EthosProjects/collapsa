@@ -1143,6 +1143,7 @@ module.exports = function (nsp, ns, mLab) {
     this.Walls = Walls;
     this.Player = Player;
     this.Clans = clans
+    this.dropped = dropped
     this.Players = Players;
     global.games.push(this);
 };
