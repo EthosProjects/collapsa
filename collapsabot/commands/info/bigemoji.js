@@ -15,12 +15,12 @@ module.exports = new Command({
     /**
      * @param {Message} message
      */
-    execute: async (message, args = [], client, mLab) => {
-        let emoji = args[0];
-        console.log(emoji);
-        if (!(emoji instanceof GuildEmoji)) return message.reply('Invalid Emoji specified');
+    execute: async (message, args = [], client, mLab, Invalid) => {
+        let emoji = args[0]
+        if(emoji instanceof Invalid) return message.reply('Invalid emoji specified')
+        let url = `https://cdn.discordapp.com/emojis/${emoji}.png`
         let embed = new MessageEmbed()
-            .setImage(emoji.url)
+            .setImage(url)
             .setAuthor('CollapsaBot', 'http://www.collapsa.io/client/img/favicon.png')
             .setTimestamp();
         await message.channel.send(embed);
