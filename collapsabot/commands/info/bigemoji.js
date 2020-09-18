@@ -8,7 +8,7 @@ module.exports = new Command({
             _name: 'emoji',
             optional: false,
             nameStartsWithVowel: true,
-            type: 'Emoji',
+            type: 'EmojiID',
             description: 'The emoji to enlarge',
         }),
     ],
