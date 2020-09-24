@@ -154,12 +154,6 @@ class Command {
                     if (emoji) return emoji;
                     else return new Invalid();
                 };
-                let resolveEmojiID = (arg) => {
-                    let emojiRegex = /^(<:[a-zA-Z0-9_]{2,32}:\d{16,18}>|\d{16,18})$/;
-                    if (!args[argIndex].match(emojiRegex)) return new Invalid();
-                    let id = args[argIndex].replace(/<:[a-zA-Z0-9_]{2,32}:/, '').replace(/>/, '');
-                    return id
-                };
                 let resolveCommandName = (argument) => {
                     if (client.commands.has(currArg)) {
                         return client.commands.get(currArg);
@@ -217,11 +211,6 @@ class Command {
                         if (emoji instanceof Invalid) {
                             resolvedArgs[i] = false;
                         } else resolvedArgs[i] = emoji;
-                    } else if (argument.type == 'EmojiID') {
-                        let emojiID = resolveEmojiID();
-                        if (emojiID instanceof Invalid) {
-                            resolvedArgs[i] = false;
-                        } else resolvedArgs[i] = emojiID;
                     } else resolvedArgs[i] = args[argIndex];
                 };
                 resolveArgument(arg);
