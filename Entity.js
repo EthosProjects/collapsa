@@ -1011,32 +1011,7 @@ module.exports = function (nsp, ns, mLab) {
     let currentFrame = false;
     let framesPerSecond = 60;
     setInterval(() => {
-        if (Players.list[0] === undefined){
-            for (let prop in game.initPack) {
-            if (!alr && game.initPack[prop].length > 0) {
-                alr = true;
-                self.nsp.emit('initPack', game.initPack);
-                game.initPack = {
-                    player: [],
-                    bullet: [],
-                    tree: [],
-                    stone: [],
-                    iron: [],
-                    gold: [],
-                    diamond: [],
-                    wall: [],
-                    door: [],
-                    floor: [],
-                    campfire: [],
-                    ctable: [],
-                    cfarm: [],
-                    chest: [],
-                    emerald: [],
-                    amethyst: [],
-                };
-            }
-        }
-        };
+        if (Players.list[0] === undefined) return;
         if (currentFrame) return;
         currentFrame = true;
         frameCount++;
